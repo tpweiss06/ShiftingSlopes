@@ -1,0 +1,1 @@
+# Test script. This is only to test that Git and GitHub are working appropriately
