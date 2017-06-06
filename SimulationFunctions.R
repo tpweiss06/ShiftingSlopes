@@ -13,6 +13,41 @@
 # ---------------------------- Biological Functions ----------------------------
 # ------------------------------------------------------------------------------
 
+######
+# This function will calculate a dispersal trait value for a set of individuals
+#    based on their dispersal alleles.
+### INPUTS
+# population: A vector of the population (i.e. row numbers) for which to 
+#              calculate a dispersal trait.
+# PopMat: The population matrix to use
+# nDisp: The number of dispersal loci in the current simulation
+### OUTPUTS
+# The function will create a matrix with two columns. The first column will 
+#    correspond to the ID (row number) of the individual and the second column
+#    will be the dispersal trait value. If the dispersal trait is calculated for
+#    the entire population, as will normally be the case, then the first column
+#    will simply correspond to the row number, but including this column allows
+#    for the calculation of dispersal for a subset of the current population.
+CalcDispTrait <- function(population, PopMat, nDisp){
+     # First create an empty matrix for the dispersal trait values and put
+     #    the population IDs in the first column
+     DispTrait <- matrix(NA, nrow = length(population), ncol = 2)
+     DispTrait[,1] <- population
+     # Calculate which columns of PopMat correspond to dispersal. Since it is
+     #    the last trait in the matrix, we don't need to know how many fitness
+     #    traits occured before it, we simply subtract from the last column.
+     DispColumns <- ncol(PopMat) - nDisp + 1
+     # Now calculate each individual's dispersal loci sum
+     LociSum <- rowSums(PopMat[population, DispColumns])
+     # Finally, exponentiate this sum to ensure that the dispersal trait 
+     #    (diffusion coefficient) can't become negative. There is no need to
+     #    impose an upper limit because the range limit itself will impose a
+     #    cost on dispersing too far.
+     DispTrait[,2] <- exp(LociSum)
+     return(DispTrait)
+}
+
+
 # ------------------------------------------------------------------------------
 # -------------------------- Environmental Functions ---------------------------
 # ------------------------------------------------------------------------------
