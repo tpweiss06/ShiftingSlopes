@@ -98,10 +98,7 @@ Disperse <- function(PopMat, DispTrait, width, DispTime = 1){
      }
      # Use the width of the landscape to correct any x coordinates outside
      #    of the allowed boundaries
-     while(min(CurX) < 0){
-          CurX <- ifelse(CurX < 0, CurX + width, CurX)
-     }
-     CurX <- ifelse(CurX > width, CurX %% width, CurX)
+     CurX <- ifelse( (CurX > width) | (CurX < 0), CurX %% width, CurX)
      CurX <- ifelse(CurX == 0, width, CurX)
      
      # Finally, update the appropriate entries of the PopMat matrix and return
