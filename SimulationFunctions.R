@@ -115,13 +115,71 @@ Disperse <- function(PopMat, DispTrait, width, DispTime = 1){
      return(PopMat)
 }
 
-
-
-
-
 # ------------------------------------------------------------------------------
 # -------------------------- Environmental Functions ---------------------------
 # ------------------------------------------------------------------------------
+
+###### CalcEnvMean
+# This function will use the relevant environmental parameters to calculate the
+#    mean of the range capacity function over a given interval using the Mean
+#    Value Theorem.
+### INPUTS
+# alpha, beta, gamma, and tau are all parameters in the range capacity function.
+#    See the function write up for details on these parameters.
+# a:      Lower interval bound
+# b:      Upper interval bound
+### OUTPUS
+# This function will output a single value for the mean value of the function
+#    over the given interval.
+CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
+     # First determine where the interval falls in the range, then calculate
+     #    the appropriate mean (See write up)
+     if(b <= beta){
+          numerator <- exp(gamma * (b - beta + tau)) + 1
+          denominator <- exp(gamma * (a - beta + tau)) + 1
+          FullIntegral <- (alpha / gamma) * log(numerator / denominator)
+          EnvMean <- (1 / (b - a)) * FullIntegral
+     } else if(a >= beta){
+          numerator <- exp(-1 * gamma * (b - beta - tau)) + 1
+          denominator <- exp(-1 * gamma * (a - beta - tau)) + 1
+          FullIntegral <- -1 * (alpha / gamma) * log(numerator / denominator)
+          EnvMean <- (1 / (b - a)) * FullIntegral
+     } else{
+          PreNum <- exp(gamma * tau) + 1
+          PreDen <- exp(gamma * (a - beta + tau)) + 1
+          PostNum <- exp(-1 * gamma * (b - beta - tau)) + 1
+          PostDen <- exp(gamma * tau) + 1
+          FullIntegral <- (alpha / gamma) * log(PreNum / PreDen) + 
+                         -1 * (alpha/gamma) * log(PostNum / PostDen)
+          EnvMean <- (1 / (b - a)) * FullIntegral
+     }
+     return(EnvMean)
+}
+
+###### GetEnvQual
+# This function will uses the CalcEnvMean function to extract a vector of 
+#    environmental means for a given set of patches defined by their center
+#    points and widths. 
+### INPUTS
+# alpha, beta, gamma, and tau are all parameters in the range capacity function.
+#    See the function write up for details on these parameters.
+# PatchCenters:     A vector of the center coordinates for discrete habitat
+#                        patches
+# PatchScale:       A single constant value used to modify the size of patches.
+#                        By defaul this will be set to 1, but it could in 
+#                        principle be used to explore the consequences of 
+#                        discretizing space by letting it become arbitrarily
+#                        small or alternatively it could allow a given range
+#                        to contain less patches and thus save computational
+#                        power or explore the effects of essentially lowering
+#                        the population size.
+### OUTPUTS
+# This function will generate a vector of environmental quality values for each
+#    patch as determined by the GetEnvMean function.
+GetEnvQual <- function(alpha, beta, gamma, tau, PatchCenters, PatchScale = 1){
+     
+}
+
 
 # ------------------------------------------------------------------------------
 # --------------------------- Bookkeeping Functions ----------------------------
