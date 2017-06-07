@@ -78,18 +78,25 @@ Disperse <- function(PopMat, DispTrait, width, DispTime = 1){
      CurY <- PopMat[DispTrait[,1], "y0"]
      # Now disperse individuals according to their event times until we exceed
      #    the allowed dispersal time
-     StepDists <- c(-1, 1)
+     
+     # Define a matrix with the x and y movements for the eigth possible nearest
+     #    neighbor movements according to this layout:
+     #    1    2    3
+     #    8    *    4
+     #    7    6    5
+     # The rows in the following matrix correspond to: [1,] numbered neighboring
+     #    patch, [2,] required shift in x coordinates, [3,] required shift in y
+     #    coordinates
+     NearNeighbors <- matrix(NA, nrow = 3, ncol = 8)
+     NearNeighbors[1,] <- 1:8
+     NearNeighbors[2,] <- c(-1, 0, 1, 1, 1, 0, -1, -1)
+     NearNeighbors[3,] <- c(1, 1, 1, 0, -1, -1, -1, 0)
      while(CurTime <= DispTime){
-          # Randomly choose a direction for dispersal
-          XorY <- rbinom(n = 1, size = 1, prob = 0.5)
-          if(XorY == 0){
-               # Dispersal occurs in the x direction
-               CurX[CurIndividual] <- CurX[CurIndividual] + sample(StepDists, size = 1)
-          }
-          if(XorY == 1){
-               # Dispersal occurs in the y direction
-               CurY[CurIndividual] <- CurY[CurIndividual] + sample(StepDists, size = 1)
-          }
+          # Update the current x and y coordinates for an individual
+          patch <- sample(NearNeighbors[1,], size = 1)
+          CurX[CurIndividual] <- CurX[CurIndividual] + NearNeighbors[2,patch]
+          CurY[CurIndividual] <- CurY[CurIndividual] + NearNeighbors[3,patch]
+          
           # Add in the next event time for the current individual and reset
           #    the current time and individual
           EventTimes[CurIndividual] <- rexp(n = 1, rate = 1) / DispTrait[CurIndividual,2]
