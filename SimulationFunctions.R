@@ -52,9 +52,10 @@ CalcDispTrait <- function(population, PopMat, nDisp){
 #    parameter student's t dispersal kernel used in the Shaw 2008 ppaer on the
 #    consequences of risky dispersal.
 ### INPUTS
-# n: The number of random numbers to generate
-# d: The dispersal trait(s) for the individual(s) involved. This will be 
-#         converted to another parameter to use in the probability distribution
+# n:      The number of random numbers to generate
+# d:      The dispersal trait(s) for the individual(s) involved. This will be 
+#              converted to another parameter to use in the probability 
+#              distribution
 ### OUTPUTS
 # n random numbers generated from the student's t dispersal kernel
 rStudKern <- function(n, d){
@@ -68,70 +69,61 @@ rStudKern <- function(n, d){
 }
 
 ###### Disperse
-# This function will use the previously calculated diffusion coefficients in a
-#    Poisson process to perform the actual dispersal events.
-### INPUTS
+# This function will use the previously calculated dispersal traits to calculate
+#    new, post dispersal locations for individuals according to any of three
+#    potential dispersal kernels: normal, exponential, or student's t dispersal
+#    kernel (Shaw 2008).
+### INPUTS:
 # PopMat:      The population matrix to use
 # DispTrait:   The two column matrix created by the CalcDispTrait function
 # width:       The number of discrete cells defining the width of the word
 #                   being simulated
-# DispTime:    The total time allowed for dispersal during the Poisson Process.
-#                   This will be set to 1 by default because it really only
-#                   adjusts the scale of the diffusion coefficients so there's
-#                   no good reason to set to anything else unless we are trying
-#                   to match scales with a given system or a different model.
-### OUTPUTS
-# The function will perform dispersal for all the individuals involved via a 
-#    Poisson process in which each event is defined by an individual randomly
-#    shifting in space one cell in any direction (i.e. unbiased). This function
-#    assumes wrapping borders for the width direction to avoid edge effects.
-Disperse <- function(PopMat, DispTrait, width, DispTime = 1){
-     # First create the initial vector of event times based on each individual's
-     #    diffusion coefficient.
-     EventTimes <- rexp(n = nrow(DispTrait), rate = 1) / DispTrait[,2]
-     # Find the first event and record the individual
-     CurTime <- min(EventTimes)
-     CurIndividual <- which(EventTimes == CurTime)
-     # Record the current x and y coordinates for each individual prior to 
-     #    dispersal
-     CurX <- PopMat[DispTrait[,1], "x0"]
-     CurY <- PopMat[DispTrait[,1], "y0"]
-     # Now disperse individuals according to their event times until we exceed
-     #    the allowed dispersal time
+# kern:        The dispersal kernel to be used. Can be "norm", "exp", or 
+#                   "stud_t"
+# PatchScale:  A constant value determining the width of individual patches on
+#                   the Cartesian coordinate system defining both
+#                   environmental quality and dispersal kernels.
+### OUTPUTS:
+# The function will return an updated population matrix with the post dispersal
+#    columns filled in.
+Disperse <- function(PopMat, DispTrait, width, kern, PatchScale = 1){
+     # First determine the number of dispersal events to simulate
+     N <- nrow(DispTrait)
      
-     # Define a matrix with the x and y movements for the eigth possible nearest
-     #    neighbor movements according to this layout:
-     #    1    2    3
-     #    8    *    4
-     #    7    6    5
-     # The rows in the following matrix correspond to: [1,] numbered neighboring
-     #    patch, [2,] required shift in x coordinates, [3,] required shift in y
-     #    coordinates
-     NearNeighbors <- matrix(NA, nrow = 3, ncol = 8)
-     NearNeighbors[1,] <- 1:8
-     NearNeighbors[2,] <- c(-1, 0, 1, 1, 1, 0, -1, -1)
-     NearNeighbors[3,] <- c(1, 1, 1, 0, -1, -1, -1, 0)
-     while(CurTime <= DispTime){
-          # Update the current x and y coordinates for an individual
-          patch <- sample(NearNeighbors[1,], size = 1)
-          CurX[CurIndividual] <- CurX[CurIndividual] + NearNeighbors[2,patch]
-          CurY[CurIndividual] <- CurY[CurIndividual] + NearNeighbors[3,patch]
-          
-          # Add in the next event time for the current individual and reset
-          #    the current time and individual
-          EventTimes[CurIndividual] <- rexp(n = 1, rate = 1) / DispTrait[CurIndividual,2]
-          CurTime <- min(EventTimes)
-          CurIndividual <- which(EventTimes == CurTime)
+     # Then generate the dispersal distances according to the type of kernel
+     if(kern == "norm"){
+          sigma <- (DispTrait[,2]^2 * pi) / 2
+          dists <- abs(rnorm(n = N, mean = 0, sd = sigma))
+     } else if(kern == "exp"){
+          dists <- rexp(n = N, rate = 1 / DispTrait[,2])
+     } else if(kern == "stud_t"){
+          dists <- rStudKern(n = N, d = DispTrait[,2])
      }
-     # Use the width of the landscape to correct any x coordinates outside
-     #    of the allowed boundaries
+     
+     # Now generate the random, unbiased direction used by each individual
+     angles <- runif(n = N, min = 0, max = 2 * pi)
+     
+     # Now calculate the new x and y coordinates of each individual as if their
+     #    current location is the origin
+     NewX <- dists * cos(angles)
+     NewY <- dists * sin(angles)
+     
+     # Now use the PatchScale parameter to determine the number of x and y
+     #    patches changed
+     DeltaX <- floor(NewX / PatchScale)
+     DeltaY <- floor(NewY / PatchScale)
+     
+     # Update the values in the population matrix
+     PopMat[DispTrait[,1], "x1"] <- PopMat[DispTrait[,1], "x0"] + DeltaX
+     PopMat[DispTrait[,1], "y1"] <- PopMat[DispTrait[,1], "y0"] + DeltaY
+     
+     # Finally, check and fix any x values that fall outside of the allowed
+     #    width of the landscape and return the updated population matrix
+     CurX <- PopMat[DispTrait[,1], "x1"]
      CurX <- ifelse( (CurX > width) | (CurX < 0), CurX %% width, CurX)
      CurX <- ifelse(CurX == 0, width, CurX)
      
-     # Finally, update the appropriate entries of the PopMat matrix and return
-     #    the new version.
      PopMat[DispTrait[,1], "x1"] <- CurX
-     PopMat[DispTrait[,1], "y1"] <- CurY
      return(PopMat)
 }
 
