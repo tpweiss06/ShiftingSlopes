@@ -47,6 +47,26 @@ CalcDispTrait <- function(population, PopMat, nDisp){
      return(DispTrait)
 }
 
+###### rStudKern
+# This function will perform a specified number of random draws from the one 
+#    parameter student's t dispersal kernel used in the Shaw 2008 ppaer on the
+#    consequences of risky dispersal.
+### INPUTS
+# n: The number of random numbers to generate
+# d: The dispersal trait(s) for the individual(s) involved. This will be 
+#         converted to another parameter to use in the probability distribution
+### OUTPUTS
+# n random numbers generated from the student's t dispersal kernel
+rStudKern <- function(n, d){
+     # First translate d to the u parameter used in the distribution
+     u <- sqrt(d / 1.571)
+     # Then generate n uniform random numbers between 0 and 1
+     n_unif <- runif(n = n, min = 0, max = 1)
+     # Now map them to the Student's t dispersal kernel using the CDF
+     StudKernVals <- sqrt((u * n_unif) / (1 - n_unif))
+     return(StudKernVals)
+}
+
 ###### Disperse
 # This function will use the previously calculated diffusion coefficients in a
 #    Poisson process to perform the actual dispersal events.
