@@ -169,16 +169,14 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
 }
 
 ###### GetEnvQual
-# This function will uses the CalcEnvMean function to extract a vector of 
-#    environmental means for a given set of patches defined by their center
-#    points and widths. 
+# This function uses the CalcEnvMean function to extract a vector of
+#    environmental means for a given set of patches. 
 ### INPUTS
 # alpha, beta, gamma, and tau are all parameters in the range capacity function.
 #    See the function write up for details on these parameters.
-# PatchCenters:     A vector of the center coordinates for discrete habitat
-#                        patches
+# patches:          A vector of the patch numbers to get quality information for
 # PatchScale:       A single constant value used to modify the size of patches.
-#                        By defaul this will be set to 1, but it could in 
+#                        By default this will be set to 1, but it could in 
 #                        principle be used to explore the consequences of 
 #                        discretizing space by letting it become arbitrarily
 #                        small or alternatively it could allow a given range
@@ -188,8 +186,19 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
 ### OUTPUTS
 # This function will generate a vector of environmental quality values for each
 #    patch as determined by the GetEnvMean function.
-GetEnvQual <- function(alpha, beta, gamma, tau, PatchCenters, PatchScale = 1){
+GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
+     NumPatches <- length(patches)
      
+     # Calculate the lower and upper bounds of each patch on the continuous scale
+     #    by first calculating their center points
+     centers <- patches * PatchScale
+     lowers <- centers - PatchScale * 0.5
+     uppers <- centers + PatchScale * 0.5
+     
+     # Now get and return the environmental quality score for each patch
+     EnvQuals <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
+                             a = lowers, b = uppers)
+     return(EnvQuals)
 }
 
 
