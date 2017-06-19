@@ -138,32 +138,38 @@ Disperse <- function(PopMat, DispTrait, width, kern, PatchScale = 1){
 ### INPUTS
 # alpha, beta, gamma, and tau are all parameters in the range capacity function.
 #    See the function write up for details on these parameters.
-# a:      Lower interval bound
-# b:      Upper interval bound
+# a:      Lower interval bound(s)
+# b:      Upper interval bound(s)
 ### OUTPUS
 # This function will output a single value for the mean value of the function
 #    over the given interval.
 CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
-     # First determine where the interval falls in the range, then calculate
-     #    the appropriate mean (See write up)
-     if(b <= beta){
-          numerator <- exp(gamma * (b - beta + tau)) + 1
-          denominator <- exp(gamma * (a - beta + tau)) + 1
-          FullIntegral <- (alpha / gamma) * log(numerator / denominator)
-          EnvMean <- (1 / (b - a)) * FullIntegral
-     } else if(a >= beta){
-          numerator <- exp(-1 * gamma * (b - beta - tau)) + 1
-          denominator <- exp(-1 * gamma * (a - beta - tau)) + 1
-          FullIntegral <- -1 * (alpha / gamma) * log(numerator / denominator)
-          EnvMean <- (1 / (b - a)) * FullIntegral
-     } else{
-          PreNum <- exp(gamma * tau) + 1
-          PreDen <- exp(gamma * (a - beta + tau)) + 1
-          PostNum <- exp(-1 * gamma * (b - beta - tau)) + 1
-          PostDen <- exp(gamma * tau) + 1
-          FullIntegral <- (alpha / gamma) * log(PreNum / PreDen) + 
-                         -1 * (alpha/gamma) * log(PostNum / PostDen)
-          EnvMean <- (1 / (b - a)) * FullIntegral
+     # Determine the number of patches to calculate the mean for, then loop
+     #    over them
+     NumPatches <- length(a)
+     EnvMean <- rep(NA, NumPatches)
+     for(i in 1:NumPatches){
+          # First determine where the interval falls in the range, then calculate
+          #    the appropriate mean (See write up)
+          if(b[i] <= beta){
+               numerator <- exp(gamma * (b[i] - beta + tau)) + 1
+               denominator <- exp(gamma * (a[i] - beta + tau)) + 1
+               FullIntegral <- (alpha / gamma) * log(numerator / denominator)
+               EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
+          } else if(a[i] >= beta){
+               numerator <- exp(-1 * gamma * (b[i] - beta - tau)) + 1
+               denominator <- exp(-1 * gamma * (a[i] - beta - tau)) + 1
+               FullIntegral <- -1 * (alpha / gamma) * log(numerator / denominator)
+               EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
+          } else{
+               PreNum <- exp(gamma * tau) + 1
+               PreDen <- exp(gamma * (a[i] - beta + tau)) + 1
+               PostNum <- exp(-1 * gamma * (b[i] - beta - tau)) + 1
+               PostDen <- exp(gamma * tau) + 1
+               FullIntegral <- (alpha / gamma) * log(PreNum / PreDen) + 
+                              -1 * (alpha/gamma) * log(PostNum / PostDen)
+               EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
+          }
      }
      return(EnvMean)
 }
@@ -187,8 +193,6 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
 # This function will generate a vector of environmental quality values for each
 #    patch as determined by the GetEnvMean function.
 GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
-     NumPatches <- length(patches)
-     
      # Calculate the lower and upper bounds of each patch on the continuous scale
      #    by first calculating their center points
      centers <- patches * PatchScale
@@ -196,8 +200,8 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
      uppers <- centers + PatchScale * 0.5
      
      # Now get and return the environmental quality score for each patch
-     EnvQuals <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
-                             a = lowers, b = uppers)
+     EnvQuals[i] <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
+                                  a = lowers, b = uppers)
      return(EnvQuals)
 }
 
