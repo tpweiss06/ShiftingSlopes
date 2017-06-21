@@ -49,7 +49,7 @@ CalcDispTrait <- function(population, PopMat, nDisp){
 
 ###### rStudKern
 # This function will perform a specified number of random draws from the one 
-#    parameter student's t dispersal kernel used in the Shaw 2008 ppaer on the
+#    parameter student's t dispersal kernel used in the Shaw 2014 ppaer on the
 #    consequences of risky dispersal.
 ### INPUTS
 # n:      The number of random numbers to generate
@@ -72,7 +72,7 @@ rStudKern <- function(n, d){
 # This function will use the previously calculated dispersal traits to calculate
 #    new, post dispersal locations for individuals according to any of three
 #    potential dispersal kernels: normal, exponential, or student's t dispersal
-#    kernel (Shaw 2008).
+#    kernel (Shaw 2014).
 ### INPUTS:
 # PopMat:      The population matrix to use
 # DispTrait:   The two column matrix created by the CalcDispTrait function
