@@ -134,9 +134,17 @@ Disperse <- function(PopMat, traits, width, kern, PatchScale = 1){
 #    through the rest of the functions I will need.
 ### INPUTS
 ### OUTPUTS
-FullSim <- function(BetaInit, BurnIn, LengthShift, BurnOut, ClimSpeed){
-     # First initialize the generation 0 founding population
-     PopMat <- initialize()
+FullSim <- function(){
+     # First, create the column names for the population matrices used in this
+     #    simulation and store the indices for the fitness and dispersal columns
+     ColumnNames <- PopMatColNames(nFit = nFit, nDisp = nDisp, 
+                                   monoecious = monoecious)
+     FitCols <- grep("^fit", ColumnNames)
+     DispCols <- grep("^disp", ColumnNames)
+     
+     # Next initialize the generation 0 founding population
+     PopMat <- initialize(ColumnNames = ColumnNames, FitCols = FitCols, 
+                          DispCols = DispCols)
      
      # Set up objects to hold whatever summary statistics we decide on here and
      #    populate them with the initial population values
@@ -258,6 +266,53 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 # ------------------------------------------------------------------------------
 # --------------------------- Bookkeeping Functions ----------------------------
 # ------------------------------------------------------------------------------
+
+###### initialize
+# This function will initialize a population matrix of founders to start a 
+#    simulation.
+### INPUTS
+# ColumnNames: The column names for the population matrix in the current 
+#                   simulation
+# FitCols:     The column indices for the fitness loci
+# DispCols:    The column indices for the dispersal loci
+# PopSize:     The number of founders to create in the intitial population
+# BetaInit:    The starting location of the range center where individuals will
+#                   initialize
+# SexRatio:    The sex ratio of the founding population (if dioecious). Set to
+#                   0.5 by default
+# FitInit:     The mean initial value for all fitness loci
+# FitDiv:      The standard deviation of the initial distribution of fitness 
+#                   loci
+# DispInit:    The mean initial value for all dispersal loci
+# DispDiv:     The standard deviation of the initial distribution of dispersal 
+#                   loci
+### OUTPUS
+# A filled in population matrix to start generation 0
+initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit, 
+                       SexRatio = 0.5, FitInit, FitDiv, DispInit, DispDiv, ...){
+     # First make an empty population matrix with the correct names
+     PopMat <- matrix(NA, nrow = PopSize, ncol = length(ColumnNames))
+     colnames(PopMat) <- ColumnNames
+     
+     # Next, fill in the x1 and y1 columns for the founders (the founders are
+     #    considered post dispersal and will reproduce next)
+     PopMat[,"x1"] <- BetaInit
+     PopMat[,"y1"] <- sample(1:width, size = PopSize, replace = TRUE)
+     
+     # Fill in the sex column if it is present
+     if("sex" %in% ColumnNames){
+          PopMat[,"sex"] <- rbinom(n = PopSize, size = 1, prob = SexRatio)
+     }
+     
+     # Now fill in the fitness and dispersal allele columns
+     PopMat[,FitCols] <- rnorm(n = PopSize * length(FitCols), mean = FitInit,
+                               sd = FitDiv)
+     PopMat[,DispCols] <- rnorm(n = PopSize * length(DispCols), mean = DispInit,
+                                sd = DispDiv)
+     
+     # Return the filled in initial population matrix
+     return(PopMat)
+}
 
 ###### PopMatColNames
 # This function generates the column names to use for a given simulation
