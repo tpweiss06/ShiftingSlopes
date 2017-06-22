@@ -13,38 +13,43 @@
 # ---------------------------- Biological Functions ----------------------------
 # ------------------------------------------------------------------------------
 
-###### CalcDispTrait
-# This function will calculate a dispersal trait value for a set of individuals
-#    based on their dispersal alleles.
+###### CalcTraits
+# This function will calculate the fitness and dispersal trait values for a set 
+#    of individuals based on their alleles
 ### INPUTS
 # population:  A vector of the population (i.e. row numbers) for which to 
-#                   calculate a dispersal trait.
+#                   calculate a trait values.
 # PopMat:      The population matrix to use
+# nFit:        The number of fitness loci in the current simulation
 # nDisp:       The number of dispersal loci in the current simulation
 ### OUTPUTS
-# The function will create a matrix with two columns. The first column will 
-#    correspond to the ID (row number) of the individual and the second column
-#    will be the dispersal trait value. If the dispersal trait is calculated for
-#    the entire population, as will normally be the case, then the first column
-#    will simply correspond to the row number, but including this column allows
-#    for the calculation of dispersal for a subset of the current population.
-CalcDispTrait <- function(population, PopMat, nDisp){
-     # First create an empty matrix for the dispersal trait values and put
+# The function will create a matrix with three columns. The first column will 
+#    correspond to the ID (row number) of the individual, the second column
+#    will be the fitness trait value, and the third column will be the dispersal
+#    trait. If the traits are calculated for the entire population, as will 
+#    normally be the case, then the first column will simply correspond to the 
+#    row number, but including this column allows for the calculation of 
+#    traits for a subset of the current population.
+CalcTraits <- function(population, PopMat, nFit, nDisp){
+     # First create an empty matrix for the trait values and put
      #    the population IDs in the first column
-     DispTrait <- matrix(NA, nrow = length(population), ncol = 2)
-     DispTrait[,1] <- population
-     # Calculate which columns of PopMat correspond to dispersal. Since it is
-     #    the last trait in the matrix, we don't need to know how many fitness
-     #    traits occured before it, we simply subtract from the last column.
-     DispColumns <- ncol(PopMat) - nDisp + 1
-     # Now calculate each individual's dispersal loci sum
-     LociSum <- rowSums(PopMat[population, DispColumns])
-     # Finally, exponentiate this sum to ensure that the dispersal trait 
-     #    (diffusion coefficient) can't become negative. There is no need to
-     #    impose an upper limit because the range limit itself will impose a
-     #    cost on dispersing too far.
-     DispTrait[,2] <- exp(LociSum)
-     return(DispTrait)
+     traits <- matrix(NA, nrow = length(population), ncol = 3)
+     traits[,1] <- population
+     
+     # Calculate which columns of PopMat correspond to dispersal and fitness.
+     FitColumns <- 6:(5 + nFit)
+     DispColumns <- (6+nFit):ncol(PopMat)
+     
+     # Now calculate the sum of each individual's quantitative loci for each 
+     #    trait
+     FitLociSum <- rowSums(PopMat[population, FitColumns])
+     DispLociSum <- rowSums(PopMat[population, DispColumns])
+     # Finally, store the trait values in the matrix and return it. 
+     #    Note the exponential transformation of the dispersal trait to ensure
+     #    that the trait value (mean distance dispersed) is bounded below by 0.
+     traits[,2] <- FitLociSum
+     traits[,3] <- exp(DispLociSum)
+     return(traits)
 }
 
 ###### rStudKern
@@ -117,14 +122,61 @@ Disperse <- function(PopMat, DispTrait, width, kern, PatchScale = 1){
      PopMat[DispTrait[,1], "x1"] <- PopMat[DispTrait[,1], "x0"] + DeltaX
      PopMat[DispTrait[,1], "y1"] <- PopMat[DispTrait[,1], "y0"] + DeltaY
      
-     # Finally, check and fix any x values that fall outside of the allowed
+     # Finally, check and fix any y values that fall outside of the allowed
      #    width of the landscape and return the updated population matrix
-     CurX <- PopMat[DispTrait[,1], "x1"]
-     CurX <- ifelse( (CurX > width) | (CurX < 0), CurX %% width, CurX)
-     CurX <- ifelse(CurX == 0, width, CurX)
+     CurY <- PopMat[DispTrait[,1], "y1"]
+     CurY <- ifelse( (CurY > width) | (CurY < 0), CurY %% width, CurY)
+     CurY <- ifelse(CurY == 0, width, CurY)
      
-     PopMat[DispTrait[,1], "x1"] <- CurX
+     PopMat[DispTrait[,1], "y1"] <- CurY
      return(PopMat)
+}
+
+###### FullSim
+# Currently this is only mean to stand in as a template so that I can think
+#    through the rest of the functions I will need.
+### INPUTS
+### OUTPUTS
+FullSim <- function(BetaInit, BurnIn, LengthShift, BurnOut, ClimSpeed){
+     # First initialize the generation 0 founding population
+     PopMat <- initialize()
+     
+     # Set up objects to hold whatever summary statistics we decide on here and
+     #    populate them with the initial population values
+     
+     # Calculate the time points for the end of the shifting and the total time
+     EndShift <- BurnIn + LengthShift
+     TotalTime <- BurnIn + LengthShift + BurnOut
+     
+     # Calculate the beta values for during the period of climate change
+     BetaShift <- ChangeClimate(BetaInit, LengthShift, ClimSpeed)
+     # Now run through the actual simulation
+     for(g in 1:TotalTime){
+          if(g <= BurnIn){
+               beta <- BetaInit
+          } else if( (g > BurnIn) & (g <= EndShift) ){
+               beta <- BetaShift[g - BurnIn]
+          } else if( (g > EndShift) & (g <= TotalTime) ){
+               beta <- BetaShift[LengthShift]
+          }
+          RepPopMat <- Reproduce(PopMat, beta = beta)
+          DispPopMat <- Disperse(RepPopMat)
+          PopMat <- DispPopMat
+          
+          # Keep track of all summary statistics here
+     }
+     
+     # Finally, save the results here
+     CurDirectory <- getwd()
+     ResultsDir <- GetSafeID(ParentDirectory = CurDirectory, parallel = FALSE)
+     dir.create(ResultsDir)
+     write.csv(PopMat, file = paste(ResultsDir, "PopMat.csv", sep = "/"), 
+               row.names = FALSE, quote = FALSE)
+     SaveParams(FilePath = paste(ResultsDir, "Params.R", sep = "/"))
+     # Either save or return my summary statistics here
+     return(NULL)
+     # I need to think carefully about a useful thing for the function to return
+     #    (or if there is one).
 }
 
 # ------------------------------------------------------------------------------
@@ -251,7 +303,7 @@ MakePopMat <- function(PopSize, nFit, nDisp, example = FALSE){
      return(PopMat)
 }
 
-###### get_safe_ID
+###### GetSafeID
 # This function looks through the current working directory and finds a safe
 #    name to use that will not overwrite anything else when saving simulation
 #    results
@@ -263,7 +315,7 @@ MakePopMat <- function(PopSize, nFit, nDisp, example = FALSE){
 ### OUTPUTS
 # The full file path for a new directory that the current simulation results will
 #    be saved to
-get_safe_ID <- function(ParentDirectory, parallel = FALSE){
+GetSafeID <- function(ParentDirectory, parallel = FALSE){
      # Set the working directory to easily scan for directory names
      setwd(ParentDirectory)
      
