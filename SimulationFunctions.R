@@ -30,15 +30,11 @@
 #    normally be the case, then the first column will simply correspond to the 
 #    row number, but including this column allows for the calculation of 
 #    traits for a subset of the current population.
-CalcTraits <- function(population, PopMat, nFit, nDisp){
+CalcTraits <- function(population, PopMat, FitColumns, DispColumns){
      # First create an empty matrix for the trait values and put
      #    the population IDs in the first column
      traits <- matrix(NA, nrow = length(population), ncol = 3)
      traits[,1] <- population
-     
-     # Calculate which columns of PopMat correspond to dispersal and fitness.
-     FitColumns <- 6:(5 + nFit)
-     DispColumns <- (6+nFit):ncol(PopMat)
      
      # Now calculate the sum of each individual's quantitative loci for each 
      #    trait
@@ -49,6 +45,7 @@ CalcTraits <- function(population, PopMat, nFit, nDisp){
      #    that the trait value (mean distance dispersed) is bounded below by 0.
      traits[,2] <- FitLociSum
      traits[,3] <- exp(DispLociSum)
+     colnames(traits) <- c("ID", "fit", "disp")
      return(traits)
 }
 
@@ -80,7 +77,7 @@ rStudKern <- function(n, d){
 #    kernel (Shaw 2014).
 ### INPUTS:
 # PopMat:      The population matrix to use
-# DispTrait:   The two column matrix created by the CalcDispTrait function
+# traits:      The three column matrix created by the CalcTrait function
 # width:       The number of discrete cells defining the width of the word
 #                   being simulated
 # kern:        The dispersal kernel to be used. Can be "norm", "exp", or 
@@ -91,18 +88,18 @@ rStudKern <- function(n, d){
 ### OUTPUTS:
 # The function will return an updated population matrix with the post dispersal
 #    columns filled in.
-Disperse <- function(PopMat, DispTrait, width, kern, PatchScale = 1){
+Disperse <- function(PopMat, traits, width, kern, PatchScale = 1){
      # First determine the number of dispersal events to simulate
-     N <- nrow(DispTrait)
+     N <- nrow(traits)
      
      # Then generate the dispersal distances according to the type of kernel
      if(kern == "norm"){
-          sigma <- (DispTrait[,2]^2 * pi) / 2
+          sigma <- (traits[,"disp"]^2 * pi) / 2
           dists <- abs(rnorm(n = N, mean = 0, sd = sigma))
      } else if(kern == "exp"){
-          dists <- rexp(n = N, rate = 1 / DispTrait[,2])
+          dists <- rexp(n = N, rate = 1 / traits[,"disp"])
      } else if(kern == "stud_t"){
-          dists <- rStudKern(n = N, d = DispTrait[,2])
+          dists <- rStudKern(n = N, d = traits[,"disp"])
      }
      
      # Now generate the random, unbiased direction used by each individual
@@ -124,11 +121,11 @@ Disperse <- function(PopMat, DispTrait, width, kern, PatchScale = 1){
      
      # Finally, check and fix any y values that fall outside of the allowed
      #    width of the landscape and return the updated population matrix
-     CurY <- PopMat[DispTrait[,1], "y1"]
+     CurY <- PopMat[traits[,"ID"], "y1"]
      CurY <- ifelse( (CurY > width) | (CurY < 0), CurY %% width, CurY)
      CurY <- ifelse(CurY == 0, width, CurY)
      
-     PopMat[DispTrait[,1], "y1"] <- CurY
+     PopMat[traits[,"ID"], "y1"] <- CurY
      return(PopMat)
 }
 
@@ -262,13 +259,14 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 # --------------------------- Bookkeeping Functions ----------------------------
 # ------------------------------------------------------------------------------
 
-###### MakePopMat
-# This function generates the matrices used to track individuals in the model
+###### PopMatColNames
+# This function generates the column names to use for a given simulation
 ### INPUTS
-# PopSize:     a single number indicating the number of individuals the matrix 
-#                   needs to track
 # nFit:        the number of loci defining an individual's fitness
 # nDisp:       the number of loci defining an individual's dispersal ability
+# monoecious:  a boolean value indicating whether the individuals in the simulation
+#              are monoecious (i.e. possessing both the female and male 
+#              reproductive organs in the same individual) or not.
 # example:     a boolean value indicating whether the function should simply 
 #                   return an example character vector containing the column 
 #                   names and order used
@@ -277,30 +275,41 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 #    + 5 columns with appropriate names (see function definition for details). 
 #    If example = TRUE, however, the function simply returns a simple character
 #    vector with the column names and layout.
-MakePopMat <- function(PopSize, nFit, nDisp, example = FALSE){
+PopMatColNames <- function(nFit, nDisp, monoecious, example = FALSE){
      if(example){
           MatNames <- c("x0", "y0", "x1", "y1", "sex", "fit1", "...", "fitN",
                         "disp1", "...", "dispN")
           return(MatNames)
      }
      # First determine the number of columns and make the population matrix
-     MatCols <- (nFit + nDisp + 5)
-     PopMat <- matrix(NA, nrow = PopSize, ncol = MatCols)
-     # Next create a vector of column names
+     MatCols <- ifelse(monoecious, (nFit + nDisp + 4), (nFit + nDisp + 5) )
+     
+     # Next create an empty vector of column names
      MatNames <- rep(NA, MatCols)
-     MatNames[1:5] <- c("x0", "y0", "x1", "y1", "sex")
+     
+     # Create the names of the first 4 or 5 columns depending on whether
+     #    individuals are monoecious and therefore whether a sex column is
+     #    needed.
+     if(monoecious){
+          TraitStart <- 4
+          MatNames[1:TraitStart] <- c("x0", "y0", "x1", "y1")
+     } else{
+          TraitStart <- 5
+          MatNames[1:TraitStart] <- c("x0", "y0", "x1", "y1", "sex")
+     }
+     
+     # Next create the column names for the fitness and dispersal traits
      for(n in 1:nFit){
           ColName <- paste("fit", n, sep = "")
-          MatNames[5 + n] <- ColName
+          MatNames[TraitStart + n] <- ColName
      }
      for(n in 1:nDisp){
           ColName <- paste("disp", n, sep = "")
-          MatNames[5 + nFit + n] <- ColName
+          MatNames[TraitStart + nFit + n] <- ColName
      }
      
-     # Apply the names and return the matrix
-     colnames(PopMat) <- MatNames
-     return(PopMat)
+     # Return the names for the population matrix
+     return(MatNames)
 }
 
 ###### GetSafeID
