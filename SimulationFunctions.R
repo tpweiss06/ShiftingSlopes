@@ -296,14 +296,13 @@ MatFill <- function(RealizedNtp1, ColumnNames, OccPatches, SexRatio, RelFits,
 #    number of loci defining the trait under consideration.
 Inheritence <- function(Cols, parents, PopMat, U, Vm){
      NumOffspring <- nrow(parents)
-     NumLoci <- length(Cols)
-     SegregatedLoci <- matrix(NA, nrow = NumOffspring, ncol = NumLoci)
+     NumLoci <- length(Cols) / 2
+     SegregatedLoci <- matrix(NA, nrow = NumOffspring, ncol = 2*NumLoci)
      for(i in 1:nrow(parents)){
           ParentLoci <- PopMat[parents[i,], Cols]
-          segregation <- sample(c(1,2), replace = TRUE, size = NumLoci)
-          for(j in 1:length(Cols)){
-               SegregatedLoci[i,j] <- ParentLoci[segregation[j],j]
-          }
+          Parent1Alleles <- NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
+          Parent2Alleles <- NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
+          SegregatedLoci[i,] <- c(ParentLoci[1,Parent1Alleles], ParentLoci[2,Parent2Alleles])
      }
      
      # Calculate the per locus mutation probability and the standard deviation
@@ -407,6 +406,8 @@ Reproduce <- function(alpha, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSel,
           #    selection.
           K <- K0 * MeanFit
           R <- R0 / ((1 + (R0 * MeanFit - 1) * length(Nt[[i]])) / K)
+          # If using dioecious individuals and there is only 1 individual or less,
+          #    the next generation's population is set to 0 automatically.
           Ntp1[i] <- ifelse(("sex" %in% ColumnNames) & (length(Nt[[i]]) < 2),
                             0, R * MeanFit * length(Nt[[i]]))
      }
@@ -647,12 +648,12 @@ Initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit,
 #    vector with the column names and layout.
 PopMatColNames <- function(nFit, nDisp, monoecious, example = FALSE){
      if(example){
-          MatNames <- c("x0", "y0", "x1", "y1", "sex", "fit1", "...", "fitN",
-                        "disp1", "...", "dispN")
+          MatNames <- c("x0", "y0", "x1", "y1", "sex", "fit1_1", "fit1_2", "...", "fit1_N",
+                        "fit2_1", "...", "fit2_N", "disp1_1", "...", "disp2_N")
           return(MatNames)
      }
      # First determine the number of columns and make the population matrix
-     MatCols <- ifelse(monoecious, (nFit + nDisp + 4), (nFit + nDisp + 5) )
+     MatCols <- ifelse(monoecious, (2*nFit + 2*nDisp + 4), (2*nFit + 2*nDisp + 5) )
      
      # Next create an empty vector of column names
      MatNames <- rep(NA, MatCols)
@@ -670,12 +671,20 @@ PopMatColNames <- function(nFit, nDisp, monoecious, example = FALSE){
      
      # Next create the column names for the fitness and dispersal traits
      for(n in 1:nFit){
-          ColName <- paste("fit", n, sep = "")
+          ColName <- paste("fit1", n, sep = "_")
           MatNames[TraitStart + n] <- ColName
      }
-     for(n in 1:nDisp){
-          ColName <- paste("disp", n, sep = "")
+     for(n in 1:nFit){
+          ColName <- paste("fit2", n, sep = "_")
           MatNames[TraitStart + nFit + n] <- ColName
+     }
+     for(n in 1:nDisp){
+          ColName <- paste("disp1", n, sep = "_")
+          MatNames[TraitStart + 2*nFit + n] <- ColName
+     }
+     for(n in 1:nDisp){
+          ColName <- paste("disp2", n, sep = "_")
+          MatNames[TraitStart + 2*nFit + nDisp + n] <- ColName
      }
      
      # Return the names for the population matrix
