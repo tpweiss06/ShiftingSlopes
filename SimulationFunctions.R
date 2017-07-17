@@ -129,123 +129,298 @@ Disperse <- function(PopMat, traits, width, kern, PatchScale = 1){
      return(PopMat)
 }
 
+###### RelFit
+# This function will calculate the relative fitness values for individuals 
+#    depending on their position within the range and their respective phenotype
+#    values.
+### INPUTS
+# LocalSel:    A value determining the strength of local selection across the
+#                   range. Higher values will correspond to a steeper gradient
+#                   in optimum phenotype values from one end of the range to the
+#                   other.
+# tau:         The tau value used to define the width of the range
+# beta:        The beta value used to define the center of the range
+# traits:      The trait matrix calculated by the CalcTraits function
+# PopMat:      The population matrix containing the focal individuals
+# individuals: A vector of the individual IDs (row numbers) of the focal 
+#                   individuals.
+# omega:       This parameter is the inverse of the strength of stabilizing 
+#                   selection.
+### OUTPUTS
+# This function will generate a vector of relative fitness values for each
+#    individual in the same order they are presented in the phenotype vector.
+RelFit <- function(LocalSel, tau, beta, traits, PopMat, individuals, omega){
+     # Calculate the "slope" of the phenotypic optimum function using tau
+     #    and the LocalSel argument
+     lambda <- LocalSel / tau
+     
+     # Calculate the Zopt values for each individual depending on where they
+     #    are in space.
+     numerator <- exp(lambda * (PopMat[individuals, "x1"] - beta))
+     denominator <- 1 + exp(lambda * (PopMat[individuals, "x1"] - beta))
+     Zopt <- numerator / denominator
+     
+     # Finally, use the equation for stabilizing selection to calculate each
+     #    individual's relative fitness and return that as a vector
+     RelFits <- exp(-1 * (traits[individuals, "fit"] - Zopt)^2 / (2*omega^2))
+     return(RelFits)
+}
+
+###### MatFill
+# This function will fill in the appropriate values for a new population matrix
+#    in the Reproduce function.
+### INPUTS
+# RealizedNtp1:      A vector of the stochastically determined population size for
+#                        each occupied patch in the next generation
+# ColumnNames:       A vector of the column names being used in the population
+#                        matrix for these simulations
+# OccPatches:        A two column matrix with the x and y coordinates of all
+#                        occupied patches in the current generation.
+# SexRatio:          The sex ratio of the population (set to 0.5 by default)
+# RelFits:           A vector of the relative fitness values of individuals in the
+#                        population.
+# U:                 The diploid mutation rate for quantitative trait z
+# Vm:                The mutational variance component of the total quantitative
+#                        genetic variance
+# FitColumns:        A vector of the columns corresponding to fitness traits
+# DispColumns:       A vector of the columns corresponding to dispersal
+# PopMat:            The population matrix for the current generation
+### OUTPUTS
+# This function will return a new matrix composed of all the offspring and their
+#    location, loci, etc. for the next generation.
+MatFill <- function(RealizedNtp1, ColumnNames, OccPatches, SexRatio, RelFits,
+                    U, Vm, FitColumns, DispColumns, PopMat){
+     # Create the new matrix for the next population
+     NewPopMat <- matrix(NA, nrow = sum(RealizedNtp1), ncol = length(ColumnNames))
+     colnames(NewPopMat) <- ColumnNames
+     
+     # Filter for only the patches that produced offspring
+     NewOccPatches <- which(RealizedNtp1 != 0)
+     Ntp1 <- RealizedNtp1[NewOccPatches]
+     
+     # Now step through and fill in the matrix
+     for(i in 1:length(NewOccPatches)){
+          # Calculate the starting and ending row for offspring in the current
+          #    patch
+          StartRow <- ifelse(i == 1, 1, 1 + sum(Ntp1[1:(i-1)]))
+          EndRow <- sum(Ntp1[1:i])
+          
+          # Fill in the location details
+          NewPopMat[StartRow:EndRow, "x0"] <- OccPatches[NewOccPatches[i], "x1"]
+          NewPopMat[StartRow:EndRow, "y0"] <- OccPatches[NewOccPatches[i], "y1"]
+          
+          # Depending on life history being modeled (monoecious vs. dioecious),
+          #    add in sex information if relevant and determine parents for each
+          #    offspring
+          if("sex" %in% ColumnNames){
+               NewPopMat[StartRow:EndRow, "sex"] <- rbinom(n = Ntp1[i], size = 1,
+                                                       prob = SexRatio)
+               
+               # Identify the females and males present in the current patch
+               females <- which( (PopMat[,"sex"] == 1) & 
+                              (PopMat[,"x1"] == OccPatches[NewOccPatches[i], "x1"]) &
+                              (PopMat[,"y1"] == OccPatches[NewOccPatches[i], "y1"]))
+               males <- which( (PopMat[,"sex"] == 0) & 
+                              (PopMat[,"x1"] == OccPatches[NewOccPatches[i], "x1"]) &
+                              (PopMat[,"y1"] == OccPatches[NewOccPatches[i], "y1"]))
+               
+               # Now extract the relative fitness values for the males and
+               #    females
+               FemaleFits <- RelFits[females]
+               MaleFits <- RelFits[males]
+                    
+               # Sample from the pool of females and males according to their
+               #    relative fitnesses to select parents for each offspring
+               parent1 <- sample(females, size = Ntp1[i], replace = TRUE,
+                                 prob = FemaleFits)
+               parent2 <- sample(males, size = Ntp1[i], replace = TRUE,
+                                 prob = MaleFits)
+               parents <- cbind(parent1, parent2)
+          } else{
+               # Define the pool of potential parents for the offspring and 
+               #    their associated relative fitnesses
+               ParentPool <- which( (PopMat[,"x1"] == OccPatches[NewOccPatches[i], "x1"]) &
+                              (PopMat[,"y1"] == OccPatches[NewOccPatches[i], "y1"]))
+               ParentFits <- RelFits[ParentPool]
+               
+               # Next select the first parent
+               parent1 <- sample(ParentPool, size = Ntp1[i], replace = TRUE, 
+                                 prob = ParentFits)
+               
+               # If there are more than one potential parents, choose a 
+               #    different individual as the second parent, otherwise choose
+               #    the same individual (i.e. preferentially avoid selfing)
+               if(length(ParentPool) > 1){
+                    parent2 <- rep(NA, Ntp1[i])
+                    for(j in 1:Ntp1[i]){
+                         NewParentPool <- setdiff(ParentPool, parent1[j])
+                         parent2[j] <- sample(NewParentPool, size = 1,
+                                              prob = RelFits[NewParentPool])
+                    }
+               } else{
+                    parent2 <- parent1
+               }
+               
+               parents <- cbind(parent1, parent2)
+          }
+          # Fill in the loci according to the inheritence function
+          NewPopMat[StartRow:EndRow, FitColumns] <- Inheritence(Cols = FitColumns, 
+                                             parents = parents, PopMat = PopMat,
+                                             U = U["fit"], Vm = Vm["fit"])
+          NewPopMat[StartRow:EndRow, DispColumns] <- Inheritence(Cols = DispColumns, 
+                                             parents = parents, PopMat = PopMat,
+                                             U = U["disp"], Vm = Vm["disp"])
+     }
+     return(NewPopMat)
+}
+
+###### Inheritence
+# This function performs inheritence of alleles from both parents, assuming
+#    independent segregation and no crossover events. It incorporates mutations
+#    in alleles via the U and Vm parameters (see below).
+# INPUTS
+# parents:     A matrix with two columns and a number of rows equal to the 
+#                   number of offpsring being created. Each row contains the
+#                   IDs (row indices in PopMat) of the parent(s) of the 
+#                   offspring corresponding to that row.
+# Cols:        A vector containing the focal columns containing the loci for the
+#                   trait being inherited.
+# PopMat:      The matrix containing all population information for the parental
+#                   generation.
+# U:           The diploid mutation rate for the focal quantitative trait
+# Vm:          The mutational variance component of the total quantitative
+#                   genetic variance
+# OUTPUTS
+# This function will return a matrix consisting of a number of rows equal to
+#    the number of offspring produced and a number of columns equal to the 
+#    number of loci defining the trait under consideration.
+Inheritence <- function(Cols, parents, PopMat, U, Vm){
+     NumOffspring <- nrow(parents)
+     NumLoci <- length(Cols)
+     SegregatedLoci <- matrix(NA, nrow = NumOffspring, ncol = NumLoci)
+     for(i in 1:nrow(parents)){
+          ParentLoci <- PopMat[parents[i,], Cols]
+          segregation <- sample(c(1,2), replace = TRUE, size = NumLoci)
+          for(j in 1:length(Cols)){
+               SegregatedLoci[i,j] <- ParentLoci[segregation[j],j]
+          }
+     }
+     
+     # Calculate the per locus mutation probability and the standard deviation
+     #    for the mutational effects. The following calculations are taken from
+     #    Gilbert et al. 2017 AmNat
+     PerLocusProb <- U / (2 * NumLoci)
+     MutStd <- sqrt(Vm / U)
+     
+     # Use the per locus mutation probability to identify a number of mutations
+     #    for each new offspring
+     NumMut <- rbinom(n = NumOffspring, size = NumLoci, prob = PerLocusProb)
+     
+     # Now step through each offspring in which a mutation takes place and alter
+     #    allele values appropriately
+     MutOffspring <- which(NumMut != 0)
+     for(i in MutOffspring){
+          MutLocus <- sample(1:NumLoci, size = NumMut[i])
+          SegregatedLoci[i,MutLocus] <- rnorm(mean = SegregatedLoci[i,MutLocus], 
+                                              sd = MutStd, n = NumMut[i])
+     }
+     
+     # return the segregated and mutated loci
+     return(SegregatedLoci)
+}
+
 ###### Reproduce
 # This function will use the previously calculated fitness traits and perform
 #    logisitic population growth in all occupied patches with offspring assigned
 #    to parental pairs according to individual fitness values.
 ### INPUTS:
-# PopMat:      The population matrix to use
-# traits:      The three column matrix created by the CalcTrait function
-# EnvGradType: Indicator variable of whether the environmental gradient is over
-#                   carrying capacity (K) or growth rate (R)
-# 
-
-# alpha, beta, gamma, tau
-# omega (zopt can be calculated from f(x))
-# mutation rate
-# mutation sd
-# ColumnNames
-# FitColumns
-# DispColumns
-# SexRatio
+# alpha, beta, gamma, tau:    Parameters corresponding to the range capacity fxn
+# omega:            The inverse of the strength of stabilizing selection.             
+# R0, K0:           The growth and carrying capacity parameters for logistic
+#                        growth. These values are the maximum attainable values
+#                        which are then used to compute realized values
+#                        throughout the range.
+# U:                A vector of 2 entries with the diploid mutation rate for
+#                        each trait.
+# Vm:               A vector of 2 entries with the mutational variance for each
+#                        trait.
+# LocalSel:         A value determining the gradient in local phenotypic optima
+#                        across the range.
+# traits:           A two column matrix of trait values created by CalcTraits
+# PopMat:           The matrix with all information on the current generation
+# EnvGradType:      The type of environmental gradient being measured (either "K"
+#                        or "R")
+# ColumnNames:      A vector of the column names relevant for the simulation.
+# SexRatio:         The sex ratio of the population if individuals are dioecious.
+#                        By default, this is set to 0.5
+# FitColumns:       A vector of the column indices corresponding to fitness loci
+# DispColumns:      A vector of the column indices corresponding to dispersal loci
 ### OUTPUTS:
 # The function will return new population matrix with the offspring resulting
 #    from reproduction with their x0 and y0 columns corresponding to their
 #    natal patches.
-Reproduce <- function(PopMat, traits, EnvGradType, alpha, beta, gamma, tau,
-                      omega, MutRate, MutSd, ColumnNames, FitColumns, DispColumns,
-                      SexRatio = 0.5){
-     # First calculate the relative fitness of each individual in the population,
-     #    by first calculating the optimum trait value for their location, then
-     #    calculating their fitness based on their trait value and the classic
-     #    equation for stabilizing selection
-     IndEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
-                              tau = tau, patches = PopMat[,"x1"])
-     IndZopt <- ifelse(PopMat[,"x1"] <= beta, IndEnvQual / (2*alpha), 
-                       1 - IndEnvQual / (2*alpha) )
-     RelFits <- exp(-1 * (traits[,"fit"] - IndZopt)^2 / (2 * omega^2))
+Reproduce <- function(alpha, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSel, 
+                      traits, PopMat, EnvGradType, ColumnNames, SexRatio = 0.5,
+                      FitColumns, DispColumns){
+     # First calculate the relative fitness of each individual in the population
+     RelFits <- RelFit(LocalSel = LocalSel, tau = tau, beta = beta, traits = traits, 
+                       PopMat = PopMat, individuals = 1:nrow(PopMat), omega = omega)
      
-     # Next generate a list of all the occupied patches with populations that
-     #    need to reproduce and loop through them to generate the next generation
+     # Next generate a list of all the occupied patches and calculate the
+     #    environmental quality score for each occupied patch
      OccPatches <- unique(PopMat[,c("x1","y1")])
+     PatchEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
+                              tau = tau, patches = OccPatches[,"x1"])
+     
+     # Create objects to hold the current population and the expected size for
+     # the next generation's population size
      Ntp1 <- rep(NA, nrow(OccPatches))
      Nt <- vector(mode = "list", length = nrow(OccPatches))
+     
+     # Loop through each occupied patch and calculate the expected population
+     #    size in the next generation
      for(i in 1:nrow(OccPatches)){
           # Extract the quality of the current patch and the population size
-          PatchQual <- IndEnvQual[which(PopMat[,"x1"] == OccPatches[i,"x1"])[1]]
+          PatchQual <- PatchEnvQual[i]
           Nt[[i]] <- which( (PopMat[,"x1"] == OccPatches[i,"x1"]) & 
                           (PopMat[,"y1"] == OccPatches[i,"y1"]) )
           
           # Calculate the relevant demographic parameter and return a helpful
           #    error message if needed
           if(EnvGradType == "K"){
-               K <- PatchQual * K
+               K0 <- PatchQual * K0
           } else if(EnvGradType == "R"){
-               R <- PatchQual * R
+               R0 <- PatchQual * R0
           } else{
                write("Invalid type of environmental gradient", stderr())
                return(NULL)
           }
           
-          # Now calculate the expected population size for the next generation
-          #    using logistic growth
-          if(length(Nt[[i]]) > 1){
-               Ntp1[i] <- R * length(Nt[[i]]) * (K - length(Nt[[i]]) / K)
-          } else{
-               Ntp1[i] <- 0
-          }
+          # Now calculate the mean fitness of the current patch
+          CurPop <- which((PopMat[,"x1"] == OccPatches[i, "x1"]) &
+                               (PopMat[,"y1"] == OccPatches[i,"y1"]))
+          MeanFit <- mean(RelFits[CurPop])
+          
+          # Use the mean fitness to calculate the realized R and K parameters
+          #    for the population and the resultant expected population size
+          #    according to Peischl et al. 2015 and the assumption of hard
+          #    selection.
+          K <- K0 * MeanFit
+          R <- R0 / ((1 + (R0 * MeanFit - 1) * length(Nt[[i]])) / K)
+          Ntp1[i] <- ifelse(("sex" %in% ColumnNames) & (length(Nt[[i]]) < 2),
+                            0, R * MeanFit * length(Nt[[i]]))
      }
      
      # Use the expected population sizes to generate the realized population 
      #    sizes for each patch
      RealizedNtp1 <- rpois(n = length(Ntp1), lambda = Ntp1)
      
-     # Now make a new population matrix for the offspring
-     NewPopMat <- matrix(NA, nrow = sum(RealizedNtp1), ncol = length(ColumnNames))
-     colnames(NewPopMat) <- ColumnNames
-     
-     # Now step through and fill in the matrix
-     CurRow <- 1
-     for(i in 1:nrow(OccPatches)){
-          if(RealizedNtp1[i] > 0){
-               NewPopMat[CurRow:RealizedNtp1[i], "x0"] <- OccPatches[i, "x1"]
-               NewPopMat[CurRow:RealizedNtp1[i], "y0"] <- OccPatches[i, "y1"]
-               # Determine the parents of each new offspring
-               if("sex" %in% ColumnNames){
-                    NewPopMat[CurRow:RealizedNtp1[i], "sex"] <- rbinom(n = RealizedNtp1[i],
-                                                                       size = 1, prob = SexRatio)
-                    # Identify the females and males present in the current patch
-                    #    along with their relative fitnesses
-                    females <- which(PopMat[Nt[[i]], "sex"] == 1)
-                    FemaleFits <- RelFits[ Nt[[i]][females] ]
-                    males <- which(PopMat[Nt[[i]], "sex"] == 0)
-                    MaleFits <- RelFits[ Nt[[i]][males] ]
-                    
-                    # Sample from the pool of females and males according to their
-                    #    relative fitnesses to select parents for each offspring
-                    moms <- Nt[[i]][sample(females, size = RealizedNtp1[i],
-                                           replace = TRUE, prob = FemaleFits)]
-                    dads <- Nt[[i]][sample(males, size = RealizedNtp1[i],
-                                           replace = TRUE, prob = MaleFits)]
-                    parents <- cbind(moms, dads)
-               } else{
-                    parent1 <- sample(Nt[[i]], size = RealizedNtp1[i],
-                                      replace = TRUE, prob = RelFits[Nt[[i]]])
-                    parent2 <- rep(NA, RealizedNtp1[i])
-                    for(j in 1:RealizedNtp1[i]){
-                         ParentPool <- setdiff(Nt[[i]], parent1[j])
-                         parent2[j] <- sample(ParentPool, size = 1, 
-                                              prob = RelFits[ParentPool])
-                    }
-                    parents <- cbind(parent1, parent2)
-               }
-               # Write code for the inheritance of loci here
-               # Remember to update the current row
-          }     
-          
-     }
-     # Return the offspring population matrix at the end of the function
-     
+     # Now make and return a new population matrix for the offspring
+     Ntp1Mat <- MatFill(RealizedNtp1 = RealizedNtp1, ColumnNames = ColumnNames,
+                        OccPatches = OccPatches, SexRatio = SexRatio, PopMat = PopMat,
+                        RelFits = RelFits, FitColumns = FitColumns, 
+                        DispColumns = DispColumns, U = U, Vm = Vm)
+     return(Ntp1Mat)
 }
 
 ###### FullSim
@@ -254,10 +429,25 @@ Reproduce <- function(PopMat, traits, EnvGradType, alpha, beta, gamma, tau,
 ### INPUTS
 # parameters:  A list with all necessary parameter values for a single model
 #                   run. These will be unpacked and stored by the SaveParams
-#                   function.
+#                   function. It will include the following items (as most of
+#                   these are described in the documentation for other functions
+#                   I am only including descriptions of the new parameters here):
+#              PopMatColNames(), Initialize(), ChangeClimate(), Reproduce(),
+#                   Disperse(), and GetSafeID()
+#                   BurnIn:        Length of time pre shift
+#                   LengthShift:   Duration of the shift
+#                   BurnOut:       Length of time post shift
+# parallel: A boolean variable indicating whether the simulations are being run
+#              on a server or not (which affects how file paths are determined).
 ### OUTPUTS
-FullSim <- function(parameters){
-     # First, save the parameters used for this simulation and source the file
+FullSim <- function(parameters, parallel = FALSE){
+     # First generate a save directory name and create it to save all output
+     #    from the simulation
+     CurDirectory <- getwd()
+     ResultsDir <- GetSafeID(ParentDirectory = CurDirectory, parallel = parallel)
+     dir.create(ResultsDir)
+     
+     # Next, save the parameters used for this simulation and source the file
      #    to have access to them within the function
      SaveParams(parameters, FilePath)
      #source(FilePath to parameter file)
@@ -270,7 +460,7 @@ FullSim <- function(parameters){
      DispCols <- grep("^disp", ColumnNames)
      
      # Next initialize the generation 0 founding population
-     PopMat <- initialize(ColumnNames = ColumnNames, FitCols = FitCols, 
+     PopMat <- Initialize(ColumnNames = ColumnNames, FitCols = FitCols, 
                           DispCols = DispCols, PopSize = InitPopSize, 
                           BetaInit = BetaInit, FitInit = FitInit, FitDiv = FitDiv, 
                           DispInit = DispInit, DispDiv = DispDiv)
@@ -301,12 +491,8 @@ FullSim <- function(parameters){
      }
      
      # Finally, save the results here
-     CurDirectory <- getwd()
-     ResultsDir <- GetSafeID(ParentDirectory = CurDirectory, parallel = FALSE)
-     dir.create(ResultsDir)
      write.csv(PopMat, file = paste(ResultsDir, "PopMat.csv", sep = "/"), 
                row.names = FALSE, quote = FALSE)
-     SaveParams(FilePath = paste(ResultsDir, "Params.R", sep = "/"))
      # Either save or return my summary statistics here
      return(NULL)
      # I need to think carefully about a useful thing for the function to return
@@ -396,7 +582,7 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 # --------------------------- Bookkeeping Functions ----------------------------
 # ------------------------------------------------------------------------------
 
-###### initialize
+###### Initialize
 # This function will initialize a population matrix of founders to start a 
 #    simulation.
 ### INPUTS
@@ -417,7 +603,7 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 #                   loci
 ### OUTPUS
 # A filled in population matrix to start generation 0
-initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit, 
+Initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit, 
                        SexRatio = 0.5, FitInit, FitDiv, DispInit, DispDiv){
      # First make an empty population matrix with the correct names
      PopMat <- matrix(NA, nrow = PopSize, ncol = length(ColumnNames))
