@@ -358,7 +358,7 @@ Inheritence <- function(Cols, parents, PopMat, U, Vm){
 # The function will return new population matrix with the offspring resulting
 #    from reproduction with their x0 and y0 columns corresponding to their
 #    natal patches.
-Reproduce <- function(alpha, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSel, 
+Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSel, 
                       traits, PopMat, EnvGradType, ColumnNames, SexRatio = 0.5,
                       FitColumns, DispColumns){
      # First calculate the relative fitness of each individual in the population
@@ -450,8 +450,8 @@ FullSim <- function(parameters, parallel = FALSE){
      
      # Next, save the parameters used for this simulation and source the file
      #    to have access to them within the function
-     SaveParams(parameters, FilePath)
-     #source(FilePath to parameter file)
+     SaveParams(parameters, FilePath = ResultsDir)
+     source(paste(ResultsDir, "parameters.R", sep = "/"))
      
      # Next, create the column names for the population matrices used in this
      #    simulation and store the indices for the fitness and dispersal columns
@@ -735,3 +735,48 @@ GetSafeID <- function(ParentDirectory, parallel = FALSE){
      return(FullPath)
 }
 
+###### SaveParams
+# This function will unpack a list of parameters and save them in an output file
+#    that can be sourced to load all parameters into the environment. In this 
+#    way, the parameters for each simulation are saved and easily accessible and
+#    it allows the parameters for the simulations to be passed in to the main 
+#    function in an easier format (i.e. a single list).
+### INPUTS
+# parameters:  a list containing all the parameter values necessary for a 
+#                   simulation.
+# FilePath:    a character vector for the results directory for the current
+#                   simulation.
+### OUTPUTS
+# This function will unpack the parameter vector and create a .R file which
+#    creates objects with the parameter names and values and named for the
+#    specific simulation.
+SaveParams <- function(parameters, FilePath){
+     OutFile <- paste(FilePath, "parameters.R", sep = "/")
+     sink(OutFile)
+     cat('beta <- ', parameters$beta, '\n', sep='')
+     cat('gamma <- ', parameters$gamma, '\n', sep='')
+     cat('tau <- ', parameters$tau, '\n', sep='')
+     cat('LocalSel <- ', parameters$LocalSel, '\n', sep='')
+     cat('omega <- ', parameters$omega, '\n', sep='')
+     cat('U <- c(', parameters$U[1], ",", parameters$U[2], ')\n', sep='')
+     cat('Vm <- c(', parameters$Vm[1], ",", parameters$Vm[2], ')\n', sep='')
+     cat('nFit <- ', parameters$nFit, '\n', sep='')
+     cat('nDisp <- ', parameters$nDisp, '\n', sep='')
+     cat('R0 <- ', parameters$R0, '\n', sep='')
+     cat('K0 <- ', parameters$K0, '\n', sep='')
+     cat('width <- ', parameters$width, '\n', sep='')
+     cat('kern <- ', parameters$kern, '\n', sep='')
+     cat('EnvGradType <- ', parameters$EnvGradType, '\n', sep='')
+     cat('monoecious <- ', parameters$monoecious, '\n', sep='')
+     cat('BurnIn <- ', parameters$BurnIn, '\n', sep='')
+     cat('BurnOut <- ', parameters$BurnOut, '\n', sep='')
+     cat('LengthShift <- ', parameters$LengthShift, '\n', sep='')
+     cat('ClimSpeed <- ', parameters$ClimSpeed, '\n', sep='')
+     cat('InitPopSize <- ', parameters$InitPopSize, '\n', sep='')
+     cat('BetaInit <- ', parameters$BetaInit, '\n', sep='')
+     cat('FitInit <- ', parameters$FitInit, '\n', sep='')
+     cat('FitDiv <- ', parameters$FitDiv, '\n', sep='')
+     cat('DispInit <- ', parameters$DispInit, '\n', sep='')
+     cat('DispDiv <- ', parameters$DispDiv, '\n', sep='')
+     sink()
+}
