@@ -504,6 +504,22 @@ FullSim <- function(parameters, parallel = FALSE){
 # -------------------------- Environmental Functions ---------------------------
 # ------------------------------------------------------------------------------
 
+###### ChangeClimate
+# This function will create a vector of beta values depending on how fast the 
+#    climate is set to change, assuming a constant rate of change
+### INPUTS
+# BetaInit:         The starting value of beta
+# LengthShift:      The length of the climate shift
+# ClimSpeed:        The speed with which the climate shifts
+### OUTPUT
+# A one dimensional vector containing the shifted beta values at each time point
+#    for the duration of the climate change period
+ChangeClimate <- function(BetaInit, LengthShift, ClimSpeed){
+     TimeVec <- 1:LengthShift
+     BetaVec <- BetaInit + ClimSpeed*TimeVec
+     return(BetaVec)
+}
+
 ###### CalcEnvMean
 # This function will use the relevant environmental parameters to calculate the
 #    mean of the range capacity function over a given interval using the Mean
