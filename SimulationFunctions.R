@@ -230,11 +230,22 @@ MatFill <- function(RealizedNtp1, ColumnNames, OccPatches, SexRatio, RelFits,
                MaleFits <- RelFits[males]
                     
                # Sample from the pool of females and males according to their
-               #    relative fitnesses to select parents for each offspring
-               parent1 <- sample(females, size = Ntp1[i], replace = TRUE,
-                                 prob = FemaleFits)
-               parent2 <- sample(males, size = Ntp1[i], replace = TRUE,
-                                 prob = MaleFits)
+               #    relative fitnesses to select parents for each offspring, but
+               #    only use the sample command if there are more than one male
+               #    or female available to avoid undesired behavior from the
+               #    sample function
+               if(length(females) == 1){
+                    parent1 <- rep(females, Ntp1[i])
+               } else{
+                    parent1 <- sample(females, size = Ntp1[i], replace = TRUE,
+                                      prob = FemaleFits)
+               }
+               if(length(males) == 1){
+                    parent2 <- rep(males, Ntp1[i])
+               } else{
+                    parent2 <- sample(males, size = Ntp1[i], replace = TRUE,
+                                      prob = MaleFits)
+               }
                parents <- cbind(parent1, parent2)
           } else{
                # Define the pool of potential parents for the offspring and 
@@ -243,24 +254,24 @@ MatFill <- function(RealizedNtp1, ColumnNames, OccPatches, SexRatio, RelFits,
                               (PopMat[,"y1"] == OccPatches[NewOccPatches[i], "y1"]))
                ParentFits <- RelFits[ParentPool]
                
-               # Next select the first parent
-               parent1 <- sample(ParentPool, size = Ntp1[i], replace = TRUE, 
-                                 prob = ParentFits)
-               
-               # If there are more than one potential parents, choose a 
-               #    different individual as the second parent, otherwise choose
-               #    the same individual (i.e. preferentially avoid selfing)
-               if(length(ParentPool) > 1){
+               # Next select both parents, again avoiding unwanted behavior
+               #    from the sample function
+               if(length(ParentPool) == 1){
+                    parent1 <- rep(ParentPool, Ntp1[i])
+                    parent2 <- rep(ParentPool, Ntp1[i])
+               } else if(length(ParentPool) == 2){
+                    parent1 <- rep(ParentPool[1], Ntp1[i])
+                    parent2 <- rep(ParentPool[2], Ntp1[i])
+               } else{
+                    parent1 <- sample(ParentPool, size = Ntp1[i], replace = TRUE, 
+                                      prob = ParentFits)
                     parent2 <- rep(NA, Ntp1[i])
                     for(j in 1:Ntp1[i]){
                          NewParentPool <- setdiff(ParentPool, parent1[j])
                          parent2[j] <- sample(NewParentPool, size = 1,
                                               prob = RelFits[NewParentPool])
                     }
-               } else{
-                    parent2 <- parent1
                }
-               
                parents <- cbind(parent1, parent2)
           }
           # Fill in the loci according to the inheritence function
@@ -300,8 +311,8 @@ Inheritence <- function(Cols, parents, PopMat, U, Vm){
      SegregatedLoci <- matrix(NA, nrow = NumOffspring, ncol = 2*NumLoci)
      for(i in 1:nrow(parents)){
           ParentLoci <- PopMat[parents[i,], Cols]
-          Parent1Alleles <- NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
-          Parent2Alleles <- NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
+          Parent1Alleles <- 1:NumLoci + NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
+          Parent2Alleles <- 1:NumLoci + NumLoci * sample(c(0,1), replace = TRUE, size = NumLoci)
           SegregatedLoci[i,] <- c(ParentLoci[1,Parent1Alleles], ParentLoci[2,Parent2Alleles])
      }
      
@@ -360,7 +371,14 @@ Inheritence <- function(Cols, parents, PopMat, U, Vm){
 #    natal patches.
 Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSel, 
                       traits, PopMat, EnvGradType, ColumnNames, SexRatio = 0.5,
-                      FitColumns, DispColumns){
+                      FitColumns, DispColumns, PatchScale){
+     # Check that R0 is non-negative before anything else
+     if(R0 < 0){
+          write("Negative values are not recomended for R0 as they can result in undesired behavior in the logistic growth equation",
+                stderr())
+          return(NULL)
+     }
+     
      # First calculate the relative fitness of each individual in the population
      RelFits <- RelFit(LocalSel = LocalSel, tau = tau, beta = beta, traits = traits, 
                        PopMat = PopMat, individuals = 1:nrow(PopMat), omega = omega)
@@ -369,7 +387,8 @@ Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSe
      #    environmental quality score for each occupied patch
      OccPatches <- unique(PopMat[,c("x1","y1")])
      PatchEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
-                              tau = tau, patches = OccPatches[,"x1"])
+                              tau = tau, patches = OccPatches[,"x1"], 
+                              PatchScale = PatchScale)
      
      # Create objects to hold the current population and the expected size for
      # the next generation's population size
@@ -383,121 +402,79 @@ Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, U, Vm, LocalSe
           PatchQual <- PatchEnvQual[i]
           Nt[[i]] <- which( (PopMat[,"x1"] == OccPatches[i,"x1"]) & 
                           (PopMat[,"y1"] == OccPatches[i,"y1"]) )
+          PopSize <- length(Nt[[i]])
           
           # Calculate the relevant demographic parameter and return a helpful
           #    error message if needed
           if(EnvGradType == "K"){
-               K0 <- PatchQual * K0
+               K0 <- PatchQual * K0 * PatchScale
           } else if(EnvGradType == "R"){
                R0 <- PatchQual * R0
+               K0 <- K0 * PatchScale
           } else{
                write("Invalid type of environmental gradient", stderr())
                return(NULL)
           }
           
-          # Now calculate the mean fitness of the current patch
+          # Calculate the expected population size based on the logistic equation,
+          #    correcting for cases where a large ratio of Nt to K will mathematically
+          #    lead to unrealistically large increases in population size. Also
+          #    correcting for the times when both R and K are 0, leading to a 
+          #    NaN result.
+          if( (R0 == 0) & (K0 == 0)){
+               ExpPopGrowth <- 0
+          } else if(PopSize < (K0 * (1 + 1/R0))){
+               ExpPopGrowth <- 1 + R0 * (1 - PopSize / K0)
+          } else{
+               ExpPopGrowth <- 0
+          }
+          
+          # Now calculate the mean fitness of the current patch and use it to
+          #    calculate the expected population growth after accounting for 
+          #    hard selection on local fitness
           CurPop <- which((PopMat[,"x1"] == OccPatches[i, "x1"]) &
                                (PopMat[,"y1"] == OccPatches[i,"y1"]))
           MeanFit <- mean(RelFits[CurPop])
+          AdjPopGrowth <- MeanFit * ExpPopGrowth * PopSize
           
-          # Use the mean fitness to calculate the realized R and K parameters
-          #    for the population and the resultant expected population size
-          #    according to Peischl et al. 2015 and the assumption of hard
-          #    selection.
-          K <- K0 * MeanFit
-          R <- R0 / ((1 + (R0 * MeanFit - 1) * length(Nt[[i]])) / K)
-          # If using dioecious individuals and there is only 1 individual or less,
-          #    the next generation's population is set to 0 automatically.
-          Ntp1[i] <- ifelse(("sex" %in% ColumnNames) & (length(Nt[[i]]) < 2),
-                            0, R * MeanFit * length(Nt[[i]]))
+          # If using dioecious individuals, ensure there are at least 1 male and
+          #    female to allow for reproduction (mate finding Allee effect).
+          if("sex" %in% ColumnNames){
+               NumFemales <- length(which( (PopMat[,"sex"] == 1) & 
+                                   (PopMat[,"x1"] == OccPatches[i, "x1"]) &
+                                   (PopMat[,"y1"] == OccPatches[i, "y1"])))
+               NumMales <- length(which( (PopMat[,"sex"] == 0) & 
+                                   (PopMat[,"x1"] == OccPatches[i, "x1"]) &
+                                   (PopMat[,"y1"] == OccPatches[i, "y1"])))
+               if( (NumFemales >= 1) & (NumMales >= 1) ){
+                    Ntp1[i] <- AdjPopGrowth
+               } else{
+                    Ntp1[i] <- 0
+               }
+          } else{
+               Ntp1[i] <- AdjPopGrowth
+          }
      }
+     
+     # Check for negative values of Ntp1 and reset those to 0
+     LambdaVals <- ifelse(Ntp1 < 0, 0, Ntp1)
      
      # Use the expected population sizes to generate the realized population 
      #    sizes for each patch
-     RealizedNtp1 <- rpois(n = length(Ntp1), lambda = Ntp1)
+     RealizedNtp1 <- rpois(n = length(Ntp1), lambda = LambdaVals)
      
-     # Now make and return a new population matrix for the offspring
-     Ntp1Mat <- MatFill(RealizedNtp1 = RealizedNtp1, ColumnNames = ColumnNames,
-                        OccPatches = OccPatches, SexRatio = SexRatio, PopMat = PopMat,
-                        RelFits = RelFits, FitColumns = FitColumns, 
-                        DispColumns = DispColumns, U = U, Vm = Vm)
-     return(Ntp1Mat)
-}
-
-###### FullSim
-# Currently this is only mean to stand in as a template so that I can think
-#    through the rest of the functions I will need.
-### INPUTS
-# parameters:  A list with all necessary parameter values for a single model
-#                   run. These will be unpacked and stored by the SaveParams
-#                   function. It will include the following items (as most of
-#                   these are described in the documentation for other functions
-#                   I am only including descriptions of the new parameters here):
-#              PopMatColNames(), Initialize(), ChangeClimate(), Reproduce(),
-#                   Disperse(), and GetSafeID()
-#                   BurnIn:        Length of time pre shift
-#                   LengthShift:   Duration of the shift
-#                   BurnOut:       Length of time post shift
-# parallel: A boolean variable indicating whether the simulations are being run
-#              on a server or not (which affects how file paths are determined).
-### OUTPUTS
-FullSim <- function(parameters, parallel = FALSE){
-     # First generate a save directory name and create it to save all output
-     #    from the simulation
-     CurDirectory <- getwd()
-     ResultsDir <- GetSafeID(ParentDirectory = CurDirectory, parallel = parallel)
-     dir.create(ResultsDir)
-     
-     # Next, save the parameters used for this simulation and source the file
-     #    to have access to them within the function
-     SaveParams(parameters, FilePath = ResultsDir)
-     source(paste(ResultsDir, "parameters.R", sep = "/"))
-     
-     # Next, create the column names for the population matrices used in this
-     #    simulation and store the indices for the fitness and dispersal columns
-     ColumnNames <- PopMatColNames(nFit = nFit, nDisp = nDisp, 
-                                   monoecious = monoecious)
-     FitCols <- grep("^fit", ColumnNames)
-     DispCols <- grep("^disp", ColumnNames)
-     
-     # Next initialize the generation 0 founding population
-     PopMat <- Initialize(ColumnNames = ColumnNames, FitCols = FitCols, 
-                          DispCols = DispCols, PopSize = InitPopSize, 
-                          BetaInit = BetaInit, FitInit = FitInit, FitDiv = FitDiv, 
-                          DispInit = DispInit, DispDiv = DispDiv)
-     
-     # Set up objects to hold whatever summary statistics we decide on here and
-     #    populate them with the initial population values
-     
-     # Calculate the time points for the end of the shifting and the total time
-     EndShift <- BurnIn + LengthShift
-     TotalTime <- BurnIn + LengthShift + BurnOut
-     
-     # Calculate the beta values for during the period of climate change
-     BetaShift <- ChangeClimate(BetaInit, LengthShift, ClimSpeed)
-     # Now run through the actual simulation
-     for(g in 1:TotalTime){
-          if(g <= BurnIn){
-               beta <- BetaInit
-          } else if( (g > BurnIn) & (g <= EndShift) ){
-               beta <- BetaShift[g - BurnIn]
-          } else if( (g > EndShift) & (g <= TotalTime) ){
-               beta <- BetaShift[LengthShift]
-          }
-          RepPopMat <- Reproduce(PopMat, beta = beta)
-          DispPopMat <- Disperse(RepPopMat)
-          PopMat <- DispPopMat
-          
-          # Keep track of all summary statistics here
+     # Now make and return a new population matrix for the offspring, if there
+     #    are any
+     if(sum(RealizedNtp1) > 0){
+          Ntp1Mat <- MatFill(RealizedNtp1 = RealizedNtp1, ColumnNames = ColumnNames,
+                             OccPatches = OccPatches, SexRatio = SexRatio, PopMat = PopMat,
+                             RelFits = RelFits, FitColumns = FitColumns, 
+                             DispColumns = DispColumns, U = U, Vm = Vm)
+     } else{
+          Ntp1Mat <- matrix(NA, nrow = 0, ncol = length(ColumnNames))
+          colnames(Ntp1Mat) <- ColumnNames
      }
-     
-     # Finally, save the results here
-     write.csv(PopMat, file = paste(ResultsDir, "PopMat.csv", sep = "/"), 
-               row.names = FALSE, quote = FALSE)
-     # Either save or return my summary statistics here
-     return(NULL)
-     # I need to think carefully about a useful thing for the function to return
-     #    (or if there is one).
+     return(Ntp1Mat)
 }
 
 # ------------------------------------------------------------------------------
@@ -515,6 +492,16 @@ FullSim <- function(parameters, parallel = FALSE){
 # A one dimensional vector containing the shifted beta values at each time point
 #    for the duration of the climate change period
 ChangeClimate <- function(BetaInit, LengthShift, ClimSpeed){
+     # First check for a negative speed
+     if(ClimSpeed < 0){
+          write("Negative speed is not supported for climate change", stderr())
+          return(NULL)
+     }
+     # Next check for a 0 value for the length of climate change
+     if(LengthShift == 0){
+          return(NULL)
+     }
+     # Perform the climate shift for the range center
      TimeVec <- 1:LengthShift
      BetaVec <- BetaInit + ClimSpeed*TimeVec
      return(BetaVec)
@@ -589,7 +576,7 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
      uppers <- centers + PatchScale * 0.5
      
      # Now get and return the environmental quality score for each patch
-     EnvQuals[i] <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
+     EnvQuals <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
                                   a = lowers, b = uppers)
      return(EnvQuals)
 }
@@ -620,7 +607,7 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
 #                   loci
 ### OUTPUS
 # A filled in population matrix to start generation 0
-Initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit, 
+Initialize <- function(ColumnNames, FitCols, DispCols, PopSize, BetaInit, width, 
                        SexRatio = 0.5, FitInit, FitDiv, DispInit, DispDiv){
      # First make an empty population matrix with the correct names
      PopMat <- matrix(NA, nrow = PopSize, ncol = length(ColumnNames))
@@ -767,32 +754,159 @@ GetSafeID <- function(ParentDirectory, parallel = FALSE){
 #    creates objects with the parameter names and values and named for the
 #    specific simulation.
 SaveParams <- function(parameters, FilePath){
+     # First cheack that all necessary parameters are included
+     ParamCheck <- names(parameters) == c("beta", "gamma", "tau", "LocalSel", "omega",
+                              "U", "Vm", "nFit", "nDisp", "R0", "K0", "width",
+                              "kern", "EnvGradType", "monoecious", "BurnIn",
+                              "BurnOut", "LengthShift", "ClimSpeed", "InitPopSize",
+                              "BetaInit", "FitInit", "FitDiv", "DispInit", "DispDiv")
+     if(sum(ParamCheck) != length(ParamCheck)){
+          write("Incorrect names or number of input parameters", stderr())
+          return(NULL)
+     }
+     
      OutFile <- paste(FilePath, "parameters.R", sep = "/")
      sink(OutFile)
-     cat('beta <- ', parameters$beta, '\n', sep='')
-     cat('gamma <- ', parameters$gamma, '\n', sep='')
-     cat('tau <- ', parameters$tau, '\n', sep='')
-     cat('LocalSel <- ', parameters$LocalSel, '\n', sep='')
-     cat('omega <- ', parameters$omega, '\n', sep='')
-     cat('U <- c(', parameters$U[1], ",", parameters$U[2], ')\n', sep='')
-     cat('Vm <- c(', parameters$Vm[1], ",", parameters$Vm[2], ')\n', sep='')
-     cat('nFit <- ', parameters$nFit, '\n', sep='')
-     cat('nDisp <- ', parameters$nDisp, '\n', sep='')
-     cat('R0 <- ', parameters$R0, '\n', sep='')
-     cat('K0 <- ', parameters$K0, '\n', sep='')
-     cat('width <- ', parameters$width, '\n', sep='')
-     cat('kern <- ', parameters$kern, '\n', sep='')
-     cat('EnvGradType <- ', parameters$EnvGradType, '\n', sep='')
-     cat('monoecious <- ', parameters$monoecious, '\n', sep='')
-     cat('BurnIn <- ', parameters$BurnIn, '\n', sep='')
-     cat('BurnOut <- ', parameters$BurnOut, '\n', sep='')
-     cat('LengthShift <- ', parameters$LengthShift, '\n', sep='')
-     cat('ClimSpeed <- ', parameters$ClimSpeed, '\n', sep='')
-     cat('InitPopSize <- ', parameters$InitPopSize, '\n', sep='')
-     cat('BetaInit <- ', parameters$BetaInit, '\n', sep='')
-     cat('FitInit <- ', parameters$FitInit, '\n', sep='')
-     cat('FitDiv <- ', parameters$FitDiv, '\n', sep='')
-     cat('DispInit <- ', parameters$DispInit, '\n', sep='')
-     cat('DispDiv <- ', parameters$DispDiv, '\n', sep='')
+     cat("beta <- ", parameters$beta, "\n", sep = "")
+     cat("gamma <- ", parameters$gamma, "\n", sep = "")
+     cat("tau <- ", parameters$tau, "\n", sep = "")
+     cat("LocalSel <- ", parameters$LocalSel, "\n", sep = "")
+     cat("omega <- ", parameters$omega, "\n", sep = "")
+     cat("U <- c(", parameters$U[1], ",", parameters$U[2], ")\n", sep = "")
+     cat("Vm <- c(", parameters$Vm[1], ",", parameters$Vm[2], ")\n", sep = "")
+     cat("nFit <- ", parameters$nFit, "\n", sep = "")
+     cat("nDisp <- ", parameters$nDisp, "\n", sep = "")
+     cat("R0 <- ", parameters$R0, "\n", sep = "")
+     cat("K0 <- ", parameters$K0, "\n", sep = "")
+     cat("width <- ", parameters$width, "\n", sep = "")
+     cat("kern <- ", parameters$kern, "\n", sep = "")
+     cat("EnvGradType <- ", parameters$EnvGradType, "\n", sep = "")
+     cat("monoecious <- ", parameters$monoecious, "\n", sep = "")
+     cat("BurnIn <- ", parameters$BurnIn, "\n", sep = "")
+     cat("BurnOut <- ", parameters$BurnOut, "\n", sep = "")
+     cat("LengthShift <- ", parameters$LengthShift, "\n", sep = "")
+     cat("ClimSpeed <- ", parameters$ClimSpeed, "\n", sep = "")
+     cat("InitPopSize <- ", parameters$InitPopSize, "\n", sep = "")
+     cat("BetaInit <- ", parameters$BetaInit, "\n", sep = "")
+     cat("FitInit <- ", parameters$FitInit, "\n", sep = "")
+     cat("FitDiv <- ", parameters$FitDiv, "\n", sep = "")
+     cat("DispInit <- ", parameters$DispInit, "\n", sep = "")
+     cat("DispDiv <- ", parameters$DispDiv, "\n", sep = "")
      sink()
 }
+
+
+# ------------------------------------------------------------------------------
+# ------------------------ Full Simulation Function ----------------------------
+# ------------------------------------------------------------------------------
+
+###### FullSim
+# Currently this is only mean to stand in as a template so that I can think
+#    through the rest of the functions I will need.
+### INPUTS
+# parameters:  A list with all necessary parameter values for a single model
+#                   run. These will be unpacked and stored by the SaveParams
+#                   function. It will include all the parameters necessary for
+#                   the following functions as well as a few additional time
+#                   keeping parameters: 
+#                   Functions --
+#                   PopMatColNames(), Initialize(), ChangeClimate(), Reproduce(), 
+#                        Disperse(), and GetSafeID()
+#                   Time keeping parameters --
+#                   BurnIn:        Length of time pre shift
+#                   LengthShift:   Duration of the shift
+#                   BurnOut:       Length of time post shift
+# parallel: A boolean variable indicating whether the simulations are being run
+#              on a server or not (which affects how file paths are determined).
+### OUTPUTS
+FullSim <- function(parameters, parallel = FALSE){
+     # First generate a save directory name and create it to save all output
+     #    from the simulation
+     CurDirectory <- getwd()
+     ResultsDir <- GetSafeID(ParentDirectory = CurDirectory, parallel = parallel)
+     dir.create(ResultsDir)
+     
+     # Next, save the parameters used for this simulation and source the file
+     #    to have access to them within the function
+     SaveParams(parameters, FilePath = ResultsDir)
+     source(paste(ResultsDir, "parameters.R", sep = "/"))
+     
+     # Next, create the column names for the population matrices used in this
+     #    simulation and store the indices for the fitness and dispersal columns
+     ColumnNames <- PopMatColNames(nFit = nFit, nDisp = nDisp, 
+                                   monoecious = monoecious)
+     FitCols <- grep("^fit", ColumnNames)
+     DispCols <- grep("^disp", ColumnNames)
+     
+     # Next initialize the generation 0 founding population and allow it to
+     #    reproduce
+     PopMat <- Initialize(ColumnNames = ColumnNames, FitCols = FitCols, 
+                          DispCols = DispCols, PopSize = InitPopSize, 
+                          BetaInit = BetaInit, FitInit = FitInit, FitDiv = FitDiv, 
+                          DispInit = DispInit, DispDiv = DispDiv, width = width)
+     PopMat <- Reproduce(...)
+     
+     # Calculate the time points for the end of the shifting and the total time
+     EndShift <- BurnIn + LengthShift
+     TotalTime <- BurnIn + LengthShift + BurnOut
+     
+     # Set up objects to hold summary information including patch abundance,
+     #    patch genetic diversity in each trait, mean and standard deviations
+     #    for patch trait values. As a first step, calculate number of patches
+     #    to track for each of these objects which will be centered on the
+     #    range center (beta)
+     RangeK <- K0 * PatchScale * GetEnvQual(alpha = 1, beta = beta, gamma = gamma, 
+                         tau = tau, patches = -1000:1000, PatchScale = PatchScale)
+     HalfRange <- sum(RangeK >= 1) %/% 2
+     RangeLength <- 2 * (HalfRange + 10) + 1
+     BetaIndex <- ceiling(RangeLength / 2)
+     PatchAbund <- array(0, dim = c(TotalTime, width, RangeLength))
+     PatchFitDiv <- array(NA, dim = c(TotalTime, width, RangeLength))
+     PatchDispDiv <- array(NA, dim = c(TotalTime, width, RangeLength))
+     PatchFitMean <- array(NA, dim = c(TotalTime, width, RangeLength))
+     PatchDispMean <- array(NA, dim = c(TotalTime, width, RangeLength))
+     
+     # Calculate the beta values for during the period of climate change
+     BetaShift <- ChangeClimate(BetaInit, LengthShift, ClimSpeed)
+     # Now run through the actual simulation
+     for(g in 1:TotalTime){
+          if(g <= BurnIn){
+               beta <- BetaInit
+          } else if( (g > BurnIn) & (g <= EndShift) ){
+               beta <- BetaShift[g - BurnIn]
+          } else if( (g > EndShift) & (g <= TotalTime) ){
+               beta <- BetaShift[LengthShift]
+          }
+          DispPopMat <- Disperse(PopMat)
+          RepPopMat <- Reproduce(DispPopMat, beta = beta)
+          PopMat <- RepPopMat
+          
+          # Keep track of all summary statistics here
+          OccPatches <- unique(PopMat[,c("x0","y0")])
+          for(i in 1:nrow(OccPatches)){
+               CurIndices <- c(g, OccPatches[i,"y0"], (OccPatches[i,"x0"] - beta) +
+                                    BetaIndex)
+               if( (CurIndices[3] < 1) | (CurIndices[3] > RangeLength) ){
+                    write("Summary statistics not initialized with enough space", stderr())
+                    return(NULL)
+               }
+               CurPop <- which((PopMat[,"x1"] == OccPatches[i, "x1"]) &
+                                    (PopMat[,"y1"] == OccPatches[i,"y1"]))
+               PatchAbund[CurIndices] <- length(CurPop)
+               PatchFitDiv[CurIndices] <- sqrt(sd(PopMat[CurPop, FitCols]))
+               PatchFitMean[CurIndices] <- mean(PopMat[CurPop, FitCols])
+               PatchDispDiv[CurIndices] <- sqrt(sd(PopMat[CurPop, DispCols]))
+               PatchDispMean[CurIndices] <- mean(PopMat[CurPop, DispCols])
+          }
+     }
+     
+     # Finally, save the results here
+     write.csv(PopMat, file = paste(ResultsDir, "PopMat.csv", sep = "/"), 
+               row.names = FALSE, quote = FALSE)
+     save(PatchAbund, PatchFitDiv, PatchFitMean, PatchDispDiv, PatchDispMean,
+          file = paste(ResultsDir, "SummaryStats.Rdata", sep = "/"))
+     
+     return(NULL)
+}
+
+
