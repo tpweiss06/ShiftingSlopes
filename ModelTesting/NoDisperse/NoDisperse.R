@@ -2,7 +2,7 @@
 #    absence of dispersal. 
 
 setwd("~/Desktop/RangeShifts/ShiftingSlopes/ModelTesting/NoDisperse/")
-source("~/Desktop/RangeShifts/ShiftingSlopes/SimulationFunctions.R")
+source("~/Desktop/RangeShifts/ShiftingSlopes/SimFunctions.R")
 
 # First set all parameters
 BetaInit <- 0
@@ -21,7 +21,7 @@ width <- 10
 kern <- "exp"
 EnvGradType <- "K"
 monoecious <- TRUE
-BurnIn <- 5
+BurnIn <- 100
 BurnOut <- 0
 LengthShift <- 0
 ClimSpeed <- 0
@@ -31,29 +31,50 @@ FitDiv <- 0.025
 DispInit <- -100
 DispDiv <- 0
 PatchScale <- 10
+NumRands <- 1000000
+SexRatio <- 0.5
+
 
 parameters <- list(BetaInit, gamma, tau, LocalSel, omega, U, Vm, nFit, nDisp, R0,
                    K0, width, kern, EnvGradType, monoecious, BurnIn, BurnOut, 
                    LengthShift, ClimSpeed, InitPopSize, FitInit, FitDiv, DispInit,
-                   DispDiv, PatchScale)
+                   DispDiv, PatchScale, NumRands, SexRatio)
 names(parameters) <- c("BetaInit", "gamma", "tau", "LocalSel", "omega", "U", "Vm", 
                        "nFit", "nDisp", "R0", "K0", "width", "kern", "EnvGradType", 
                        "monoecious", "BurnIn", "BurnOut", "LengthShift", "ClimSpeed", 
                        "InitPopSize", "FitInit", "FitDiv", "DispInit", "DispDiv", 
-                       "PatchScale")
+                       "PatchScale", "NumRands", "SexRatio")
 
 FullSim(parameters = parameters, parallel = FALSE)
 
 
-# Graph the resulting abundance patterns
-quartz(width = 7, height = 5)
-par(mfrow = c(2, 5), mar = c(0, 0, 0, 0), oma = c(5, 4, 4, 2) + 0.1)
+# Graph the resulting abundance patterns through time as a composite graph
+TimeVec <- 1:BurnIn
 load("Sim1/SummaryStats.Rdata")
-OccPatches <- rep(NA, width)
-for(i in 1:width){
-     PopData <- PatchAbund[,i,]
-     OccPatches[i] <- which(PopData[])
-}
+PatchAbunds <- PatchAbund[,,57] # rows are generations, columns are patches
+
+pdf(file = "NoDisperseTest.pdf", width = 7.2, height = 5.4)
+     par(mfrow = c(2,5), mar = c(0.5,0.5,0.5,0.5), oma = c(c(5,4,1,1)))
+     for(p in 1:width){
+          plot(TimeVec, PatchAbunds[,p], type = "l", axes = FALSE, xlab = "",
+               ylab = "", main = "", lwd = 1.5, ylim = c(0, 140))
+          box()
+          axis(1, at = seq(0, 100, by = 2), labels = FALSE, tcl = -0.25)
+          axis(2, at = seq(0, 140, by = 5), labels = FALSE, tcl = -0.25)
+          if(p == 1 | p == 6){
+               axis(2, at = seq(0, 140, by = 20), tcl = -0.5, cex.axis = 1.5)
+          } else{
+               axis(2, at = seq(0, 140, by = 20), labels = FALSE, tcl = -0.5)
+          }
+          if(p >= 6){
+               axis(1, at = seq(0,100,by=10), tcl = -0.5, cex.axis = 1.5)
+          } else{
+               axis(1, at = seq(0,100,by=10), labels = FALSE, tcl = -0.5)
+          }
+     }
+     mtext("Time", side = 1, outer = TRUE, cex = 1.5, line = 2.5)
+     mtext("Abundance", side = 2, outer = TRUE, cex = 1.5, line = 2)
+dev.off()
 
 
 

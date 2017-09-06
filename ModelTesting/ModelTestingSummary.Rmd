@@ -32,11 +32,11 @@ output: pdf_document
     \hline
     Reproduce() & Reproduce.R checks for helpful error messages, cases for which there should be zero growth on average, and detioriating growth with increased distance from an optimum due to local adaptation & `r readLines("Reproduce.txt")` \\
     \hline
-    No dispersal & NoDisperse.R uses the full model to test the case of zero dispersal and ensure that populations do not leave their staring patch & `r readLines("NoDisperse.txt")` \\
+    No dispersal & NoDisperse.R uses the full model to test the case of zero dispersal and ensure that populations do not leave their staring patch & `r readLines("NoDisperse/NoDisperse.txt")` \\
     \hline
-    Stationary range & StationaryRange.R uses the full model to check that populations with the ability to grow and disperse fill up a stationary range boundary, but do not move beyond it & `r readLines("StationaryRange.txt")` \\
+    Stationary range & StationaryRange.R uses the full model to check that populations with the ability to grow and disperse fill up a stationary range boundary, but do not move beyond it & `r readLines("StationaryRange/StationaryRange.txt")` \\
     \hline
-    Moving environment & MovingEnv.R uses the full model to check that populations with the ability to grow, but not disperse, react to a moving environment by eventually going extinct & `r readLines("MovingEnv.txt")` \\
+    Moving environment & MovingEnv.R uses the full model to check that populations with the ability to grow, but not disperse, react to a moving environment by eventually going extinct & `r readLines("MovingEnv/MovingEnv.txt")` \\
     \hline
     \end{tabular}
 \end{center}

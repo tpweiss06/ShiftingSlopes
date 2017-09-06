@@ -13,7 +13,7 @@ width <- 10
 kern <- "exp"
 EnvGradType <- "K"
 monoecious <- TRUE
-BurnIn <- 5
+BurnIn <- 100
 BurnOut <- 0
 LengthShift <- 0
 ClimSpeed <- 0
