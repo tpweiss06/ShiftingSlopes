@@ -38,9 +38,13 @@ CalcTraits <- function(population, PopMat, PopSize, PopIndices){
      
      # Now calculate the sum of each individual's quantitative loci for each 
      #    trait
-     FitLociSum <- rowSums(PopMat[population, PopIndices$FitCols])
-     DispLociSum <- rowSums(PopMat[population, PopIndices$DispCols])
-     
+     if(PopSize > 1){
+          FitLociSum <- rowSums(PopMat[population, PopIndices$FitCols])
+          DispLociSum <- rowSums(PopMat[population, PopIndices$DispCols])
+     } else{
+          FitLociSum <- sum(PopMat[population, PopIndices$FitCols])
+          DispLociSum <- sum(PopMat[population, PopIndices$DispCols])
+     }
      # Finally, store the trait values in the matrix and return it. 
      #    Note the exponential transformation of the dispersal trait to ensure
      #    that the trait value (mean distance dispersed) is bounded below by 0.
@@ -185,7 +189,8 @@ RelFit <- function(LocalSel, tau, beta, traits, PopMat, individuals, omega,
 # NumMut(for both fit and disp)
 # OffspringIndex: an all purpose index for the random number vectors for which
 #    there is a single entry per offpsring (NumMuts and SexRands)
-# LocusVec(for both Fit and Disp; see Inheritence() documentation for details)
+# LocusVec (for both Fit and Disp; see Inheritence() documentation for details)
+# AlleleVec (For both fit and disp; see Inheritence() documentation)
 ### OUTPUTS
 # This function will return a new matrix composed of all the offspring and their
 #    location, loci, etc. for the next generation.
@@ -193,7 +198,7 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, SexRatio, RelFits,
                     PopMat, NumCols, SexRands = NULL, CurPop, SumNtp1, nDisp, nFit, 
                     DispSegVals1, DispSegVals2, DispSegIndex, FitSegVals1, FitSegVals2, 
                     FitSegIndex, FitMutStd, DispMutStd, FitNumMut, DispNumMut, OffspringIndex,
-                    FitLocusVec, DispLocusVec){
+                    FitLocusVec, DispLocusVec, FitAlleleVec, DispAlleleVec){
      # Create the new matrix for the next population
      NewPopMat <- matrix(NA, nrow = SumNtp1, ncol = NumCols)
      
@@ -289,13 +294,15 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, SexRatio, RelFits,
                                                        NumLoci = nFit, SegVals1 = FitSegVals1,
                                                        SegVals2 = FitSegVals2, SegIndex = FitSegIndex,
                                                        MutStd = FitMutStd, NumMutVec = FitNumMut,
-                                                       MutIndex = OffspringIndex, LocusVec = FitLocusVec)
+                                                       MutIndex = OffspringIndex, LocusVec = FitLocusVec,
+                                                       AlleleVec = FitAlleleVec)
           NewPopMat[CurVec, PopIndices$DispCols] <- Inheritence(Cols = PopIndices$DispCols, SumNtp1 = PatchNtp1,
                                                         parents = parents, PopMat = PopMat,
                                                         NumLoci = nDisp, SegVals1 = DispSegVals1,
                                                         SegVals2 = DispSegVals2, SegIndex = DispSegIndex,
                                                         MutStd = DispMutStd, NumMutVec = DispNumMut,
-                                                        MutIndex = OffspringIndex, LocusVec = DispLocusVec)
+                                                        MutIndex = OffspringIndex, LocusVec = DispLocusVec,
+                                                        AlleleVec = DispAlleleVec)
      }
      return(NewPopMat)
 }
@@ -324,11 +331,13 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, SexRatio, RelFits,
 # SumNtp1:     The total number of offspring in the next generation
 # LocusVec:    A vector of 1:the number of loci for a given trait. Made once in
 #                   the main function and then re-used over and over here for efficiency.
+# AlleleVec:   Similar to LocusVec, but with an entry for each allele (i.e. it is twice
+#                   the size of LocusVec)
 # OUTPUTS
 # This function will return a matrix consisting of a number of rows equal to
 #    the number of offspring produced and a number of columns equal to the 
 #    number of loci defining the trait under consideration.
-Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1,
+Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1, AlleleVec,
                         MutStd, NumMutVec, MutIndex, LocusVec, SegVals2, SegIndex){
      SegregatedLoci <- matrix(NA, nrow = SumNtp1, ncol = 2*NumLoci)
      for(i in 1:SumNtp1){
@@ -345,7 +354,7 @@ Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1,
      #    allele values appropriately
      MutOffspring <- which(NumMut != 0)
      for(i in MutOffspring){
-          MutLocus <- sample(LocusVec, size = NumMut[i])
+          MutLocus <- sample(AlleleVec, size = NumMut[i])
           SegregatedLoci[i,MutLocus] <- rnorm(mean = SegregatedLoci[i,MutLocus], 
                                               sd = MutStd, n = NumMut[i])
      }
@@ -397,9 +406,7 @@ Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1,
 # OccPatches:       A matrix with the x and y coordinates of all occupied patches
 # RelFits:          A vector of relative fitness values
 ### OUTPUTS:
-# The function will return new population matrix with the offspring resulting
-#    from reproduction with their x0 and y0 columns corresponding to their
-#    natal patches.
+# The function will return a vector of population sizes for the occupied patches
 Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, 
                       traits, PopMat, EnvGradType, ColumnNames, SexRatio = 0.5,
                       PatchScale, PopIndices, SexRands = NULL, CurPop, nDisp, nFit, 
@@ -414,14 +421,12 @@ Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0,
           return(NULL)
      }
      
-     # Next generate environmental quality score for each occupied patch
-     PatchEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
-                                tau = tau, patches = OccPatches[,1], 
-                                PatchScale = PatchScale)
-     
-     # Create objects to hold the current population and the expected size for
-     # the next generation's population size
+     # Determine the number of occupied patches and get the patch qualities for
+     #    each, then create an object to hold expected population sizes
      NumPatches <- nrow(OccPatches)
+     PatchEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
+                                     tau = tau, patches = OccPatches[,1], 
+                                     PatchScale = PatchScale)
      Ntp1 <- rep(NA, NumPatches)
      
      # Loop through each occupied patch and calculate the expected population
@@ -812,7 +817,7 @@ SaveParams <- function(parameters, FilePath){
 # parallel: A boolean variable indicating whether the simulations are being run
 #              on a server or not (which affects how file paths are determined).
 ### OUTPUTS
-FullSim <- function(parameters, parallel = FALSE){
+FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
      # First generate a save directory name and create it to save all output
      #    from the simulation
      CurDirectory <- getwd()
@@ -829,6 +834,8 @@ FullSim <- function(parameters, parallel = FALSE){
      NumCols <- 2*nFit + 2*nDisp + 4 + (1-monoecious) * 1
      FitLocusVec <- 1:nFit
      DispLocusVec <- 1:nDisp
+     FitAlleleVec <- 1:(2*nFit)
+     DispAlleleVec <- 1:(2*nDisp)
      
      # Create vectors of random numbers (including sex determination random numbers if
      #    necessary)
@@ -894,7 +901,8 @@ FullSim <- function(parameters, parallel = FALSE){
                              FitSegIndex = FitSegIndex, FitMutStd = FitMutStd,
                              DispMutStd = DispMutStd, FitNumMut = FitNumMut,
                              DispNumMut = DispNumMut, OffspringIndex = OffspringIndex, 
-                             FitLocusVec = FitLocusVec, DispLocusVec = DispLocusVec)
+                             FitLocusVec = FitLocusVec, DispLocusVec = DispLocusVec,
+                            FitAlleleVec = FitAlleleVec, DispAlleleVec = DispAlleleVec)
           # Now update the SegIndices
           FitSegIndex <- FitSegIndex + SumNtp1*nFit
           DispSegIndex <- DispSegIndex + SumNtp1*nDisp
@@ -912,37 +920,27 @@ FullSim <- function(parameters, parallel = FALSE){
      EndShift <- BurnIn + LengthShift
      TotalTime <- BurnIn + LengthShift + BurnOut
      
-     # Set up objects to hold summary information including patch abundance,
-     #    patch genetic diversity in each trait, mean and standard deviations
-     #    for patch trait values. As a first step, calculate number of patches
-     #    to track for each of these objects which will be centered on the
-     #    range center (beta)
-     RangeK <- K0 * PatchScale * GetEnvQual(alpha = 1, beta = BetaInit, gamma = gamma, 
-                                            tau = tau, patches = -1000:1000, PatchScale = PatchScale)
-     HalfRange <- sum(RangeK >= 1) %/% 2
-     RangeLength <- 2 * (HalfRange + 10) + 1
-     BetaIndex <- ceiling(RangeLength / 2)
-     PatchAbund <- array(0, dim = c(TotalTime, width, RangeLength))
-     PatchFitDiv <- array(NA, dim = c(TotalTime, width, RangeLength))
-     PatchDispDiv <- array(NA, dim = c(TotalTime, width, RangeLength))
-     PatchFitMean <- array(NA, dim = c(TotalTime, width, RangeLength))
-     PatchDispMean <- array(NA, dim = c(TotalTime, width, RangeLength))
+     # Set up an object to hold summary statistics 
+     SumStatCols <- list(gen = 1, beta = 2, x = 3, y = 4, abund = 5, muFit = 6,
+                            sigmaFit = 7, muDisp = 8, sigmaDisp = 9)
+     SumStatRow <- 1
+     SumStats <- matrix(NA, nrow = SumMatSize, ncol = 9)
+     CurStatsDim <- SumMatSize
      
      # Keep track of all summary statistics here
      for(i in 1:nrow(OccPatches)){
-          xIndex <- OccPatches[i,1] - BetaInit + BetaIndex
-          yIndex <- OccPatches[i,2]
-          if( (xIndex < 1) | (xIndex > RangeLength) ){
-               write("Summary statistics not initialized with enough space", stderr())
-               return(NULL)
-          }
           PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &
                                  (PopMat[,PopIndices$y0] == OccPatches[i,2]))
-          PatchAbund[1, yIndex, xIndex] <- length(PatchPop)
-          PatchFitDiv[1, yIndex, xIndex] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
-          PatchFitMean[1, yIndex, xIndex] <- mean(PopMat[PatchPop, PopIndices$FitCols])
-          PatchDispDiv[1, yIndex, xIndex] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
-          PatchDispMean[1, yIndex, xIndex] <- mean(PopMat[PatchPop, PopIndices$DispCols])
+          SumStats[SumStatRow, SumStatCols$gen] <- 1
+          SumStats[SumStatRow, SumStatCols$beta] <- BetaInit
+          SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
+          SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
+          SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
+          SumStats[SumStatRow, SumStatCols$muFit] <- mean(PopMat[PatchPop, PopIndices$FitCols])
+          SumStats[SumStatRow, SumStatCols$sigmaFit] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
+          SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PopMat[PatchPop, PopIndices$DispCols])
+          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
+          SumStatRow <- SumStatRow + 1
      }
      
      # Calculate the beta values for during the period of climate change
@@ -982,7 +980,7 @@ FullSim <- function(parameters, parallel = FALSE){
                # Finally, check and fix any y values that fall outside of the allowed
                #    width of the landscape and return the updated population matrix
                CurY <- PopMat[CurPop, PopIndices$y1]
-               CurY[(CurY > width) | (CurY < 0)] <- CurY %% width
+               CurY[(CurY > width) | (CurY < 0)] <- CurY[(CurY > width) | (CurY < 0)] %% width
                CurY[CurY == 0] <- width
                PopMat[CurPop, PopIndices$y1] <- CurY
                
@@ -992,6 +990,9 @@ FullSim <- function(parameters, parallel = FALSE){
                # Generate the matrix of occupied patches and get the relative
                #    fitness of each individual
                OccPatches <- unique(PopMat[CurPop,c(PopIndices$x1, PopIndices$y1)])
+               if(is.null(nrow(OccPatches))){
+                    OccPatches <- matrix(OccPatches, nrow = 1, ncol = 2)
+               }
                RelFits <- RelFit(LocalSel = LocalSel, tau = tau, beta = beta, traits = traits, 
                                  PopMat = PopMat, individuals = CurPop, omega = omega,
                                  PopIndices = PopIndices)
@@ -1040,7 +1041,8 @@ FullSim <- function(parameters, parallel = FALSE){
                                       FitSegIndex = FitSegIndex, FitMutStd = FitMutStd,
                                       DispMutStd = DispMutStd, FitNumMut = FitNumMut,
                                       DispNumMut = DispNumMut, OffspringIndex = OffspringIndex, 
-                                      FitLocusVec = FitLocusVec, DispLocusVec = DispLocusVec)
+                                      FitLocusVec = FitLocusVec, DispLocusVec = DispLocusVec,
+                                      FitAlleleVec = FitAlleleVec, DispAlleleVec = DispAlleleVec)
                     # Now update the SegIndices
                     FitSegIndex <- FitSegIndex + SumNtp1*nFit
                     DispSegIndex <- DispSegIndex + SumNtp1*nDisp
@@ -1054,29 +1056,44 @@ FullSim <- function(parameters, parallel = FALSE){
                CurPop <- 1:PopSize
                
                # Keep track of all summary statistics here
-               for(i in 1:nrow(OccPatches)){
-                    xIndex <- OccPatches[i,1] - beta + BetaIndex
-                    yIndex <- OccPatches[i,2]
-                    if( (xIndex < 1) | (xIndex > RangeLength) ){
-                         write("Summary statistics not initialized with enough space", stderr())
-                         return(NULL)
-                    }
-                    PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &
-                                         (PopMat[,PopIndices$y0] == OccPatches[i,2]))
-                    PatchAbund[g, yIndex, xIndex] <- length(PatchPop)
-                    PatchFitDiv[g, yIndex, xIndex] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
-                    PatchFitMean[g, yIndex, xIndex] <- mean(PopMat[PatchPop, PopIndices$FitCols])
-                    PatchDispDiv[g, yIndex, xIndex] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
-                    PatchDispMean[g, yIndex, xIndex] <- mean(PopMat[PatchPop, PopIndices$DispCols])
+               NumPatches <- nrow(OccPatches)
+               if( (SumStatRow + NumPatches) > CurStatsDim){
+                    NewMat <- matrix(NA, nrow = SumMatSize, ncol = 9)
+                    SumStats <- rbind(SumStats, NewMat)
+                    CurStatsDim <- CurStatsDim + SumMatSize
                }
+               for(i in 1:NumPatches){
+                    PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &
+                                           (PopMat[,PopIndices$y0] == OccPatches[i,2]))
+                    SumStats[SumStatRow, SumStatCols$gen] <- g
+                    SumStats[SumStatRow, SumStatCols$beta] <- beta
+                    SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
+                    SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
+                    SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
+                    SumStats[SumStatRow, SumStatCols$muFit] <- mean(PopMat[PatchPop, PopIndices$FitCols])
+                    SumStats[SumStatRow, SumStatCols$sigmaFit] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
+                    SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PopMat[PatchPop, PopIndices$DispCols])
+                    SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
+                    SumStatRow <- SumStatRow + 1
+               }
+               print(paste("Generation:", g, sep = " "))
+               print(paste("Population size:", PopSize, sep = " "))
           }
      }
      
      # Finally, save the results here
+     PopMatNames <- c("x0", "y0", "x1", "y1", paste("fit", seq(1,(nFit*2)), sep = "_"),
+                      paste("disp", seq(1,(nDisp*2)), sep = "_"))
+     if( !(is.null(PopIndices$sex)) ){
+          PopMatNames <- c(PopMatNames, "sex")
+     }
+     colnames(PopMat) <- PopMatNames
+     colnames(SumStats) <- c("gen", "beta", "x", "y", "abund", "muFit", "sigmaFit",
+                             "muDisp", "sigmaDisp")
+     SumStats <- SumStats[1:(SumStatRow - 1),]
      write.csv(PopMat, file = paste(ResultsDir, "PopMat.csv", sep = "/"), 
                row.names = FALSE, quote = FALSE)
-     save(PatchAbund, PatchFitDiv, PatchFitMean, PatchDispDiv, PatchDispMean,
-          file = paste(ResultsDir, "SummaryStats.Rdata", sep = "/"))
-     
+     write.csv(SumStats, file = paste(ResultsDir, "SummaryStats.csv", sep = "/"),
+               row.names = FALSE, quote = FALSE)
      return(NULL)
 }
