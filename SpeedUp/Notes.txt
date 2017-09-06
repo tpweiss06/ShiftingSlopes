@@ -1,0 +1,23 @@
+For the main function:
+
+FitPerLocusProb <- U / (2 * NumLoci)
+FitMutStd <- sqrt(Vm / U)
+DispPerLocusProb
+DispMutStd
+
+FitNumMut <- rbinom(n = 1000000, size = FitLoci, prob = FitPerLocusProb)
+FitMutIndex <- 1
+DispNumMut <- rbinom(n = 1000000, size = DispLoci, prob = DispPerLocusProb)
+DispMutIndex <- 1
+
+if( !(is.null(PopIndices$sex)) ){
+	SexRands <- rbinom(n = 1000000, size = 1, prob = SexRatio)
+	SexIndex <- 1
+}
+
+NOTES FOR ALL FUNCTIONS
+Trait columns go: ID, fit, disp
+U and Vm entries go: fit, disp
+OccPatches columns go “x1”, “y1” but with no names
+
+

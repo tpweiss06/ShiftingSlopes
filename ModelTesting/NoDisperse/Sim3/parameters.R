@@ -1,0 +1,26 @@
+BetaInit <- 0
+gamma <- 0.025
+tau <- 276.25
+LocalSel <- 1
+omega <- 3
+U <- c(0.02,0)
+Vm <- c(4e-04,0)
+names(U) <- names(Vm) <- c("fit", "disp")
+nFit <- 5
+nDisp <- 5
+R0 <- 1
+K0 <- 10
+width <- 10
+kern <- "exp"
+EnvGradType <- "K"
+monoecious <- TRUE
+BurnIn <- 5
+BurnOut <- 0
+LengthShift <- 0
+ClimSpeed <- 0
+InitPopSize <- 50
+FitInit <- 0.05
+FitDiv <- 0.025
+DispInit <- -100
+DispDiv <- 0
+PatchScale <- 10
