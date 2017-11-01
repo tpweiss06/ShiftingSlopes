@@ -1,0 +1,907 @@
+setwd("~/Desktop/RangeShifts/ShiftingSlopes")
+source("SimFunctions.R")
+RelFit
+GammaSeq <- c(0.025, 0.075, 0.25)
+GammaSeq <- c(0.025, 0.075, 0.25)
+LocalSel <- c(0.25, 0.5, 0.75)
+expand.grid(gamma = GammaSeq, LocalSel = LocalSel)
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)
+RangeParams
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))
+setwd("~/Desktop/RangeShifts/ShiftingSlopes")#
+#
+# Make a function to calculate the range curve over a given spatial extent#
+RangeCapacity <- function(beta, gamma, tau, x_vals){#
+     R_seq <- rep(NA, length(x_vals))#
+     for(i in 1:length(x_vals)){#
+          if(x_vals[i] > beta){#
+               numerator <- exp(-1*gamma * (x_vals[i] - beta - tau))#
+               denominator <- 1 + exp(-1*gamma * (x_vals[i] - beta - tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] < beta){#
+               numerator <- exp(gamma * (x_vals[i] - beta + tau))#
+               denominator <- 1 + exp(gamma * (x_vals[i] - beta + tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] == beta){#
+               R_seq[i] <- 1#
+          }#
+     }#
+     return(R_seq)#
+}#
+#
+# Make a function to display the local fitness optimum across the range (lower#
+#    values don't mean lower fitness, just a different optimum phenotype; actual#
+#    fitness values will be calculated with these local optima and stabilizing#
+#    selection; reproduction will occur according to the range capacity gradient)#
+RelFit <- function(beta, tau, x_vals, LocalSel){#
+     FitSeq <- rep(NA, length(x_vals))#
+     GammaVal <- LocalSel / tau#
+     for(i in 1:length(x_vals)){#
+          numerator <- exp(GammaVal * (x_vals[i] - beta))#
+          denominator <- 1 + exp(GammaVal * (x_vals[i] - beta))#
+          FitSeq[i] <- numerator / denominator#
+     }#
+     return(FitSeq)#
+}#
+# Given a delta and minimum gamma value, calculate the tau value necessary for a#
+#    smooth function#
+CalcTauMin <- function(delta, gamma){#
+     numerator <- log( (1 - delta) / delta )#
+     TauMin <- numerator / gamma#
+     return(TauMin)#
+}#
+#
+# When changing the slope of the range boundary, keep the area of the range#
+#    constant and calculate a new tau#
+CalcTauNew <- function(gamma, C){#
+     numerator <- log( exp( (C*gamma) / (2) ) - 1 )#
+     TauNew <- numerator / gamma#
+     return(TauNew)#
+}#
+#
+# Calculate the total area under a given range curve#
+Calc_C <- function(gamma, tau){#
+     numerator <- 2 * log( exp(gamma * tau) + 1 )#
+     C <- numerator / gamma#
+     return(C)#
+}#
+# Now set the values for gamma, delta, beta, and LocalSel#
+GammaSeq <- c(0.025, 0.075, 0.25)#
+LocalSel <- c(0.25, 0.5, 0.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-500, 500, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+#
+# Now calculate the other tau values#
+for(i in 2:length(TauSeq)){#
+     TauSeq[i] <- CalcTauNew(C = C, gamma = GammaSeq[i])#
+}
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))
+RangeParams
+GammaSeq <- c(0.025, 0.25, 0.75)#
+LocalSel <- c(0.25, 0.5, 0.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-500, 500, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+#
+# Now calculate the other tau values#
+for(i in 2:length(TauSeq)){#
+     TauSeq[i] <- CalcTauNew(C = C, gamma = GammaSeq[i])#
+}#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))
+RangeParams
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(alpha = Alpha, beta = BetaSeq[1], gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = BetaSeq[1], tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = BetaSeq[1], gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = BetaSeq[1], tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = BetaSeq[1], tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+plot(x_seq, Rseq[1,], type = "l")#
+lines(x_seq, FitVals[1,])
+plot(x_seq, Rseq[2,], type = "l")#
+lines(x_seq, FitVals[2,])
+plot(x_seq, Rseq[3,], type = "l")#
+lines(x_seq, FitVals[3,])
+GammaSeq <- c(0.0025, 0.025, 0.25)#
+LocalSel <- c(0.25, 0.5, 0.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-500, 500, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+#
+# Now calculate the other tau values#
+for(i in 2:length(TauSeq)){#
+     TauSeq[i] <- CalcTauNew(C = C, gamma = GammaSeq[i])#
+}#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+plot(x_seq, Rseq[1,], type = "l")#
+lines(x_seq, FitVals[1,])
+plot(x_seq, Rseq[2,], type = "l")#
+lines(x_seq, FitVals[2,])
+plot(x_seq, Rseq[3,], type = "l")#
+lines(x_seq, FitVals[3,])
+rm(list = ls())
+setwd("~/Desktop/RangeShifts/ShiftingSlopes")#
+#
+# Make a function to calculate the range curve over a given spatial extent#
+RangeCapacity <- function(beta, gamma, tau, x_vals){#
+     R_seq <- rep(NA, length(x_vals))#
+     for(i in 1:length(x_vals)){#
+          if(x_vals[i] > beta){#
+               numerator <- exp(-1*gamma * (x_vals[i] - beta - tau))#
+               denominator <- 1 + exp(-1*gamma * (x_vals[i] - beta - tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] < beta){#
+               numerator <- exp(gamma * (x_vals[i] - beta + tau))#
+               denominator <- 1 + exp(gamma * (x_vals[i] - beta + tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] == beta){#
+               R_seq[i] <- 1#
+          }#
+     }#
+     return(R_seq)#
+}#
+#
+# Make a function to display the local fitness optimum across the range (lower#
+#    values don't mean lower fitness, just a different optimum phenotype; actual#
+#    fitness values will be calculated with these local optima and stabilizing#
+#    selection; reproduction will occur according to the range capacity gradient)#
+RelFit <- function(beta, tau, x_vals, LocalSel){#
+     FitSeq <- rep(NA, length(x_vals))#
+     GammaVal <- LocalSel / tau#
+     for(i in 1:length(x_vals)){#
+          numerator <- exp(GammaVal * (x_vals[i] - beta))#
+          denominator <- 1 + exp(GammaVal * (x_vals[i] - beta))#
+          FitSeq[i] <- numerator / denominator#
+     }#
+     return(FitSeq)#
+}#
+# Given a delta and minimum gamma value, calculate the tau value necessary for a#
+#    smooth function#
+CalcTauMin <- function(delta, gamma){#
+     numerator <- log( (1 - delta) / delta )#
+     TauMin <- numerator / gamma#
+     return(TauMin)#
+}#
+#
+# When changing the slope of the range boundary, keep the area of the range#
+#    constant and calculate a new tau#
+CalcTauNew <- function(gamma, C){#
+     numerator <- log( exp( (C*gamma) / (2) ) - 1 )#
+     TauNew <- numerator / gamma#
+     return(TauNew)#
+}#
+#
+# Calculate the total area under a given range curve#
+Calc_C <- function(gamma, tau){#
+     numerator <- 2 * log( exp(gamma * tau) + 1 )#
+     C <- numerator / gamma#
+     return(C)#
+}
+GammaSeq <- c(0.0025, 0.025, 0.25)
+GammaSeq <- c(0.0025, 0.025, 0.25)
+GammaSeq <- c(0.0025, 0.025, 0.25)
+LocalSel <- c(0.25, 0.5, 0.75)
+Delta <- 1e-3
+Beta <- 0
+x_seq <- seq(-500, 500, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))
+TauSeq
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])
+TauSeq
+2:length(TauSeq)
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])
+C
+for(i in 2:length(TauSeq)){#
+     TauSeq[i] <- CalcTauNew(C = C, gamma = GammaSeq[i])#
+}
+TauSeq
+GammaSeq
+C
+log(exp(C*GammaSeq[2]) -1 )
+138.1551 / 0.025
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)#
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)
+TauSeq
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+plot(x_seq, Rseq[1,], type = "l")
+plot(x_seq, Rseq[2,], type = "l")
+GammaSeq <- c(0.0025, 0.025, 0.25)#
+LocalSel <- c(0.25, 0.5, 0.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-5000, 5000, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)#
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = 0.25)#
+}
+plot(x_seq, Rseq[1,], type = "l")
+plot(x_seq, Rseq[2,], type = "l")
+plot(x_seq, Rseq[3,], type = "l")
+lines(x_seq, FitVals[3,])
+lines(x_seq, FitVals[2,])
+lines(x_seq, FitVals[1,])
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = LocalSel[i])#
+}
+plot(x_seq, Rseq[1,], type = "l")
+lines(x_seq, FitVals[1,])
+lines(x_seq, FitVals[2,])
+lines(x_seq, FitVals[3,])
+GammaSeq <- c(0.0025, 0.025, 0.25)#
+LocalSel <- c(0.25, 1, 1.25)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-5000, 5000, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)#
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams#
+# Finally, use these values to calculate starting range shapes for each#
+#    slope value#
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = LocalSel[i])#
+}
+plot(x_seq, Rseq[1,], type = "l")#
+lines(x_seq, FitVals[1,])#
+lines(x_seq, FitVals[2,])#
+lines(x_seq, FitVals[3,])#
+lines(x_seq, Rseq[2,])#
+lines(x_seq, Rseq[3,])
+plot(x_seq, Rseq[1,], type = "l")
+lines(x_seq, FitVals[1,])
+lines(x_seq, FitVals[2,])
+lines(x_seq, FitVals[3,])
+GammaSeq <- c(0.0025, 0.025, 0.25)#
+LocalSel <- c(0.25, 1, 1.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-5000, 5000, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)#
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams#
+# Finally, use these values to calculate starting range shapes for each#
+#    slope value#
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = LocalSel[i])#
+}#
+#
+# Try a basic plot to make sure these functions are working and that these#
+#    initial values work#
+plot(x_seq, Rseq[1,], type = "l")
+lines(x_seq, FitVals[1,])
+lines(x_seq, FitVals[2,])
+lines(x_seq, FitVals[3,])
+lines(x_seq, Rseq[2,])
+lines(x_seq, Rseq[2,])
+GammaSeq <- c(0.0025, 0.01, 0.25)#
+LocalSel <- c(0.25, 1, 1.75)#
+Delta <- 1e-3#
+Beta <- 0#
+#
+# Now create a sequence of x values and an object to store the tau values#
+x_seq <- seq(-5000, 5000, length.out = 10000) #
+TauSeq <- rep(NA, length(GammaSeq))#
+#
+# Now calculate TauMin and C#
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])#
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])#
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)#
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)#
+#
+# Now, create a table to store the parameter values in#
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams#
+# Finally, use these values to calculate starting range shapes for each#
+#    slope value#
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = LocalSel[i])#
+}#
+#
+# Try a basic plot to make sure these functions are working and that these#
+#    initial values work#
+plot(x_seq, Rseq[1,], type = "l")#
+lines(x_seq, FitVals[1,])#
+lines(x_seq, FitVals[2,])#
+lines(x_seq, FitVals[3,])
+lines(x_seq, Rseq[2,])
+lines(x_seq, Rseq[2,])
+rm(list = ls())
+RangeCapacity <- function(beta, gamma, tau, x_vals){#
+     R_seq <- rep(NA, length(x_vals))#
+     for(i in 1:length(x_vals)){#
+          if(x_vals[i] > beta){#
+               numerator <- exp(-1*gamma * (x_vals[i] - beta - tau))#
+               denominator <- 1 + exp(-1*gamma * (x_vals[i] - beta - tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] < beta){#
+               numerator <- exp(gamma * (x_vals[i] - beta + tau))#
+               denominator <- 1 + exp(gamma * (x_vals[i] - beta + tau))#
+               R_seq[i] <- numerator / denominator#
+          } else if(x_vals[i] == beta){#
+               R_seq[i] <- 1#
+          }#
+     }#
+     return(R_seq)#
+}
+RelFit <- function(beta, tau, x_vals, LocalSel){#
+     FitSeq <- rep(NA, length(x_vals))#
+     GammaVal <- LocalSel / tau#
+     for(i in 1:length(x_vals)){#
+          numerator <- exp(GammaVal * (x_vals[i] - beta))#
+          denominator <- 1 + exp(GammaVal * (x_vals[i] - beta))#
+          FitSeq[i] <- numerator / denominator#
+     }#
+     return(FitSeq)#
+}
+CalcTauMin <- function(delta, gamma){#
+     numerator <- log( (1 - delta) / delta )#
+     TauMin <- numerator / gamma#
+     return(TauMin)#
+}
+CalcTauNew <- function(gamma, C){#
+     numerator <- log( exp( (C*gamma) / 2 ) - 1 )#
+     TauNew <- numerator / gamma#
+     return(TauNew)#
+}
+Calc_C <- function(gamma, tau){#
+     numerator <- 2 * log( exp(gamma * tau) + 1 )#
+     C <- numerator / gamma#
+     return(C)#
+}
+GammaSeq <- c(0.0025, 0.01, 0.25)#
+LocalSel <- c(0.25, 1, 1.75)#
+Delta <- 1e-3#
+Beta <- 0
+x_seq <- seq(-5000, 5000, length.out = 10000)
+TauSeq <- rep(NA, length(GammaSeq))
+TauSeq[1] <- CalcTauMin(delta = Delta, gamma = GammaSeq[1])
+C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])
+TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)
+TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)
+TauSeq
+Rseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+FitVals <- matrix(NA, nrow = length(GammaSeq), ncol = length(x_seq))#
+for(i in 1:length(GammaSeq)){#
+     Rseq[i,] <- RangeCapacity(beta = Beta, gamma = GammaSeq[i], #
+                        tau = TauSeq[i], x_vals = x_seq)#
+     FitVals[i,] <- RelFit(beta = Beta, tau = TauSeq[i], x_vals = x_seq, LocalSel = LocalSel[i])#
+}
+plot(x_seq, Rseq[1,], type = "l")
+lines(x_seq, FitVals[1,])
+lines(x_seq, FitVals[2,])
+lines(x_seq, FitVals[3,])
+lines(x_seq, Rseq[2,])
+lines(x_seq, Rseq[3,])
+C
+TauSeq[1]
+GammaSeq
+numerator2 <- log(exp(C*GammaSeq[2]/2)-1)
+numerator3 <- log(exp(C*GammaSeq[3]/2)-1)
+numerator2
+numerator3
+numerator2 / 0.01
+numerator3 / 0.25
+numerator4 <- log(exp(C*1.25/2)-1)
+numerator4
+numerator4 <- log(exp(C*0.8/2)-1)
+numerator4
+numerator4 <- log(exp(C*0.7/2)-1)
+numerator4
+numerator4 <- log(exp(C*0.5/2)-1)
+numerator4
+numerator4 <- log(exp(C*0.25/2)-1)
+numerator4
+pdf(file = "RangeParams.pdf", width = 7, height = 3.5, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[i,])#
+			lines(x_seq, FitVals[j,])#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[i,])#
+			lines(x_seq, FitVals[j,])#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[i,], type = "l")#
+			lines(x_seq, FitVals[j,])#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l")#
+			lines(x_seq, FitVals[i,])#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,2))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l")#
+			lines(x_seq, FitVals[i,])#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,2))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE)#
+			lines(x_seq, FitVals[i,])#
+			box()#
+		}#
+	}#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,2))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue")#
+	mtext("Local Optimum", outer = TRUE, side = 3, cex = 1.5, col = "red")#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,2))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5), line = 1.5#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+?text
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = -1000, y = 0.3, labels = LamdaText, col = "red")#
+				text(x = -1000, y = 0.2, labels = GammaText, col = "blue")#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = -1000, y = 0.3, labels = LambdaText, col = "red")#
+				text(x = -1000, y = 0.2, labels = GammaText, col = "blue")#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = -500, y = 0.2, labels = LambdaText, col = "red", cex = 1.5)#
+				text(x = -500, y = 0.1, labels = GammaText, col = "blue", cex = 1.5)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = 0, y = 0.2, labels = LambdaText, col = "red", cex = 1.5)#
+				text(x = 0, y = 0.1, labels = GammaText, col = "blue", cex = 1.5)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = 0, y = 0.2, labels = LambdaText, col = "red", cex = 1.25)#
+				text(x = 0, y = 0.1, labels = GammaText, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 2,4))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(i == j){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				text(x = 0, y = 0.15, labels = LambdaText, col = "red", cex = 1.25)#
+				text(x = 0, y = 0.05, labels = GammaText, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 1.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 1){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				#LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				LambdaText <- expression(paste(lambda, "=", LocalSel[i], sep = " "))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				#LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				LambdaText <- bquote(lambda = .(LocalSel[i]))#
+				#LambdaText <- expression(paste(lambda, "=", LocalSel[i], sep = " "))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				#LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				#LambdaText <- bquote(lambda = .(LocalSel[i]))#
+				LambdaText <- expression(paste(lambda, "=", bquote(.(LocalSel[i])), sep = " "))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				#LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				LambdaText <- bquote(expression(lambda) == .(LocalSel[i]))#
+				#LambdaText <- expression(paste(lambda, "=", bquote(.(LocalSel[i])), sep = " "))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				#LambdaText <- paste("lambda = ", LocalSel[i], sep = "")#
+				LambdaText <- bquote(lambda == .(LocalSel[i]))#
+				#LambdaText <- expression(paste(lambda, "=", bquote(.(LocalSel[i])), sep = " "))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- paste("gamma = ", GammaSeq[j], sep = "")#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+pdf(file = "RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")#
+	par(mfrow = c(3,3), mar = c(0,0,0,0), oma = c(4, 4, 4,6))#
+	for(i in 1:3){#
+		for(j in 1:3){#
+			plot(x_seq, Rseq[j,], type = "l", axes = FALSE, col = "blue")#
+			lines(x_seq, FitVals[i,], col = "red")#
+			box()#
+			if(j == 3){#
+				LambdaText <- bquote(lambda == .(LocalSel[i]))#
+				mtext(LambdaText, side = 4, col = "red", cex = 1.25, line = 1.5)#
+			}#
+			if(i == 1){#
+				GammaText <- bquote(gamma == .(GammaSeq[j]))#
+				mtext(GammaText, side = 3, col = "blue", cex = 1.25)#
+			}#
+		}#
+	}#
+	mtext("Spatial Position", outer = TRUE, side = 1, cex = 1.5, line = 1.5)#
+	mtext("Range Capacity", outer = TRUE, side = 2, cex = 1.5, col = "blue", line = 1.5)#
+	mtext("Local Optimum", outer = TRUE, side = 4, cex = 1.5, col = "red", line = 3.5)#
+dev.off()
+RangeParams
+RangeParams <- expand.grid(gamma = GammaSeq, LocalSel = LocalSel)#
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3))#
+RangeParams
+write.csv(RangeParams, file = "RangeParameters.csv")
