@@ -33,7 +33,7 @@ AbundExtract <- function(SimID){
                     PopSize <- CurRow$abund[x]
                     xArrInd <- BetaPos + CurCols[x]
                     if((xArrInd > 0) & (xArrInd <= TrialLength)){
-                         Abunds[y, xArrInd, g]
+                         Abunds[y, xArrInd, g] <- PopSize
                     }
                }
           }

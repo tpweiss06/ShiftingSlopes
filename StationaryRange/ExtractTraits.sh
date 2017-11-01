@@ -1,6 +1,6 @@
 #!/bin/bash -l
-#PBS -N ExtractAbunds
-#PBS -l walltime=00:20:00,nodes=1:ppn=24
+#PBS -N ExtractTraits
+#PBS -l walltime=01:00:00,nodes=1:ppn=24
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
@@ -16,4 +16,4 @@ export RMPI_TYPE=OPENMPI
 
 # Run the R script itself, saving the output to
 #	a log file
-R --vanilla < ExtractAbunds.R >& ExtractAbunds.log 
+R --vanilla < ExtractTraits.R >& ExtractTraits.log 

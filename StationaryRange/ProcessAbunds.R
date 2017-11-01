@@ -15,31 +15,24 @@ RangeParams <- 1
 
 # Load in the simulation abundance data
 load(paste("SimData/Params", RangeParams, "Abunds.rdata", sep = ""))
-nWidth <- dim(Abunds[[1]])[1]
-nLength <- dim(Abunds[[1]])[2]
-nTime <- dim(Abunds[[1]])[3]
+nWidth <- dim(SimAbunds[[1]])[1]
+nLength <- dim(SimAbunds[[1]])[2]
+nTime <- dim(SimAbunds[[1]])[3]
 
 # Create the objects to hold the various quantities I need
-MeanAbunds <- array(NA, dim = dim(Abunds[[1]]))
-SigmaAbunds <- array(NA, dim = dim(Abunds[[1]]))
+MeanAbunds <- array(NA, dim = dim(SimAbunds[[1]]))
+SigmaAbunds <- array(NA, dim = dim(SimAbunds[[1]]))
 SectorMeans <- matrix(NA, nrow = nLength, ncol = nTime)
 SectorSigma <- matrix(NA, nrow = nLength, ncol = nTime)
 
-# Now make functions to extract the abundances of each patch in each simulation
-GetAbunds <- function(wid, len, time, AbundArray){
-     return(Abund)
-}
-
 # Now loop through all simulations and fill in these quantities
-
-
 for(k in 1:nLength){
      for(l in 1:nTime){
           PooledAbunds <- NULL
           for(j in 1:nWidth){
-               TempAbunds <- rep(NA, length(Abunds))
+               TempAbunds <- rep(NA, length(SimAbunds))
                for(i in 1:length(Abunds)){
-                    TempAbunds[i] <- Abunds[[i]][j,k,l]
+                    TempAbunds[i] <- SimAbunds[[i]][j,k,l]
                }
                MeanAbunds[j,k,l] <- mean(TempAbunds)
                SigmaAbunds[j,k,l] <- sqrt(var(TempAbunds))

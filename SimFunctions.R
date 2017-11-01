@@ -817,7 +817,7 @@ SaveParams <- function(parameters, FilePath){
 # parallel: A boolean variable indicating whether the simulations are being run
 #              on a server or not (which affects how file paths are determined).
 ### OUTPUTS
-FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
+FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = NULL){
      # First generate a save directory name and create it to save all output
      #    from the simulation
      CurDirectory <- getwd()
@@ -862,11 +862,15 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
      
      # Next initialize the generation 0 founding population and allow it to
      #    reproduce
-     PopMat <- Initialize(PopIndices = PopIndices, PopSize = InitPopSize, NumCols = NumCols,
-                          BetaInit = BetaInit, FitInit = FitInit, FitDiv = FitDiv, 
-                          DispInit = DispInit, DispDiv = DispDiv, width = width)
-     CurPop <- 1:InitPopSize
-     PopSize <- InitPopSize
+     if(is.null(PopInit)){
+          PopMat <- Initialize(PopIndices = PopIndices, PopSize = InitPopSize, NumCols = NumCols,
+                               BetaInit = BetaInit, FitInit = FitInit, FitDiv = FitDiv, 
+                               DispInit = DispInit, DispDiv = DispDiv, width = width)
+     } else{
+          PopMat <- PopInit
+     }
+     CurPop <- 1:nrow(PopMat)
+     PopSize <- length(CurPop)
      traits <- CalcTraits(population = CurPop, PopMat = PopMat, PopSize = PopSize,
                           PopIndices = PopIndices)
      
@@ -936,10 +940,17 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
           SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
           SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
           SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
-          SumStats[SumStatRow, SumStatCols$muFit] <- mean(PopMat[PatchPop, PopIndices$FitCols])
-          SumStats[SumStatRow, SumStatCols$sigmaFit] <- var(PopMat[PatchPop, PopIndices$FitCols])
-          SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PopMat[PatchPop, PopIndices$DispCols])
-          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- var(PopMat[PatchPop, PopIndices$DispCols])
+          if(length(PatchPop) > 1){
+               PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
+               PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
+          } else{
+               PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
+               PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+          }
+          SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
+          SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
+          SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
+          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
           SumStatRow <- SumStatRow + 1
      }
      
@@ -1070,10 +1081,17 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
                     SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
                     SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
                     SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
-                    SumStats[SumStatRow, SumStatCols$muFit] <- mean(PopMat[PatchPop, PopIndices$FitCols])
-                    SumStats[SumStatRow, SumStatCols$sigmaFit] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
-                    SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PopMat[PatchPop, PopIndices$DispCols])
-                    SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
+                    if(length(PatchPop) > 1){
+                         PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
+                         PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
+                    } else{
+                         PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
+                         PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+                    }
+                    SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
+                    SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
+                    SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
+                    SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
                     SumStatRow <- SumStatRow + 1
                }
                print(paste("Generation:", g, sep = " "))
