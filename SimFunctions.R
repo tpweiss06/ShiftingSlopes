@@ -937,9 +937,9 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000){
           SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
           SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
           SumStats[SumStatRow, SumStatCols$muFit] <- mean(PopMat[PatchPop, PopIndices$FitCols])
-          SumStats[SumStatRow, SumStatCols$sigmaFit] <- sqrt(sd(PopMat[PatchPop, PopIndices$FitCols]))
+          SumStats[SumStatRow, SumStatCols$sigmaFit] <- var(PopMat[PatchPop, PopIndices$FitCols])
           SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PopMat[PatchPop, PopIndices$DispCols])
-          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sqrt(sd(PopMat[PatchPop, PopIndices$DispCols]))
+          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- var(PopMat[PatchPop, PopIndices$DispCols])
           SumStatRow <- SumStatRow + 1
      }
      
