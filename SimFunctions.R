@@ -368,7 +368,7 @@ Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1, Allel
 #    logisitic population growth in all occupied patches with offspring assigned
 #    to parental pairs according to individual fitness values.
 ### INPUTS:
-# alpha, beta, gamma, tau:    Parameters corresponding to the range capacity fxn
+# beta, gamma, tau:    Parameters corresponding to the range capacity fxn
 # omega:            The inverse of the strength of stabilizing selection.             
 # R0, K0:           The growth and carrying capacity parameters for logistic
 #                        growth. These values are the maximum attainable values
@@ -407,7 +407,7 @@ Inheritence <- function(Cols, parents, PopMat, SumNtp1, NumLoci, SegVals1, Allel
 # RelFits:          A vector of relative fitness values
 ### OUTPUTS:
 # The function will return a vector of population sizes for the occupied patches
-Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0, 
+Reproduce <- function(beta, gamma, tau, omega, R0, K0, 
                       traits, PopMat, EnvGradType, ColumnNames, SexRatio = 0.5,
                       PatchScale, PopIndices, SexRands = NULL, CurPop, nDisp, nFit, 
                       DispSegVals1, DispSegVals2, DispSegIndex, FitSegVals1, FitSegVals2, 
@@ -424,7 +424,7 @@ Reproduce <- function(alpha = 1, beta, gamma, tau, omega, R0, K0,
      # Determine the number of occupied patches and get the patch qualities for
      #    each, then create an object to hold expected population sizes
      NumPatches <- nrow(OccPatches)
-     PatchEnvQual <- GetEnvQual(alpha = alpha, beta = beta, gamma = gamma, 
+     PatchEnvQual <- GetEnvQual(beta = beta, gamma = gamma, 
                                      tau = tau, patches = OccPatches[,1], 
                                      PatchScale = PatchScale)
      Ntp1 <- rep(NA, NumPatches)
@@ -530,14 +530,14 @@ ChangeClimate <- function(BetaInit, LengthShift, ClimSpeed){
 #    mean of the range capacity function over a given interval using the Mean
 #    Value Theorem.
 ### INPUTS
-# alpha, beta, gamma, and tau are all parameters in the range capacity function.
+# beta, gamma, and tau are all parameters in the range capacity function.
 #    See the function write up for details on these parameters.
 # a:      Lower interval bound(s)
 # b:      Upper interval bound(s)
 ### OUTPUS
 # This function will output a single value for the mean value of the function
 #    over the given interval.
-CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
+CalcEnvMean <- function(beta, gamma, tau, a, b){
      # Determine the number of patches to calculate the mean for, then loop
      #    over them
      NumPatches <- length(a)
@@ -548,20 +548,20 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
           if(b[i] <= beta){
                numerator <- exp(gamma * (b[i] - beta + tau)) + 1
                denominator <- exp(gamma * (a[i] - beta + tau)) + 1
-               FullIntegral <- (alpha / gamma) * log(numerator / denominator)
+               FullIntegral <- (1 / gamma) * log(numerator / denominator)
                EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
           } else if(a[i] >= beta){
                numerator <- exp(-1 * gamma * (b[i] - beta - tau)) + 1
                denominator <- exp(-1 * gamma * (a[i] - beta - tau)) + 1
-               FullIntegral <- -1 * (alpha / gamma) * log(numerator / denominator)
+               FullIntegral <- -1 * (1 / gamma) * log(numerator / denominator)
                EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
           } else{
                PreNum <- exp(gamma * tau) + 1
                PreDen <- exp(gamma * (a[i] - beta + tau)) + 1
                PostNum <- exp(-1 * gamma * (b[i] - beta - tau)) + 1
                PostDen <- exp(gamma * tau) + 1
-               FullIntegral <- (alpha / gamma) * log(PreNum / PreDen) + 
-                    -1 * (alpha/gamma) * log(PostNum / PostDen)
+               FullIntegral <- (1 / gamma) * log(PreNum / PreDen) + 
+                    -1 * (1 /gamma) * log(PostNum / PostDen)
                EnvMean[i] <- (1 / (b[i] - a[i])) * FullIntegral
           }
      }
@@ -572,7 +572,7 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
 # This function uses the CalcEnvMean function to extract a vector of
 #    environmental means for a given set of patches. 
 ### INPUTS
-# alpha, beta, gamma, and tau are all parameters in the range capacity function.
+# beta, gamma, and tau are all parameters in the range capacity function.
 #    See the function write up for details on these parameters.
 # patches:          A vector of the patch numbers to get quality information for
 # PatchScale:       A single constant value used to modify the size of patches.
@@ -586,7 +586,7 @@ CalcEnvMean <- function(alpha, beta, gamma, tau, a, b){
 ### OUTPUTS
 # This function will generate a vector of environmental quality values for each
 #    patch as determined by the GetEnvMean function.
-GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
+GetEnvQual <- function(beta, gamma, tau, patches, PatchScale = 1){
      # Calculate the lower and upper bounds of each patch on the continuous scale
      #    by first calculating their center points
      centers <- patches * PatchScale
@@ -594,7 +594,7 @@ GetEnvQual <- function(alpha, beta, gamma, tau, patches, PatchScale = 1){
      uppers <- centers + PatchScale * 0.5
      
      # Now get and return the environmental quality score for each patch
-     EnvQuals <- CalcEnvMean(alpha = alpha, beta = beta, gamma = gamma, tau = tau, 
+     EnvQuals <- CalcEnvMean(beta = beta, gamma = gamma, tau = tau, 
                              a = lowers, b = uppers)
      return(EnvQuals)
 }
