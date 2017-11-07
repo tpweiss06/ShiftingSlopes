@@ -25,15 +25,16 @@ AbundExtract <- function(SimID){
      SimData <- read.csv(InFile)
      Abunds <- array(0, dim = c(width, TrialLength, BurnIn))
      for(g in 1:BurnIn){
-          CurGen <- subset(SimData, gen == g)
-          for(y in 1:width){
-               CurRow <- subset(CurGen, y == y)
-               CurCols <- CurRow$x
-               for(x in 1:length(CurCols)){
-                    PopSize <- CurRow$abund[x]
-                    xArrInd <- BetaPos + CurCols[x]
-                    if((xArrInd > 0) & (xArrInd <= TrialLength)){
-                         Abunds[y, xArrInd, g] <- PopSize
+          CurGen <- subset(SimData, (gen == g) & (abund > 0))
+          xRange <- range(CurGen$x)
+          xSeq <- seq(xRange[1], xRange[2], by = 1)
+          for(j in xSeq){
+               CurCol <- subset(CurGen, x == j)
+               xArrInd <- BetaPos + j
+               for(k in 1:width){
+                    CurPatch <- subset(CurCol, y == k)
+                    if(dim(CurPatch)[1] == 1){
+                         Abunds[k,xArrInd,g] <- CurPatch$abund
                     }
                }
           }
@@ -51,6 +52,6 @@ clusterExport(cl, ExportVec)
 SimAbunds <- clusterApply(cl, x = AllSimIDs, fun = AbundExtract)
 
 # Save the extracted abundance output
-save(SimAbunds, paste("Params", RangeParams, "Abunds.rdata", sep = ""))
+save(SimAbunds, file = paste("Params", RangeParams, "Abunds.rdata", sep = ""))
 
 # The code will then shut down the cluster after this line.

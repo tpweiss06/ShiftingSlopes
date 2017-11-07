@@ -11,10 +11,10 @@
 
 # Set the working directory and declare which paramater combination to work with
 setwd("~/Desktop/RangeShifts/ShiftingSlopes/StationaryRange/")
-RangeParams <- 1
+RangeParams <- 2
 
 # Load in the simulation abundance data
-load(paste("SimData/Params", RangeParams, "Abunds.rdata", sep = ""))
+load(paste("SimData/Params", RangeParams, "/Params", RangeParams, "Abunds.rdata", sep = ""))
 nWidth <- dim(SimAbunds[[1]])[1]
 nLength <- dim(SimAbunds[[1]])[2]
 nTime <- dim(SimAbunds[[1]])[3]
@@ -31,18 +31,18 @@ for(k in 1:nLength){
           PooledAbunds <- NULL
           for(j in 1:nWidth){
                TempAbunds <- rep(NA, length(SimAbunds))
-               for(i in 1:length(Abunds)){
+               for(i in 1:length(SimAbunds)){
                     TempAbunds[i] <- SimAbunds[[i]][j,k,l]
                }
                MeanAbunds[j,k,l] <- mean(TempAbunds)
-               SigmaAbunds[j,k,l] <- sqrt(var(TempAbunds))
+               SigmaAbunds[j,k,l] <- sd(TempAbunds)
                PooledAbunds <- c(PooledAbunds, TempAbunds)
           }
           SectorMeans[k,l] <- mean(MeanAbunds[,k,l])
-          SectorSigma[k,l] <- sqrt(var(PooledAbunds))
+          SectorSigma[k,l] <- sd(PooledAbunds)
           rm(PooledAbunds)
      }
 }
 
-OutFile <- paste("SimData/Params", RangeParams, "ExtractedAbunds.rdata", sep = "")
+OutFile <- paste("SimData/Params", RangeParams, "/ExtractedAbunds.rdata", sep = "")
 save(MeanAbunds, SigmaAbunds, SectorMeans, SectorSigma, file = OutFile)

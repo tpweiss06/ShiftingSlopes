@@ -28,21 +28,19 @@ TraitExtract <- function(SimID){
      MuDisp <- array(0, dim = c(width, TrialLength, BurnIn))
      SigmaDisp <- array(0, dim = c(width, TrialLength, BurnIn))
      for(g in 1:BurnIn){
-          CurGen <- subset(SimData, gen == g)
-          for(y in 1:width){
-               CurRow <- subset(CurGen, y == y)
-               CurCols <- CurRow$x
-               for(x in 1:length(CurCols)){
-                    PopMuFit <- CurRow$muFit[x]
-                    PopSigFit <- CurRow$sigmaFit[x]
-                    PopMuDisp <- CurRow$muDisp[x]
-                    PopSigDisp <- CurRow$sigmaDisp[x]
-                    xArrInd <- BetaPos + CurCols[x]
-                    if((xArrInd > 0) & (xArrInd <= TrialLength)){
-                         MuFit[y, xArrInd, g] <- PopMuFit
-                         SigmaFit[y, xArrInd, g] <- PopSigFit
-                         MuDisp[y, xArrInd, g] <- PopMuDisp
-                         SigmaDisp[y, xArrInd, g] <- PopSigDisp
+          CurGen <- subset(SimData, (gen == g) & (abund > 0))
+          xRange <- range(CurGen$x)
+          xSeq <- seq(xRange[1], xRange[2], by = 1)
+          for(j in xSeq){
+               CurCol <- subset(CurGen, x == j)
+               xArrInd <- BetaPos + j
+               for(k in 1:width){
+                    CurPatch <- subset(CurCol, y == k)
+                    if(dim(CurPatch)[1] == 1){
+                         MuFit[k, xArrInd, g] <- CurPatch$muFit
+                         SigmaFit[k, xArrInd, g] <- CurPatch$sigmaFit
+                         MuDisp[k, xArrInd, g] <- CurPatch$muDisp
+                         SigmaDisp[k, xArrInd, g] <- CurPatch$sigmaDisp
                     }
                }
           }
@@ -61,6 +59,6 @@ clusterExport(cl, ExportVec)
 SimTraits <- clusterApply(cl, x = AllSimIDs, fun = TraitExtract)
 
 # Save the extracted abundance output
-save(SimTraits, paste("Params", RangeParams, "Traits.rdata", sep = ""))
+save(SimTraits, file = paste("Params", RangeParams, "Traits.rdata", sep = ""))
 
 # The code will then shut down the cluster after this line.
