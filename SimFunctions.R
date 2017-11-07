@@ -935,23 +935,26 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
      for(i in 1:nrow(OccPatches)){
           PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &
                                  (PopMat[,PopIndices$y0] == OccPatches[i,2]))
-          SumStats[SumStatRow, SumStatCols$gen] <- 1
-          SumStats[SumStatRow, SumStatCols$beta] <- BetaInit
-          SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
-          SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
-          SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
-          if(length(PatchPop) > 1){
-               PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
-               PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
-          } else{
-               PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
-               PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+          PatchPopSize <- length(PatchPop)
+          if(PatchPopSize > 0){
+               SumStats[SumStatRow, SumStatCols$gen] <- 1
+               SumStats[SumStatRow, SumStatCols$beta] <- BetaInit
+               SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
+               SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
+               SumStats[SumStatRow, SumStatCols$abund] <- PatchPopSize
+               if(PatchPopSize > 1){
+                    PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
+                    PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
+               } else{
+                    PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
+                    PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+               }
+               SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
+               SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
+               SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
+               SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
+               SumStatRow <- SumStatRow + 1
           }
-          SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
-          SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
-          SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
-          SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
-          SumStatRow <- SumStatRow + 1
      }
      
      # Calculate the beta values for during the period of climate change
@@ -1076,23 +1079,26 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
                for(i in 1:NumPatches){
                     PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &
                                            (PopMat[,PopIndices$y0] == OccPatches[i,2]))
-                    SumStats[SumStatRow, SumStatCols$gen] <- g
-                    SumStats[SumStatRow, SumStatCols$beta] <- beta
-                    SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
-                    SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
-                    SumStats[SumStatRow, SumStatCols$abund] <- length(PatchPop)
-                    if(length(PatchPop) > 1){
-                         PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
-                         PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
-                    } else{
-                         PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
-                         PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+                    PatchPopSize <- length(PatchPop)
+                    if(PatchPopSize > 0){
+                         SumStats[SumStatRow, SumStatCols$gen] <- g
+                         SumStats[SumStatRow, SumStatCols$beta] <- beta
+                         SumStats[SumStatRow, SumStatCols$x] <- OccPatches[i,1]
+                         SumStats[SumStatRow, SumStatCols$y] <- OccPatches[i,2]
+                         SumStats[SumStatRow, SumStatCols$abund] <- PatchPopSize
+                         if(PatchPopSize > 1){
+                              PatchFits <- rowSums(PopMat[PatchPop, PopIndices$FitCols])
+                              PatchDisps <- exp(rowSums(PopMat[PatchPop, PopIndices$DispCols]))
+                         } else{
+                              PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
+                              PatchDisps <- exp(sum(PopMat[PatchPop, PopIndices$DispCols]))
+                         }
+                         SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
+                         SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
+                         SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
+                         SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
+                         SumStatRow <- SumStatRow + 1
                     }
-                    SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
-                    SumStats[SumStatRow, SumStatCols$sigmaFit] <- sd(PopMat[PatchPop, PopIndices$FitCols])
-                    SumStats[SumStatRow, SumStatCols$muDisp] <- mean(PatchDisps)
-                    SumStats[SumStatRow, SumStatCols$sigmaDisp] <- sd(PopMat[PatchPop, PopIndices$DispCols])
-                    SumStatRow <- SumStatRow + 1
                }
                print(paste("Generation:", g, sep = " "))
                print(paste("Population size:", PopSize, sep = " "))
