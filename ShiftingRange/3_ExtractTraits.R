@@ -5,11 +5,15 @@
 #    standard deviation. Additionally, the within and among simulation variance
 #    will be calculated for the mean value of each trait.
 
+# Set the speed for the current script
+SpeedNum <- 1
+SpeedWord <- "Slow"
+
 # Set the number of processors available for this scrip
-nProc <- 24*18
+nProc <- 2*18
 
 # Set the working directory
-setwd("~/ShiftingSlopes/StationaryRange/")
+setwd("~/ShiftingSlopes/ShiftingRange/")
 
 # Create arrays to hold the trait values from each simulation. Dimensions 
 #    of these arrays are: parameter combination, simulation number, time, x axis,
@@ -22,9 +26,9 @@ setwd("~/ShiftingSlopes/StationaryRange/")
 #         3 -- SigTraitGen    (Genetic standard deviation)
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
-NumGens <- 2000
+NumGens <- 200
 width <- 10
-RangeExtent <- 121
+RangeExtent <- 121 + SpeedNum * 100 # To account for the max speed of climate change over 100 generations
 ZeroPos <- 61
 FitVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
 DispVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
@@ -36,11 +40,11 @@ TraitIndices <- expand.grid(params = 1:9, sim = 1:100)
 TraitExtract <- function(i){
      # Sort out the parameter combination and simulation under consideration
      Param <- TraitIndices$params[i]
-     AllSims <- list.files(paste("Params", Param, "/", sep = ""))
+     AllSims <- list.files(paste(SpeedWord, "/Params", Param, "/", sep = ""))
      SimID <- AllSims[TraitIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of the trait value arrays to 
@@ -153,7 +157,8 @@ for(p in 1:9){
 }
 
 # Finally save the output
+OutFile <- paste(SpeedWord, "ShiftingTraitResults.rdata", sep = "")
 save(SectorFit, AmongVarFit, WithinVarFit, SectorDisp, AmongVarDisp, WithinVarDisp,
-     file = "StationaryTraitResults.rdata")
+     file = OutFile)
 
 

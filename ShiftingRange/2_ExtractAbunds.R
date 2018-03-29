@@ -5,11 +5,15 @@
 #    (i.e. among simulation variance), and the variance among
 #    patches within the same sector (i.e. within simulation variance).
 
+# Set the speed for the current script
+SpeedNum <- 1
+SpeedWord <- "Slow"
+
 # Set the number of processors available for this scrip
-nProc <- 24*18
+nProc <- 2*18
 
 # Set the working directory
-setwd("~/ShiftingSlopes/StationaryRange/")
+setwd("~/ShiftingSlopes/ShiftingRange/")
 
 # Create an array to hold the abundance values from each simulation. Dimensions 
 #    of this array are: parameter combination, simulation number, time, x axis,
@@ -18,9 +22,9 @@ setwd("~/ShiftingSlopes/StationaryRange/")
 #    discrete lattice
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
-NumGens <- 2000
+NumGens <- 200
 width <- 10
-RangeExtent <- 121
+RangeExtent <- 121 + SpeedNum * 100 # To account for the max speed of climate change over 100 generations
 ZeroPos <- 61
 AbundVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width))
 
@@ -31,11 +35,11 @@ AbundIndices <- expand.grid(params = 1:9, sim = 1:100)
 AbundExtract <- function(i){
      # Sort out the parameter combination and simulation under consideration
      Param <- AbundIndices$params[i]
-     AllSims <- list.files(paste("Params", Param, "/", sep = ""))
+     AllSims <- list.files(paste(SpeedWord, "/Params", Param, "/", sep = ""))
      SimID <- AllSims[AbundIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of AbundVals to store the 
@@ -122,6 +126,7 @@ for(p in 1:9){
 }
 
 # Finally save the output
-save(SectorMean, AmongVar, WithinVar, file = "StationaryAbundResults.rdata")
+OutFile <- paste(SpeedWord, "ShiftingAbundResults.rdata", sep = "")
+save(SectorMean, AmongVar, WithinVar, file = OutFile)
 
 

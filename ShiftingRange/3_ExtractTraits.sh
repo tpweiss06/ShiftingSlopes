@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#PBS -l walltime=06:00:00,nodes=18:ppn=24,pmem=2580mb
+#PBS -l walltime=06:00:00,nodes=2:ppn=24,pmem=10580mb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
@@ -9,7 +9,7 @@ Rscript=3_ExtractTraits.R
 LogFile=3_ExtractTraits.log
 
 # Change to the relevant working directory
-cd ~/ShiftingSlopes/StationaryRange
+cd ~/ShiftingSlopes/ShiftingRange
 
 # Load R and MPI
 module load R/3.4.4
