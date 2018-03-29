@@ -18,7 +18,8 @@ setwd("~/ShiftingSlopes/StationaryRange/")
 #    discrete lattice
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
-NumGens <- 2000
+NumGens <- 200
+MaxGen <- 2000
 width <- 10
 RangeExtent <- 121
 ZeroPos <- 61
@@ -42,7 +43,7 @@ AbundExtract <- function(i){
      #    abundances from this particular simulation
      Abunds <- array(NA, dim = c(NumGens, RangeExtent, width))
      
-     for(g in 1:NumGens){
+     for(g in (MaxGen - NumGens + 1):MaxGen){
           CurGen <- subset(SimData, (gen == g) & (abund > 0))
           if(dim(CurGen)[1] > 0){
                xRange <- range(CurGen$x)
@@ -66,7 +67,7 @@ AbundExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
+clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
 
 # Run the simulations
 SimVec <- 1:dim(AbundIndices)[1]

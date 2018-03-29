@@ -22,7 +22,8 @@ setwd("~/ShiftingSlopes/StationaryRange/")
 #         3 -- SigTraitGen    (Genetic standard deviation)
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
-NumGens <- 2000
+NumGens <- 200
+MaxGen <- 2000
 width <- 10
 RangeExtent <- 121
 ZeroPos <- 61
@@ -48,7 +49,7 @@ TraitExtract <- function(i){
      Fit <- array(NA, dim = c(NumGens, RangeExtent, width, 3))
      Disp <- array(NA, dim = c(NumGens, RangeExtent, width, 3))
      
-     for(g in 1:NumGens){
+     for(g in (MaxGen - NumGens + 1):MaxGen){
           CurGen <- subset(SimData, (gen == g) & (abund > 0))
           if(dim(CurGen)[1] > 0){
                xRange <- range(CurGen$x)
@@ -78,7 +79,7 @@ TraitExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
+clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
 
 # Run the simulations
 SimVec <- 1:dim(TraitIndices)[1]
