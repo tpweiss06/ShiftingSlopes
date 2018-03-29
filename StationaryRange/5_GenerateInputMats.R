@@ -23,13 +23,16 @@ GenInputMat <- function(p){
      # Create the population column indices
      PopIndices <- PopMatColNames(Lf = Lf, Ld = Ld, monoecious = monoecious)
      
-     # Next generate the values to use in generating the matrix from the last generation
-     #    of stationarity
+     # Next generate the values to use in generating the matrix from the last
+     #    generation of stationarity
      LastGen <- dim(SectorMean)[3]
      MeanSectorAbunds <- round(SectorMean[p,,LastGen])
      MeanSectorFitAllele <- SectorFit[p,,LastGen,1] / (2*Lf)
      SigmaSectorFitAllele <- SectorFit[p,,LastGen,3]
-     MeanSectorDispAllele <- SectorDisp[] # ************** backcalculate this from the SimFunctions script equation
+     # For an explanation of the derivation of the MeanDispAllele approximation, 
+     #    see model documentation
+     MeanDist <- SectorDisp[p,,LastGen,1]
+     MeanSectorDispAllele <- log(MeanDist / (dmax * eta - MeanDist)) / (rho * Ld)
      SigmaSectorDispAllele <- SectorDisp[p,,LastGen,3]
 
      # Now generate a vector of population abundances per patch
