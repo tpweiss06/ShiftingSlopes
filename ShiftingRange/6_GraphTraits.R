@@ -1,7 +1,11 @@
 # This script will create the graphs from the abundance data.
 
+SpeedWord <- "Slow"
+SpeedNum <- 1
+
 # Set the working directory
-setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/StationaryRange/")
+setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
+            SpeedWord, sep = ""))
 library(plot3D)
 
 # Set some graphical parameters to use for the subsequent figures
@@ -17,9 +21,9 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-LocLabels <- seq(-75, 75, by = 30)
-TimeSeq <- 1:2000
-TimeLabels <- seq(0, 2000, by = 400)
+LocLabels <- seq(-60, 60 + 100*SpeedNum, length.out = 6)
+TimeSeq <- 1:200
+TimeLabels <- seq(0, 200, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 ColKeyWidth <- 15
 xLabLine <- 1.75
@@ -32,6 +36,14 @@ TopArrow <- matrix(c(0.2, 1.2, 3.5, 1.2), nrow = 2, ncol = 2, byrow = TRUE)
 SideArrow <- matrix(c(-0.45, -2.5, -0.45, 0.8), nrow = 2, ncol = 2, byrow = TRUE)
 LowAdj <- 0.05
 HighAdj <- 0.95
+EnvLineWidth <- 1
+
+# Create some useful objects for graphing the position of the range center
+RangeExtent <- 121 + 100*SpeedNum
+ZeroPos <- 61
+EndShift <- ZeroPos + 100*SpeedNum
+DecimalZero <- ZeroPos / RangeExtent
+DecimalEndShift <- EndShift / RangeExtent
 
 # Create a function to find the indices corresponding to the subset of the a sequence
 #	which is defined as the shortest possible sequence including both the given
@@ -49,7 +61,7 @@ FindRange <- function(minimum, maximum, sequence){
 
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
-load("StationaryTraitResults.rdata")
+load(paste(SpeedWord, "ShiftingTraitResults.rdata", sep = ""))
 MaxSectorFit <- rep(NA, 3)
 MaxSectorDisp <- rep(NA, 3)
 MaxAmongFit <- rep(NA, 3)
@@ -94,9 +106,9 @@ for(i in 1:3){
 PlotNames <- c("Mu", "GenVar", "PhenVar")
 for(v in 1:3){
      ############# First the fitness graphs
-     Fit <- c(paste("FitSector", PlotNames[v], ".pdf", sep = ""),
-              paste("FitAmong", PlotNames[v], ".pdf", sep = ""),
-              paste("FitWithin", PlotNames[v], ".pdf", sep = ""))
+     Fit <- c(paste("Figures/", SpeedWord, "FitSector", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/", SpeedWord, "FitAmong", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/", SpeedWord, "FitWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Fit[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -124,6 +136,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key
@@ -176,6 +196,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key
@@ -228,6 +256,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key
@@ -255,9 +291,9 @@ for(v in 1:3){
 
      
      ############# Now the dispersal graphs
-     Disp <- c(paste("DispSector", PlotNames[v], ".pdf", sep = ""),
-              paste("DispAmong", PlotNames[v], ".pdf", sep = ""),
-              paste("DispWithin", PlotNames[v], ".pdf", sep = ""))
+     Disp <- c(paste("Figures/", SpeedWord, "DispSector", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/", SpeedWord, "DispAmong", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/", SpeedWord, "DispWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Disp[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -285,6 +321,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key
@@ -337,6 +381,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key
@@ -389,6 +441,14 @@ for(v in 1:3){
                            y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                            xpd = NA)
                }
+               
+               # Add a black line for the center of the habitable range
+               segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                        lwd =  EnvLineWidth)
+               segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                        lwd =  EnvLineWidth)
           }
      
           # Add the color key

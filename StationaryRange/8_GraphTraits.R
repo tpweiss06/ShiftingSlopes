@@ -17,7 +17,7 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-LocLabels <- seq(-75, 75, by = 30)
+LocLabels <- seq(-60, 60, by = 24)
 TimeSeq <- 1:2000
 TimeLabels <- seq(0, 2000, by = 400)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)

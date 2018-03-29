@@ -1,7 +1,11 @@
 # This script will create the graphs from the abundance data.
 
+SpeedWord <- "Slow"
+SpeedNum <- 1
+
 # Set the working directory
-setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/StationaryRange/")
+setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
+            SpeedWord, sep = ""))
 library(plot3D)
 
 # Set some graphical parameters to use for the subsequent figures
@@ -17,9 +21,9 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-LocLabels <- seq(-60, 60, by = 24)
-TimeSeq <- 1:2000
-TimeLabels <- seq(0, 2000, by = 400)
+LocLabels <- seq(-60, 60 + 100*SpeedNum, length.out = 6)
+TimeSeq <- 1:200
+TimeLabels <- seq(0, 200, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 ColKeyWidth <- 15
 xLabLine <- 1.75
@@ -32,6 +36,14 @@ TopArrow <- matrix(c(0.2, 1.2, 3.5, 1.2), nrow = 2, ncol = 2, byrow = TRUE)
 SideArrow <- matrix(c(-0.45, -2.5, -0.45, 0.8), nrow = 2, ncol = 2, byrow = TRUE)
 LowAdj <- 0.05
 HighAdj <- 0.95
+EnvLineWidth <- 1
+
+# Create some useful objects for graphing the position of the range center
+RangeExtent <- 121 + 100*SpeedNum
+ZeroPos <- 61
+EndShift <- ZeroPos + 100*SpeedNum
+DecimalZero <- ZeroPos / RangeExtent
+DecimalEndShift <- EndShift / RangeExtent
 
 # Create a function to find the indices corresponding to the subset of the a sequence
 #	which is defined as the shortest possible sequence including both the given
@@ -49,7 +61,7 @@ FindRange <- function(minimum, maximum, sequence){
 
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
-load("StationaryAbundResults.rdata")
+load(paste(SpeedWord, "ShiftingAbundResults.rdata", sep = ""))
 MaxAbund <- max(SectorMean, na.rm = TRUE)
 MaxWithinVar <- max(WithinVar, na.rm = TRUE)
 MaxAmongVar <- max(AmongVar, na.rm = TRUE)
@@ -66,7 +78,8 @@ WithinCols[2,] <- jet.col(10000)
 AmongCols[2,] <- jet.col(10000)
 
 # Make the mean abundance graph
-pdf(file = "Figures/MeanAbunds.pdf", width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+PlotName <- paste("Figures/", SpeedWord, "MeanAbunds.pdf", sep = "")
+pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
@@ -92,6 +105,14 @@ pdf(file = "Figures/MeanAbunds.pdf", width = FigWidth, height = FigHeight, onefi
                       y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                       xpd = NA)
           }
+          
+          # Add a black line for the center of the habitable range
+          segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                   lwd =  EnvLineWidth)
      }
 
      # Add the color key
@@ -119,7 +140,8 @@ dev.off()
 
 
 # Make the within variance graph
-pdf(file = "Figures/AbundWithinVar.pdf", width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+PlotName <- paste("Figures/", SpeedWord, "AbundWithinVar.pdf", sep = "")
+pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
@@ -145,6 +167,14 @@ pdf(file = "Figures/AbundWithinVar.pdf", width = FigWidth, height = FigHeight, o
                       y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                       xpd = NA)
           }
+          
+          # Add a black line for the center of the habitable range
+          segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                   lwd =  EnvLineWidth)
      }
 
      # Add the color key
@@ -171,7 +201,8 @@ pdf(file = "Figures/AbundWithinVar.pdf", width = FigWidth, height = FigHeight, o
 dev.off()
 
 # Make the among variance graph
-pdf(file = "Figures/AbundAmongVar.pdf", width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+PlotName <- paste("Figures/", SpeedWord, "AbundAmongVar.pdf", sep = "")
+pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
@@ -197,6 +228,14 @@ pdf(file = "Figures/AbundAmongVar.pdf", width = FigWidth, height = FigHeight, on
                       y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                       xpd = NA)
           }
+          
+          # Add a black line for the center of the habitable range
+          segments(x0 = DecimalZero, y0 = 0, x1 = DecimalZero, y1 = 0.25,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalEndShift, y0 = 0.75, x1 = DecimalEndShift, y1 = 1,
+                   lwd =  EnvLineWidth)
+          segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
+                   lwd =  EnvLineWidth)
      }
 
      # Add the color key
