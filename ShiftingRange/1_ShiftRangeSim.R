@@ -7,105 +7,67 @@ nProc <- 24*18
 NumSims <- 100
 
 # Set the working directory and load necessary data and libraries
-setwd("~/ShiftingSlopes/StationaryRange/")
+setwd("~/ShiftingSlopes/ShiftingRange/")
 source("~/ShiftingSlopes/SimFunctions.R")
 RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 library(parallel)
 library(Rmpi)
 
-# Now set all parameters
-BetaInit <- 0
-omega <- 3
-U <- c(0.02, 0.02)
-Vm <- c(0.0004, 0.0004)
-Lf <- 5
-Ld <- 5
-Rmax <- 2
-Kmax <- 100
-width <- 10
-kern <- "exp"
-EnvGradType <- "K"
-monoecious <- FALSE
-BurnIn <- 2000
-BurnOut <- 0
-LengthShift <- 0
-v <- 0
-InitPopSize <- 2500
-FitInit <- 0
-FitDiv <- 0.025
-DispInit <- -1
-DispDiv <- 1
-NumRands <- 1000000
-z <- 0.5
-dmax <- 1000
-rho <- 0.5
+# Define the velocity conditions for shifting climate
+SpeedWords <- c("Slow", "Med", "Fast")
+SpeedNums <- c(1, 3, 5)
 
+# Now load in the parameters and compile all 9 combinations into a single list
+#    with sublists for the three speeds of climate change
 AllParams <- vector(mode = "list", length = 9)
-
 for(i in 1:9){
-     gamma <- RangeParams$gamma[i]
-     lambda <- RangeParams$lambda[i]
-     tau <- RangeParams$tau[i]
-     eta <- RangeParams$eta[i]
+     ParamFile <- paste("ParamFiles/Params", i, ".R", sep = "")
+     source(ParamFile)
      
-     AllParams[[i]] <- list(BetaInit, gamma, tau, lambda, omega, U, Vm, Lf, Ld, Rmax,
-                        Kmax, width, kern, EnvGradType, monoecious, BurnIn, BurnOut, 
-                        LengthShift, v, InitPopSize, FitInit, FitDiv, DispInit,
-                        DispDiv, eta, NumRands, z, dmax, rho)
-     names(AllParams[[i]]) <- c("BetaInit", "gamma", "tau", "lambda", "omega", "U", "Vm", 
-                            "Lf", "Ld", "Rmax", "Kmax", "width", "kern", "EnvGradType", 
-                            "monoecious", "BurnIn", "BurnOut", "LengthShift", "v", 
-                            "InitPopSize", "FitInit", "FitDiv", "DispInit", "DispDiv", 
-                            "eta", "NumRands", "z", "dmax", "rho")
-}
-
-# Create the population column indices to make an input matrix
-PopIndices <- PopMatColNames(Lf = Lf, Ld = Ld, monoecious = monoecious)
-
-# Now initialize the matrix with an entry for each individual
-nCol <- ifelse(monoecious, max(PopIndices$DispCols), PopIndices$sex)
-InputMat <- matrix(NA, nrow = InitPopSize, ncol = nCol)
-
-# Now step through and populate the matrix
-Ylocs <- sample(x = 1:width, size = InitPopSize, replace = TRUE, prob = NULL)
-SectorPop <- InitPopSize / 5
-CurX <- c(rep(-2, SectorPop), rep(-1, SectorPop), rep(0, SectorPop), 
-          rep(1, SectorPop), rep(2, SectorPop))
-PatchPop <- SectorPop / width
-CurY <- rep(1:width, each = PatchPop)
-CurY <- c(CurY, CurY, CurY, CurY, CurY)
-for(i in 1:InitPopSize){
-     InputMat[i, PopIndices$x1] <- CurX[i]
-     InputMat[i, PopIndices$y1] <- CurY[i]
-     InputMat[i, PopIndices$FitCols] <- rnorm(n = Lf * 2, mean = FitInit, sd = FitDiv)
-     InputMat[i, PopIndices$DispCols] <- rnorm(n = Ld * 2, mean = DispInit,
-                                               sd = DispDiv)
-     if(!monoecious){
-          InputMat[i, PopIndices$sex] <- rbinom(n = 1, size = 1, prob = z)
+     AllParams[[i]] <- vector(mode = "list", length = 3)
+     names(AllParams[[i]]) <- SpeedWords
+     for(j in 1:3){
+          BurnIn <- 50
+          LengthShift <- 100
+          BurnOut <- 50
+          v <- SpeedNums[j]
+          AllParams[[i]][[j]] <- list(BetaInit, gamma, tau, lambda, omega, U, Vm, Lf, Ld, Rmax,
+                                 Kmax, width, kern, EnvGradType, monoecious, BurnIn, BurnOut, 
+                                 LengthShift, v, InitPopSize, FitInit, FitDiv, DispInit,
+                                 DispDiv, eta, NumRands, z, dmax, rho)
+          names(AllParams[[i]][[j]]) <- c("BetaInit", "gamma", "tau", "lambda", "omega", "U", "Vm", 
+                                     "Lf", "Ld", "Rmax", "Kmax", "width", "kern", "EnvGradType", 
+                                     "monoecious", "BurnIn", "BurnOut", "LengthShift", "v", 
+                                     "InitPopSize", "FitInit", "FitDiv", "DispInit", "DispDiv", 
+                                     "eta", "NumRands", "z", "dmax", "rho")
      }
 }
 
 # Write a function to be passed to various nodes
-SimFunc <- function(i, InMat){
-     setwd(paste("Params", i, "/", sep = ""))
-     FullSim(parameters = AllParams[[i]], parallel = TRUE, PopInit = InMat)
+SimFunc <- function(index){
+     j <- nchar(index)
+     i <- index / 10^(j-1)
+     InMat <- load(paste("InputMats/InputMat", i, ".rdata", sep = ""))
+     Params <- AllParams[[i]][[j]]
+     setwd(paste(SpeedWords[j], "/Params", i, "/", sep = ""))
+     FullSim(parameters = Params, parallel = TRUE, PopInit = InMat)
      return(i)
 }
 
 # Create a vector of parameter index values for the parallel computation
-SimVec <- rep(1:9, each = NumSims)
+SimVec <- rep(c(1:9, 1:9*10, 1:9*100), each = NumSims)
 
 # Create the cluster and run the simulations
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("AllParams", "SimVec", "InputMat") )
+clusterExport(cl, c("AllParams", "SimVec", "SpeedWords") )
 
 # Change the working directory of the worker nodes
 temp <- clusterEvalQ(cl, source("~/ShiftingSlopes/SimFunctions.R") )
 
 # Run the simulations
-Sims <- clusterApply(cl, x = SimVec, fun = SimFunc, InMat = InputMat)
+Sims <- clusterApply(cl, x = SimVec, fun = SimFunc)
 
 # This implementation of openMPI doesn't seem to play nice with Rmpi,
 #    so instead of nicely shutting down the cluster within the script,
