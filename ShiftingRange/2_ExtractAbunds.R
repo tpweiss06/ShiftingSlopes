@@ -9,11 +9,13 @@
 SpeedNum <- 1
 SpeedWord <- "Slow"
 
-# Set the number of processors available for this scrip
+# Set the number of processors available for this script
 nProc <- 2*18
 
 # Set the working directory
 setwd("~/ShiftingSlopes/ShiftingRange/")
+library(parallel)
+library(Rmpi)
 
 # Create an array to hold the abundance values from each simulation. Dimensions 
 #    of this array are: parameter combination, simulation number, time, x axis,
@@ -39,7 +41,7 @@ AbundExtract <- function(i){
      SimID <- AllSims[AbundIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of AbundVals to store the 
@@ -71,6 +73,7 @@ cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
 clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
+temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange"))
 
 # Run the simulations
 SimVec <- 1:dim(AbundIndices)[1]

@@ -14,6 +14,8 @@ nProc <- 2*18
 
 # Set the working directory
 setwd("~/ShiftingSlopes/ShiftingRange/")
+library(parallel)
+library(Rmpi)
 
 # Create arrays to hold the trait values from each simulation. Dimensions 
 #    of these arrays are: parameter combination, simulation number, time, x axis,
@@ -44,7 +46,7 @@ TraitExtract <- function(i){
      SimID <- AllSims[TraitIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of the trait value arrays to 
@@ -83,6 +85,7 @@ cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
 clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
+temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange"))
 
 # Run the simulations
 SimVec <- 1:dim(TraitIndices)[1]
