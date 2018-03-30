@@ -38,7 +38,7 @@ AbundExtract <- function(i){
      SimID <- AllSims[AbundIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of AbundVals to store the 

@@ -43,7 +43,7 @@ TraitExtract <- function(i){
      SimID <- AllSims[TraitIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv")
+     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of the trait value arrays to 
