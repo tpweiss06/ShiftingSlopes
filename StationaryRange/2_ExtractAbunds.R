@@ -53,12 +53,14 @@ AbundExtract <- function(i){
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
                     xArrInd <- ZeroPos + j
-                    for(k in 1:width){
-                         CurPatch <- subset(CurCol, y == k)
-                         if(dim(CurPatch)[1] == 1){
-                              Abunds[g, xArrInd, k] <- CurPatch$abund
+                    if(xArrInd <= RangeExtent){
+                         for(k in 1:width){
+                              CurPatch <- subset(CurCol, y == k)
+                              if(dim(CurPatch)[1] == 1){
+                                   Abunds[g - (MaxGen - NumGens), xArrInd, k] <- CurPatch$abund
+                              }
                          }
-                    }
+                    }     
                }
           } 
      }
@@ -70,6 +72,7 @@ cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
 clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
+temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/StationaryRange/"))
 
 # Run the simulations
 SimVec <- 1:dim(AbundIndices)[1]

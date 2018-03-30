@@ -59,17 +59,19 @@ TraitExtract <- function(i){
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
                     xArrInd <- ZeroPos + j
-                    for(k in 1:width){
-                         CurPatch <- subset(CurCol, y == k)
-                         if(dim(CurPatch)[1] == 1){
-                              Fit[g, xArrInd, k, 1] <- CurPatch$muFit
-                              Fit[g, xArrInd, k, 2] <- CurPatch$sigmaFitPhen
-                              Fit[g, xArrInd, k, 3] <- CurPatch$sigmaFitGen
-                              Disp[g, xArrInd, k, 1] <- CurPatch$muDisp
-                              Disp[g, xArrInd, k, 2] <- CurPatch$sigmaDispPhen
-                              Disp[g, xArrInd, k, 3] <- CurPatch$sigmaDispGen
+                    if(xArrInd <= RangeExtent){
+                         for(k in 1:width){
+                              CurPatch <- subset(CurCol, y == k)
+                              if(dim(CurPatch)[1] == 1){
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 1] <- CurPatch$muFit
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 2] <- CurPatch$sigmaFitPhen
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 3] <- CurPatch$sigmaFitGen
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 1] <- CurPatch$muDisp
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 2] <- CurPatch$sigmaDispPhen
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 3] <- CurPatch$sigmaDispGen
+                              }
                          }
-                    }
+                    }     
                }
           } 
      }
@@ -82,6 +84,7 @@ cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
 clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
+temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/StationaryRange/"))
 
 # Run the simulations
 SimVec <- 1:dim(TraitIndices)[1]
