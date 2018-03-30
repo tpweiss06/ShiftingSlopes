@@ -10,6 +10,8 @@ nProc <- 24*18
 
 # Set the working directory
 setwd("~/ShiftingSlopes/StationaryRange/")
+library(Rmpi)
+library(parallel)
 
 # Create an array to hold the abundance values from each simulation. Dimensions 
 #    of this array are: parameter combination, simulation number, time, x axis,

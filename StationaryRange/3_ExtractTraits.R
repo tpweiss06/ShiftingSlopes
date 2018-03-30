@@ -10,6 +10,8 @@ nProc <- 24*18
 
 # Set the working directory
 setwd("~/ShiftingSlopes/StationaryRange/")
+library(Rmpi)
+library(parallel)
 
 # Create arrays to hold the trait values from each simulation. Dimensions 
 #    of these arrays are: parameter combination, simulation number, time, x axis,
