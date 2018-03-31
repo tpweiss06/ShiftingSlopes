@@ -45,18 +45,20 @@ GenInputMat <- function(p){
      WidthIndex <- NULL
      
      for(i in 1:length(MeanSectorAbunds)){
-          Indices <- ((i-1)*width + 1):(i*width)
-          PopSizes <- rep(MeanSectorAbunds[i], width)
-          PatchAbunds[Indices] <- PopSizes
-          SectorIndex <- c(SectorIndex, rep(i, sum(PopSizes)))
-          for(j in 1:width){
-               WidthIndex <- c(WidthIndex, rep(j, PopSizes[j]))
+          if(!is.na(MeanSectorAbunds[i])){
+               Indices <- ((i-1)*width + 1):(i*width)
+               PopSizes <- rep(MeanSectorAbunds[i], width)
+               PatchAbunds[Indices] <- PopSizes
+               SectorIndex <- c(SectorIndex, rep(i, sum(PopSizes)))
+               for(j in 1:width){
+                    WidthIndex <- c(WidthIndex, rep(j, PopSizes[j]))
+               }
           }
      }
      
      # Now initialize the matrix with an entry for each individual
      nCol <- ifelse(monoecious, max(PopIndices$DispCols), PopIndices$sex)
-     InputMat <- matrix(NA, nrow = sum(MeanSectorAbunds), ncol = nCol)
+     InputMat <- matrix(NA, nrow = length(SectorIndex), ncol = nCol)
      
      # Now step through the input matrix and fill in all the necessary information for
      #    each individual. 

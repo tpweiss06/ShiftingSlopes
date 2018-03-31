@@ -34,7 +34,7 @@ ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
 LocLabels <- seq(-75, 75, by = 30)
-maxt <- 2000
+maxt <- 200
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 ColKeyWidth <- 15
 xLabLine <- 1.75

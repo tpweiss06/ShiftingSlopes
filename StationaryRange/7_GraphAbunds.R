@@ -18,8 +18,8 @@ ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
 LocLabels <- seq(-60, 60, by = 24)
-TimeSeq <- 1:2000
-TimeLabels <- seq(0, 2000, by = 400)
+TimeSeq <- 1:200
+TimeLabels <- seq(1800, 2000, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 ColKeyWidth <- 15
 xLabLine <- 1.75
@@ -71,8 +71,8 @@ pdf(file = "Figures/MeanAbunds.pdf", width = FigWidth, height = FigHeight, onefi
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq]), 
-                                maximum = max(SectorMean[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(SectorMean[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AbundCols[1,])
           image2D(z = SectorMean[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AbundCols[2,ColRange], colkey = FALSE)
@@ -124,8 +124,8 @@ pdf(file = "Figures/AbundWithinVar.pdf", width = FigWidth, height = FigHeight, o
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq]), 
-                                maximum = max(WithinVar[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(WithinVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = WithinCols[1,])
           image2D(z = WithinVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = WithinCols[2,ColRange], colkey = FALSE)
@@ -176,8 +176,8 @@ pdf(file = "Figures/AbundAmongVar.pdf", width = FigWidth, height = FigHeight, on
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq]), 
-                                maximum = max(AmongVar[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(AmongVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AmongCols[1,])
           image2D(z = AmongVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AmongCols[2,ColRange], colkey = FALSE)

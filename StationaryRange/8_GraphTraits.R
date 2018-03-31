@@ -18,8 +18,8 @@ ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
 LocLabels <- seq(-60, 60, by = 24)
-TimeSeq <- 1:2000
-TimeLabels <- seq(0, 2000, by = 400)
+TimeSeq <- 1:200
+TimeLabels <- seq(1800, 2000, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 ColKeyWidth <- 15
 xLabLine <- 1.75
@@ -52,41 +52,39 @@ FindRange <- function(minimum, maximum, sequence){
 load("StationaryTraitResults.rdata")
 MaxSectorFit <- rep(NA, 3)
 MaxSectorDisp <- rep(NA, 3)
-MaxAmongFit <- rep(NA, 3)
-MaxAmongDisp <- rep(NA, 3)
-MaxWithinFit <- rep(NA, 3)
-MaxAmongFit <- rep(NA, 3)
 for(i in 1:3){
-     MaxSectorFit[i] <- max(SectorFit[,,,i])
-     MaxSectorDisp[i] <- max(SectorDisp[,,,i])
-     MaxAmongFit[i] <- max(AmongVarFit[,,,i])
-     MaxAmongDisp[i] <- max(AmongVarDisp[,,,i])
-     MaxWithinFit[i] <- max(WithinVarFit[,,,i])
-     MaxWithinDisp[i] <- max(WithinVarDisp[,,,i])
-}
+     MaxSectorFit[i] <- max(SectorFit[,,,i], na.rm = TRUE)
+     MaxSectorDisp[i] <- max(SectorDisp[,,,i], na.rm = TRUE)
+}     
+MaxAmongFit <- max(AmongVarFit, na.rm = TRUE)
+MaxAmongDisp <- max(AmongVarDisp, na.rm = TRUE)
+MaxWithinFit <- max(WithinVarFit, na.rm = TRUE)
+MaxWithinDisp <- max(WithinVarDisp, na.rm = TRUE)
+
 
 FitSectorCols <- array(NA, dim = c(3,2,10000))
 DispSectorCols <- array(NA, dim = c(3,2,10000))
-FitAmongCols <- array(NA, dim = c(3,2,10000))
-DispAmongCols <- array(NA, dim = c(3,2,10000))
-FitWithinCols <- array(NA, dim = c(3,2,10000))
-DispWithinCols <- array(NA, dim = c(3,2,10000))
+FitAmongCols <- array(NA, dim = c(2,10000))
+DispAmongCols <- array(NA, dim = c(2,10000))
+FitWithinCols <- array(NA, dim = c(2,10000))
+DispWithinCols <- array(NA, dim = c(2,10000))
 
 for(i in 1:3){
      FitSectorCols[i,1,] <- seq(0, MaxSectorFit[i], length.out = 10000)
      DispSectorCols[i,1,] <- seq(0, MaxSectorDisp[i], length.out = 10000)
-     FitAmongCols[i,1,] <- seq(0, MaxAmongFit[i], length.out = 10000)
-     DispAmongCols[i,1,] <- seq(0, MaxAmongDisp[i], length.out = 10000)
-     FitWithinCols[i,1,] <- seq(0, MaxWithinFit[i], length.out = 10000)
-     DispWithinCols[i,1,] <- seq(0, MaxWithinDisp[i], length.out = 10000)
      
      FitSectorCols[i,2,] <- jet.col(10000)
      DispSectorCols[i,2,] <- jet.col(10000)
-     FitAmongCols[i,2,] <- jet.col(10000)
-     DispAmongCols[i,2,] <- jet.col(10000)
-     FitWithinCols[i,2,] <- jet.col(10000)
-     DispWithinCols[i,2,] <- jet.col(10000)
 }
+FitAmongCols[1,] <- seq(0, MaxAmongFit, length.out = 10000)
+DispAmongCols[1,] <- seq(0, MaxAmongDisp, length.out = 10000)
+FitWithinCols[1,] <- seq(0, MaxWithinFit, length.out = 10000)
+DispWithinCols[1,] <- seq(0, MaxWithinDisp, length.out = 10000)
+FitAmongCols[2,] <- jet.col(10000)
+DispAmongCols[2,] <- jet.col(10000)
+FitWithinCols[2,] <- jet.col(10000)
+DispWithinCols[2,] <- jet.col(10000)
+
 
 # --------------------- Now use a loop to make a mean, among replicate variance,
 #    and within replicate variance graph for both fitness and dispersal for each
@@ -94,17 +92,17 @@ for(i in 1:3){
 PlotNames <- c("Mu", "GenVar", "PhenVar")
 for(v in 1:3){
      ############# First the fitness graphs
-     Fit <- c(paste("FitSector", PlotNames[v], ".pdf", sep = ""),
-              paste("FitAmong", PlotNames[v], ".pdf", sep = ""),
-              paste("FitWithin", PlotNames[v], ".pdf", sep = ""))
+     Fit <- c(paste("Figures/FitSector", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/FitAmong", PlotNames[v], ".pdf", sep = ""),
+              paste("Figures/FitWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Fit[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
           par(mar = InnerMar, oma = OuterMar)
           for(i in SimSeq){
                # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(SectorFit[i,,TimeSeq,v]), 
-                                     maximum = max(SectorFit[i,,TimeSeq,v]),
+               ColRange <- FindRange(minimum = min(SectorFit[i,,TimeSeq,v], na.rm = TRUE), 
+                                     maximum = max(SectorFit[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = FitSectorCols[v,1,])
                image2D(z = SectorFit[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = FitSectorCols[v,2,ColRange], colkey = FALSE)
@@ -149,110 +147,111 @@ for(v in 1:3){
                 adj = HighAdj)
      dev.off()
 
-     # Among var
-     pdf(file = Fit[2], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
-          layout(FigMat)
-          par(mar = InnerMar, oma = OuterMar)
-          for(i in SimSeq){
-               # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(AmongVarFit[i,,TimeSeq,v]), 
-                                     maximum = max(AmongVarFit[i,,TimeSeq,v]),
-                                     sequence = FitAmongCols[v,1,])
-               image2D(z = AmongVarFit[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                       main = "", col = FitAmongCols[v,2,ColRange], colkey = FALSE)
-          
-               # Add the axes
-               axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
-               axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-               axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
-               axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-          
-               # Add the selection and environmental gradient arrows
-               if(i == 7){
-                    arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
-                           y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
-                    arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
-                           y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
+     if(v == 1){
+          # Among var
+          pdf(file = Fit[2], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+               layout(FigMat)
+               par(mar = InnerMar, oma = OuterMar)
+               for(i in SimSeq){
+                    # Find the color range for the current plot and make the figure
+                    ColRange <- FindRange(minimum = min(AmongVarFit[i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(AmongVarFit[i,,TimeSeq], na.rm = TRUE),
+                                          sequence = FitAmongCols[1,])
+                    image2D(z = AmongVarFit[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                            main = "", col = FitAmongCols[2,ColRange], colkey = FALSE)
+               
+                    # Add the axes
+                    axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
+                    axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+                    axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
+                    axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+               
+                    # Add the selection and environmental gradient arrows
+                    if(i == 7){
+                         arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
+                                y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                         arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
+                                y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                    }
                }
-          }
-     
-          # Add the color key
-          colkey(col = FitAmongCols[v,2,], clim = c(0, MaxAmongFit[v]), cex.axis = AxisSize, width = ColKeyWidth)
-     
-          # Add the x and y axis labels
-          mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
-          mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
-     
-          # Add the selection and environmental gradient text
-          mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
-                cex = TextSize)
-          mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = HighAdj)
-     
-          mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
-                cex = TextSize)
-          mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = HighAdj)
-     dev.off()
-     
-     # Within var
-     pdf(file = Fit[3], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
-          layout(FigMat)
-          par(mar = InnerMar, oma = OuterMar)
-          for(i in SimSeq){
-               # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(WithinVarFit[i,,TimeSeq,v]), 
-                                     maximum = max(WithinVarFit[i,,TimeSeq,v]),
-                                     sequence = FitWithinCols[v,1,])
-               image2D(z = WithinVarFit[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                       main = "", col = FitWithinCols[v,2,ColRange], colkey = FALSE)
           
-               # Add the axes
-               axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
-               axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-               axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
-               axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+               # Add the color key
+               colkey(col = FitAmongCols[2,], clim = c(0, MaxAmongFit), cex.axis = AxisSize, width = ColKeyWidth)
           
-               # Add the selection and environmental gradient arrows
-               if(i == 7){
-                    arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
-                           y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
-                    arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
-                           y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
+               # Add the x and y axis labels
+               mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
+               mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
+          
+               # Add the selection and environmental gradient text
+               mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
+                     cex = TextSize)
+               mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = HighAdj)
+          
+               mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+                     cex = TextSize)
+               mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = HighAdj)
+          dev.off()
+     
+          # Within var
+          pdf(file = Fit[3], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+               layout(FigMat)
+               par(mar = InnerMar, oma = OuterMar)
+               for(i in SimSeq){
+                    # Find the color range for the current plot and make the figure
+                    ColRange <- FindRange(minimum = min(WithinVarFit[i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(WithinVarFit[i,,TimeSeq], na.rm = TRUE),
+                                          sequence = FitWithinCols[1,])
+                    image2D(z = WithinVarFit[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                            main = "", col = FitWithinCols[2,ColRange], colkey = FALSE)
+               
+                    # Add the axes
+                    axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
+                    axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+                    axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
+                    axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+               
+                    # Add the selection and environmental gradient arrows
+                    if(i == 7){
+                         arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
+                                y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                         arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
+                                y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                    }
                }
-          }
-     
-          # Add the color key
-          colkey(col = FitWithinCols[v,2,], clim = c(0, MaxWithinFit[v]), cex.axis = AxisSize, width = ColKeyWidth)
-     
-          # Add the x and y axis labels
-          mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
-          mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
-     
-          # Add the selection and environmental gradient text
-          mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
-                cex = TextSize)
-          mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = HighAdj)
-     
-          mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
-                cex = TextSize)
-          mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = HighAdj)
-     dev.off()
-
+          
+               # Add the color key
+               colkey(col = FitWithinCols[2,], clim = c(0, MaxWithinFit), cex.axis = AxisSize, width = ColKeyWidth)
+          
+               # Add the x and y axis labels
+               mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
+               mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
+          
+               # Add the selection and environmental gradient text
+               mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
+                     cex = TextSize)
+               mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = HighAdj)
+          
+               mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+                     cex = TextSize)
+               mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = HighAdj)
+          dev.off()
+     }
      
      ############# Now the dispersal graphs
      Disp <- c(paste("DispSector", PlotNames[v], ".pdf", sep = ""),
@@ -264,8 +263,8 @@ for(v in 1:3){
           par(mar = InnerMar, oma = OuterMar)
           for(i in SimSeq){
                # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(SectorDisp[i,,TimeSeq,v]), 
-                                     maximum = max(SectorDisp[i,,TimeSeq,v]),
+               ColRange <- FindRange(minimum = min(SectorDisp[i,,TimeSeq,v], na.rm = TRUE), 
+                                     maximum = max(SectorDisp[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = DispSectorCols[v,1,])
                image2D(z = SectorDisp[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = DispSectorCols[v,2,ColRange], colkey = FALSE)
@@ -310,107 +309,109 @@ for(v in 1:3){
                 adj = HighAdj)
      dev.off()
      
-     # Among var
-     pdf(file = Disp[2], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
-          layout(FigMat)
-          par(mar = InnerMar, oma = OuterMar)
-          for(i in SimSeq){
-               # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(AmongVarDisp[i,,TimeSeq,v]), 
-                                     maximum = max(AmongVarDisp[i,,TimeSeq,v]),
-                                     sequence = DispAmongCols[v,1,])
-               image2D(z = AmongVarDisp[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                       main = "", col = DispAmongCols[v,2,ColRange], colkey = FALSE)
+     if(v == 1){
+          # Among var
+          pdf(file = Disp[2], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+               layout(FigMat)
+               par(mar = InnerMar, oma = OuterMar)
+               for(i in SimSeq){
+                    # Find the color range for the current plot and make the figure
+                    ColRange <- FindRange(minimum = min(AmongVarDisp[i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(AmongVarDisp[i,,TimeSeq], na.rm = TRUE),
+                                          sequence = DispAmongCols[1,])
+                    image2D(z = AmongVarDisp[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                            main = "", col = DispAmongCols[2,ColRange], colkey = FALSE)
           
-               # Add the axes
-               axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
-               axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-               axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
-               axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+                    # Add the axes
+                    axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
+                    axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+                    axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
+                    axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
           
-               # Add the selection and environmental gradient arrows
-               if(i == 7){
-                    arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
-                           y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
-                    arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
-                           y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
+                    # Add the selection and environmental gradient arrows
+                    if(i == 7){
+                         arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
+                                y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                         arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
+                                y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                    }
                }
-          }
      
-          # Add the color key
-          colkey(col = DispAmongCols[v,2,], clim = c(0, MaxAmongDisp[v]), cex.axis = AxisSize, width = ColKeyWidth)
+               # Add the color key
+               colkey(col = DispAmongCols[2,], clim = c(0, MaxAmongDisp), cex.axis = AxisSize, width = ColKeyWidth)
      
-          # Add the x and y axis labels
-          mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
-          mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
+               # Add the x and y axis labels
+               mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
+               mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
      
-          # Add the selection and environmental gradient text
-          mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
-                cex = TextSize)
-          mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = HighAdj)
-     
-          mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
-                cex = TextSize)
-          mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = HighAdj)
-     dev.off()
-     
-     # Within var
-     pdf(file = Disp[3], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
-          layout(FigMat)
-          par(mar = InnerMar, oma = OuterMar)
-          for(i in SimSeq){
-               # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(WithinVarDisp[i,,TimeSeq,v]), 
-                                     maximum = max(WithinVarDisp[i,,TimeSeq,v]),
-                                     sequence = DispWithinCols[v,1,])
-               image2D(z = WithinVarDisp[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                       main = "", col = DispWithinCols[v,2,ColRange], colkey = FALSE)
+               # Add the selection and environmental gradient text
+               mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
+                     cex = TextSize)
+               mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = HighAdj)
           
-               # Add the axes
-               axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
-               axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-               axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
-               axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
-          
-               # Add the selection and environmental gradient arrows
-               if(i == 7){
-                    arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
-                           y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
-                    arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
-                           y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
-                           xpd = NA)
+               mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+                     cex = TextSize)
+               mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = HighAdj)
+          dev.off()
+     
+          # Within var
+          pdf(file = Disp[3], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
+               layout(FigMat)
+               par(mar = InnerMar, oma = OuterMar)
+               for(i in SimSeq){
+                    # Find the color range for the current plot and make the figure
+                    ColRange <- FindRange(minimum = min(WithinVarDisp[i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(WithinVarDisp[i,,TimeSeq], na.rm = TRUE),
+                                          sequence = DispWithinCols[1,])
+                    image2D(z = WithinVarDisp[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                            main = "", col = DispWithinCols[2,ColRange], colkey = FALSE)
+               
+                    # Add the axes
+                    axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
+                    axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+                    axis(2, at = seq(0, 1, by = 0.2), labels = TimeLabels, las = 1, cex.axis = AxisSize)
+                    axis(2, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
+               
+                    # Add the selection and environmental gradient arrows
+                    if(i == 7){
+                         arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
+                                y1 = TopArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                         arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
+                                y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
+                                xpd = NA)
+                    }
                }
-          }
-     
-          # Add the color key
-          colkey(col = DispWithinCols[v,2,], clim = c(0, MaxWithinDisp[v]), cex.axis = AxisSize, width = ColKeyWidth)
-     
-          # Add the x and y axis labels
-          mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
-          mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
-     
-          # Add the selection and environmental gradient text
-          mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
-                cex = TextSize)
-          mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
-                adj = HighAdj)
-     
-          mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
-                cex = TextSize)
-          mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = LowAdj)
-          mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
-                adj = HighAdj)
-     dev.off()
+          
+               # Add the color key
+               colkey(col = DispWithinCols[2,], clim = c(0, MaxWithinDisp), cex.axis = AxisSize, width = ColKeyWidth)
+          
+               # Add the x and y axis labels
+               mtext("Spatial location (x)", side = 1, outer = TRUE, line = xLabLine, cex = TextSize)
+               mtext("Generation", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
+          
+               # Add the selection and environmental gradient text
+               mtext("Strength of local adaptation", side = 2, outer = TRUE, line = AdaptLabLine,
+                     cex = TextSize)
+               mtext("Weak", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+                     adj = HighAdj)
+          
+               mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+                     cex = TextSize)
+               mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = LowAdj)
+               mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+                     adj = HighAdj)
+          dev.off()
+     }
 }
