@@ -140,10 +140,13 @@ TraitProcess <- function(p){
      return(TempList)
 }
 
-clusterExport(cl, c("FitVals", "DispVals"))
+#clusterExport(cl, c("FitVals", "DispVals"))
 
-SimSummary <- clusterApply(cl, x = 1:9, fun = TraitProcess)
-
+#SimSummary <- clusterApply(cl, x = 1:9, fun = TraitProcess)
+SimSummary <- vector(mode = "list", length = 9)
+for(i in 1:9){
+     SimSummary[[i]] <- TraitProcess(p = i)
+}
 # Now create the summary objects to be saved from these arrays
 SectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
 SectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))

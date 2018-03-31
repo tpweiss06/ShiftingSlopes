@@ -113,10 +113,13 @@ AbundProcess <- function(p){
      return(TempList)
 }
 
-clusterExport(cl, "AbundVals")
+#clusterExport(cl, "AbundVals")
 
-SimSummary <- clusterApply(cl, x = 1:9, fun = AbundProcess)
-
+#SimSummary <- clusterApply(cl, x = 1:9, fun = AbundProcess)
+SimSummary <- vector(mode = "list", length = 9)
+for(i in 1:9){
+     SimSummary[[i]] <- AbundProcess(p = i)
+}
 # Now create the summary objects to be saved from this array
 SectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
 AmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
