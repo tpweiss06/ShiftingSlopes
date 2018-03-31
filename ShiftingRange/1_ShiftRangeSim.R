@@ -47,10 +47,10 @@ for(i in 1:9){
 SimFunc <- function(index){
      j <- nchar(index)
      i <- index / 10^(j-1)
-     InMat <- load(paste("InputMats/InputMat", i, ".rdata", sep = ""))
+     load(paste("InputMats/InputMat", i, ".rdata", sep = ""))
      Params <- AllParams[[i]][[j]]
      setwd(paste(SpeedWords[j], "/Params", i, "/", sep = ""))
-     FullSim(parameters = Params, parallel = TRUE, PopInit = InMat)
+     FullSim(parameters = Params, parallel = TRUE, PopInit = InputMat)
      return(i)
 }
 

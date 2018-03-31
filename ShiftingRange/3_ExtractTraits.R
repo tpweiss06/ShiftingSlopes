@@ -102,6 +102,8 @@ TraitProcess <- function(p){
      ParamSectorFit <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamSectorDisp <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     ParamWithinVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      ParamWithinVarDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      
      for(i in 1:RangeExtent){

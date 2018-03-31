@@ -84,8 +84,8 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq]), 
-                                maximum = max(SectorMean[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(SectorMean[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AbundCols[1,])
           image2D(z = SectorMean[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AbundCols[2,ColRange], colkey = FALSE)
@@ -146,8 +146,8 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq]), 
-                                maximum = max(WithinVar[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(WithinVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = WithinCols[1,])
           image2D(z = WithinVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = WithinCols[2,ColRange], colkey = FALSE)
@@ -207,8 +207,8 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq]), 
-                                maximum = max(AmongVar[i,,TimeSeq]),
+          ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(AmongVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AmongCols[1,])
           image2D(z = AmongVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AmongCols[2,ColRange], colkey = FALSE)
