@@ -65,6 +65,7 @@ clusterExport(cl, c("AllParams", "SimVec", "SpeedWords") )
 
 # Change the working directory of the worker nodes
 temp <- clusterEvalQ(cl, source("~/ShiftingSlopes/SimFunctions.R") )
+temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange/"))
 
 # Run the simulations
 Sims <- clusterApply(cl, x = SimVec, fun = SimFunc)
