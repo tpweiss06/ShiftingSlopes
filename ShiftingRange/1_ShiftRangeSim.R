@@ -47,9 +47,11 @@ for(i in 1:9){
 SimFunc <- function(index){
      j <- nchar(index)
      i <- index / 10^(j-1)
-     load(paste("InputMats/InputMat", i, ".rdata", sep = ""))
+     InFile <- paste("~/ShiftingSlopes/ShiftingRange/InputMats/InputMat", i, ".rdata", sep = "")
+     load(InFile)
      Params <- AllParams[[i]][[j]]
-     setwd(paste(SpeedWords[j], "/Params", i, "/", sep = ""))
+     NewDirectory <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[j], "/Params", i, "/", sep = "")
+     setwd(NewDirectory)
      FullSim(parameters = Params, parallel = TRUE, PopInit = InputMat)
      return(i)
 }
