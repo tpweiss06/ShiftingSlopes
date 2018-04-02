@@ -10,10 +10,11 @@ SpeedNum <- 1
 SpeedWord <- "Slow"
 
 # Set the number of processors available for this scrip
-nProc <- 2*18
+nProc <- 2*24
 
 # Set the working directory
 setwd("~/ShiftingSlopes/ShiftingRange/")
+source("~/ShiftingSlopes/SimFunctions.R")
 library(parallel)
 library(Rmpi)
 
@@ -30,10 +31,13 @@ library(Rmpi)
 #    number x values corresponding to patch centers to array indices
 NumGens <- 200
 width <- 10
-RangeExtent <- 121 + SpeedNum * 100 # To account for the max speed of climate change over 100 generations
-ZeroPos <- 61
+RangeExtent <- 121
 FitVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
 DispVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
+
+BetaShift <- ChangeClimate(BetaInit = 0, LengthShift = 100, eta = 50, v = SpeedNum) / 50
+BetaCoord <- c(rep(0, 50), BetaShift, rep(BetaShift[100], 50))
+ZeroPos <- 61
 
 # Create a data frame to index each simulation block in the above arrays
 TraitIndices <- expand.grid(params = 1:9, sim = 1:100)
@@ -61,7 +65,7 @@ TraitExtract <- function(i){
                xSeq <- seq(xRange[1], xRange[2], by = 1)
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
-                    xArrInd <- ZeroPos + j
+                    xArrInd <- ZeroPos + (j - BetaCoord[g])
                     for(k in 1:width){
                          CurPatch <- subset(CurCol, y == k)
                          if(dim(CurPatch)[1] == 1){
@@ -84,7 +88,8 @@ TraitExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
+clusterExport(cl, c("SpeedWord", "NumGens", "width", "RangeExtent", "ZeroPos", 
+                    "TraitIndices", "BetaCoord"))
 temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange"))
 
 # Run the simulations
@@ -102,8 +107,6 @@ TraitProcess <- function(p){
      ParamSectorFit <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamSectorDisp <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     ParamWithinVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      ParamWithinVarDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      
      for(i in 1:RangeExtent){
@@ -140,13 +143,6 @@ TraitProcess <- function(p){
      return(TempList)
 }
 
-#clusterExport(cl, c("FitVals", "DispVals"))
-
-#SimSummary <- clusterApply(cl, x = 1:9, fun = TraitProcess)
-SimSummary <- vector(mode = "list", length = 9)
-for(i in 1:9){
-     SimSummary[[i]] <- TraitProcess(p = i)
-}
 # Now create the summary objects to be saved from these arrays
 SectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
 SectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
@@ -156,12 +152,13 @@ WithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
 WithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
-     SectorFit[p,,,] <- SimSummary[[p]]$SectorFit
-     SectorDisp[p,,,] <- SimSummary[[p]]$SectorDisp
-     AmongVarFit[p,,] <- SimSummary[[p]]$AmongVarFit
-     AmongVarDisp[p,,] <- SimSummary[[p]]$AmongVarDisp
-     WithinVarFit[p,,] <- SimSummary[[p]]$WithinVarFit
-     WithinVarDisp[p,,] <- SimSummary[[p]]$WithinVarDisp
+     SimSummary <- TraitProcess(p)
+     SectorFit[p,,,] <- SimSummary$SectorFit
+     SectorDisp[p,,,] <- SimSummary$SectorDisp
+     AmongVarFit[p,,] <- SimSummary$AmongVarFit
+     AmongVarDisp[p,,] <- SimSummary$AmongVarDisp
+     WithinVarFit[p,,] <- SimSummary$WithinVarFit
+     WithinVarDisp[p,,] <- SimSummary$WithinVarDisp
 }
 
 # Finally save the output

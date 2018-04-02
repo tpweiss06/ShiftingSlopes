@@ -7,6 +7,7 @@ SpeedNum <- 1
 setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
             SpeedWord, sep = ""))
 library(plot3D)
+source("~/Desktop/RangeShifts/ShiftingSlopesCode/SimFunctions.R")
 
 # Set some graphical parameters to use for the subsequent figures
 FigMat <- matrix(NA, nrow = 3, ncol = 13)
@@ -44,6 +45,29 @@ ZeroPos <- 61
 EndShift <- ZeroPos + 100*SpeedNum
 DecimalZero <- ZeroPos / RangeExtent
 DecimalEndShift <- EndShift / RangeExtent
+
+# Create a function to convert the matrix of relative locations to absolute
+#    locations
+RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
+                          BetaInit, eta){
+     # Create a new matrix for the absolute locations of the appropriate size
+     AbsMat <- matrix(NA, nrow = RangeExtent + v*LengthShift, ncol = ncol(RelMat))
+     
+     # Establish the location of beta throughout the simulation
+     BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
+                                eta = eta, v = v) / 50
+     BetaCoord <- c(rep(BetaInit, BurnIn), BetaShift, rep(BetaShift[LengthShift], 
+                                                          BurnOut))
+     # Step through each generation and populate the absolute matrix
+     for(g in 1:ncol(RelMat)){
+          AbsXcoord <- 1:RangeExtent + BetaCoord[g]
+          vals <- which(!is.na(RelMat[,g]))
+          for(i in vals){
+               AbsMat[AbsXcoord[i],g] <- RelMat[i,g]
+          }
+     }
+     return(AbsMat)
+}
 
 # Create a function to find the indices corresponding to the subset of the a sequence
 #	which is defined as the shortest possible sequence including both the given
@@ -115,7 +139,10 @@ for(v in 1:3){
                ColRange <- FindRange(minimum = min(SectorFit[i,,TimeSeq,v], na.rm = TRUE), 
                                      maximum = max(SectorFit[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = FitSectorCols[v,1,])
-               image2D(z = SectorFit[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+               AbsMat <- RelToAbsolute(RelMat = SectorFit[i,,TimeSeq,v], BurnIn = 50,
+                                       LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                       RangeExtent = 121, BetaInit = 0, eta = 50)
+               image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = FitSectorCols[v,2,ColRange], colkey = FALSE)
           
                # Add the axes
@@ -176,7 +203,10 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(AmongVarFit[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(AmongVarFit[i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitAmongCols[1,])
-                    image2D(z = AmongVarFit[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarFit[i,,TimeSeq], BurnIn = 50,
+                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = FitAmongCols[2,ColRange], colkey = FALSE)
           
                     # Add the axes
@@ -236,7 +266,10 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(WithinVarFit[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(WithinVarFit[i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitWithinCols[1,])
-                    image2D(z = WithinVarFit[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarFit[i,,TimeSeq], BurnIn = 50,
+                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = FitWithinCols[v,2,ColRange], colkey = FALSE)
           
                     # Add the axes
@@ -301,7 +334,10 @@ for(v in 1:3){
                ColRange <- FindRange(minimum = min(SectorDisp[i,,TimeSeq,v], na.rm = TRUE), 
                                      maximum = max(SectorDisp[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = DispSectorCols[v,1,])
-               image2D(z = SectorDisp[i,,TimeSeq,v], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+               AbsMat <- RelToAbsolute(RelMat = SectorDisp[i,,TimeSeq,v], BurnIn = 50,
+                                       LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                       RangeExtent = 121, BetaInit = 0, eta = 50)
+               image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = DispSectorCols[v,2,ColRange], colkey = FALSE)
           
                # Add the axes
@@ -362,7 +398,10 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(AmongVarDisp[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(AmongVarDisp[i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispAmongCols[1,])
-                    image2D(z = AmongVarDisp[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[i,,TimeSeq], BurnIn = 50,
+                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispAmongCols[2,ColRange], colkey = FALSE)
           
                     # Add the axes
@@ -422,7 +461,10 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(WithinVarDisp[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(WithinVarDisp[i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispWithinCols[1,])
-                    image2D(z = WithinVarDisp[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[i,,TimeSeq], BurnIn = 50,
+                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispWithinCols[2,ColRange], colkey = FALSE)
           
                     # Add the axes

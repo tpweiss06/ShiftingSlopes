@@ -7,6 +7,7 @@ SpeedNum <- 1
 setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
             SpeedWord, sep = ""))
 library(plot3D)
+source("~/Desktop/RangeShifts/ShiftingSlopesCode/SimFunctions.R")
 
 # Set some graphical parameters to use for the subsequent figures
 FigMat <- matrix(NA, nrow = 3, ncol = 13)
@@ -45,6 +46,29 @@ EndShift <- ZeroPos + 100*SpeedNum
 DecimalZero <- ZeroPos / RangeExtent
 DecimalEndShift <- EndShift / RangeExtent
 
+# Create a function to convert the matrix of relative locations to absolute
+#    locations
+RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
+                          BetaInit, eta){
+     # Create a new matrix for the absolute locations of the appropriate size
+     AbsMat <- matrix(NA, nrow = RangeExtent + v*LengthShift, ncol = ncol(RelMat))
+     
+     # Establish the location of beta throughout the simulation
+     BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
+                                eta = eta, v = v) / 50
+     BetaCoord <- c(rep(BetaInit, BurnIn), BetaShift, rep(BetaShift[LengthShift], 
+                                                          BurnOut))
+     # Step through each generation and populate the absolute matrix
+     for(g in 1:ncol(RelMat)){
+          AbsXcoord <- 1:RangeExtent + BetaCoord[g]
+          vals <- which(!is.na(RelMat[,g]))
+          for(i in vals){
+               AbsMat[AbsXcoord[i],g] <- RelMat[i,g]
+          }
+     }
+     return(AbsMat)
+}
+
 # Create a function to find the indices corresponding to the subset of the a sequence
 #	which is defined as the shortest possible sequence including both the given
 #	minimum and maximum
@@ -78,7 +102,7 @@ WithinCols[2,] <- jet.col(10000)
 AmongCols[2,] <- jet.col(10000)
 
 # Make the mean abundance graph
-PlotName <- paste("Figures/", SpeedWord, "MeanAbunds.pdf", sep = "")
+PlotName <- paste(SpeedWord, "MeanAbunds.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -87,7 +111,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(SectorMean[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AbundCols[1,])
-          image2D(z = SectorMean[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+          AbsMat <- RelToAbsolute(RelMat = SectorMean[i,,TimeSeq], BurnIn = 50,
+                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AbundCols[2,ColRange], colkey = FALSE)
           
           # Add the axes
@@ -140,7 +167,7 @@ dev.off()
 
 
 # Make the within variance graph
-PlotName <- paste("Figures/", SpeedWord, "AbundWithinVar.pdf", sep = "")
+PlotName <- paste(SpeedWord, "AbundWithinVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -149,7 +176,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(WithinVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = WithinCols[1,])
-          image2D(z = WithinVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+          AbsMat <- RelToAbsolute(RelMat = WithinVar[i,,TimeSeq], BurnIn = 50,
+                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = WithinCols[2,ColRange], colkey = FALSE)
      
           # Add the axes
@@ -201,7 +231,7 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
 dev.off()
 
 # Make the among variance graph
-PlotName <- paste("Figures/", SpeedWord, "AbundAmongVar.pdf", sep = "")
+PlotName <- paste(SpeedWord, "AbundAmongVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -210,7 +240,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(AmongVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AmongCols[1,])
-          image2D(z = AmongVar[i,,TimeSeq], xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+          AbsMat <- RelToAbsolute(RelMat = AmongVar[i,,TimeSeq], BurnIn = 50,
+                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
+                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AmongCols[2,ColRange], colkey = FALSE)
      
           # Add the axes

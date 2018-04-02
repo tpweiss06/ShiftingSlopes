@@ -10,10 +10,11 @@ SpeedNum <- 1
 SpeedWord <- "Slow"
 
 # Set the number of processors available for this script
-nProc <- 2*18
+nProc <- 2*24
 
 # Set the working directory
 setwd("~/ShiftingSlopes/ShiftingRange/")
+source("~/ShiftingSlopes/SimFunctions.R")
 library(parallel)
 library(Rmpi)
 
@@ -26,9 +27,12 @@ library(Rmpi)
 #    number x values corresponding to patch centers to array indices
 NumGens <- 200
 width <- 10
-RangeExtent <- 121 + SpeedNum * 100 # To account for the max speed of climate change over 100 generations
-ZeroPos <- 61
+RangeExtent <- 121
 AbundVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width))
+
+BetaShift <- ChangeClimate(BetaInit = 0, LengthShift = 100, eta = 50, v = SpeedNum) / 50
+BetaCoord <- c(rep(0, 50), BetaShift, rep(BetaShift[100], 50))
+ZeroPos <- 61
 
 # Create a data frame to index each simulation block in the above array
 AbundIndices <- expand.grid(params = 1:9, sim = 1:100)
@@ -55,7 +59,7 @@ AbundExtract <- function(i){
                xSeq <- seq(xRange[1], xRange[2], by = 1)
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
-                    xArrInd <- ZeroPos + j
+                    xArrInd <- ZeroPos + (j - BetaCoord[g])
                     for(k in 1:width){
                          CurPatch <- subset(CurCol, y == k)
                          if(dim(CurPatch)[1] == 1){
@@ -72,7 +76,7 @@ AbundExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("NumGens", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
+clusterExport(cl, c("SpeedWord", "NumGens", "width", "RangeExtent", "ZeroPos", "AbundIndices", "BetaCoord"))
 temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange"))
 
 # Run the simulations
@@ -113,22 +117,20 @@ AbundProcess <- function(p){
      return(TempList)
 }
 
-#clusterExport(cl, "AbundVals")
+clusterExport(cl, "AbundVals")
 
-#SimSummary <- clusterApply(cl, x = 1:9, fun = AbundProcess)
-SimSummary <- vector(mode = "list", length = 9)
-for(i in 1:9){
-     SimSummary[[i]] <- AbundProcess(p = i)
-}
+SimSummary <- clusterApply(cl, x = 1:9, fun = AbundProcess)
+
 # Now create the summary objects to be saved from this array
 SectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
 AmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 WithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
-     SectorMean[p,,] <- SimSummary[[p]]$SectorMean
-     AmongVar[p,,] <- SimSummary[[p]]$AmongVar
-     WithinVar[p,,] <- SimSummary[[p]]$WithinVar
+     SimSummary <- AbundProcess(p)
+     SectorMean[p,,] <- SimSummary$SectorMean
+     AmongVar[p,,] <- SimSummary$AmongVar
+     WithinVar[p,,] <- SimSummary$WithinVar
 }
 
 # Finally save the output
