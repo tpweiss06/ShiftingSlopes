@@ -87,7 +87,7 @@ for(i in 1:InitPopSize){
 
 # Write a function to be passed to various nodes
 SimFunc <- function(i, InMat){
-     setwd(paste("Params", i, "/", sep = ""))
+     setwd(paste("~/ShiftingSlopes/StationaryRange/Params", i, "/", sep = ""))
      FullSim(parameters = AllParams[[i]], parallel = TRUE, PopInit = InMat)
      return(i)
 }

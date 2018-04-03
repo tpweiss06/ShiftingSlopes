@@ -1,11 +1,11 @@
 # This script will create the graphs from the abundance data.
-
-SpeedWord <- "Slow"
-SpeedNum <- 1
+SpeedIndex <- 1
+source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
+RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
 # Set the working directory
 setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
-            SpeedWord, sep = ""))
+            SpeedWords[SpeedIndex], sep = ""))
 library(plot3D)
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/SimFunctions.R")
 
@@ -22,7 +22,7 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-LocLabels <- seq(-60, 60 + 100*SpeedNum, length.out = 6)
+LocLabels <- seq(-60, 60 + 100*SpeedNums[SpeedIndex], length.out = 6)
 TimeSeq <- 1:200
 TimeLabels <- seq(0, 200, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
@@ -40,9 +40,9 @@ HighAdj <- 0.95
 EnvLineWidth <- 1
 
 # Create some useful objects for graphing the position of the range center
-RangeExtent <- 121 + 100*SpeedNum
+RangeExtent <- 121 + 100*SpeedNums[SpeedIndex]
 ZeroPos <- 61
-EndShift <- ZeroPos + 100*SpeedNum
+EndShift <- ZeroPos + 100*SpeedNums[SpeedIndex]
 DecimalZero <- ZeroPos / RangeExtent
 DecimalEndShift <- EndShift / RangeExtent
 
@@ -55,7 +55,7 @@ RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
      
      # Establish the location of beta throughout the simulation
      BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
-                                eta = eta, v = v) / 50
+                                eta = eta, v = v) / eta
      BetaCoord <- c(rep(BetaInit, BurnIn), BetaShift, rep(BetaShift[LengthShift], 
                                                           BurnOut))
      # Step through each generation and populate the absolute matrix
@@ -85,18 +85,28 @@ FindRange <- function(minimum, maximum, sequence){
 
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
-load(paste(SpeedWord, "ShiftingTraitResults.rdata", sep = ""))
+load(paste(SpeedWords[SpeedIndex], "ShiftingTraitResults.rdata", sep = ""))
 MaxSectorFit <- rep(NA, 3)
 MaxSectorDisp <- rep(NA, 3)
+MinSectorFit <- rep(NA, 3)
+MinSectorDisp <- rep(NA, 3)
+
 
 for(i in 1:3){
-     MaxSectorFit[i] <- max(SectorFit[,,,i])
-     MaxSectorDisp[i] <- max(SectorDisp[,,,i])
+     MaxSectorFit[i] <- max(SectorFit[,,,i], na.rm = TRUE)
+     MaxSectorDisp[i] <- max(SectorDisp[,,,i], na.rm = TRUE)
+     
+     MinSectorFit[i] <- min(SectorFit[,,,i], na.rm = TRUE)
+     MinSectorDisp[i] <- min(SectorDisp[,,,i], na.rm = TRUE)
 }
-MaxAmongFit <- max(AmongVarFit)
-MaxAmongDisp <- max(AmongVarDisp)
-MaxWithinFit <- max(WithinVarFit)
-MaxWithinDisp <- max(WithinVarDisp)
+MaxAmongFit <- max(AmongVarFit, na.rm = TRUE)
+MaxAmongDisp <- max(AmongVarDisp, na.rm = TRUE)
+MaxWithinFit <- max(WithinVarFit, na.rm = TRUE)
+MaxWithinDisp <- max(WithinVarDisp, na.rm = TRUE)
+MinAmongFit <- min(AmongVarFit, na.rm = TRUE)
+MinAmongDisp <- min(AmongVarDisp, na.rm = TRUE)
+MinWithinFit <- min(WithinVarFit, na.rm = TRUE)
+MinWithinDisp <- min(WithinVarDisp, na.rm = TRUE)
 
 FitSectorCols <- array(NA, dim = c(3,2,10000))
 DispSectorCols <- array(NA, dim = c(3,2,10000))
@@ -106,16 +116,16 @@ FitWithinCols <- array(NA, dim = c(2,10000))
 DispWithinCols <- array(NA, dim = c(2,10000))
 
 for(i in 1:3){
-     FitSectorCols[i,1,] <- seq(0, MaxSectorFit[i], length.out = 10000)
-     DispSectorCols[i,1,] <- seq(0, MaxSectorDisp[i], length.out = 10000)
+     FitSectorCols[i,1,] <- seq(MinSectorFit[i], MaxSectorFit[i], length.out = 10000)
+     DispSectorCols[i,1,] <- seq(MinSectorDisp[i], MaxSectorDisp[i], length.out = 10000)
      
      FitSectorCols[i,2,] <- jet.col(10000)
      DispSectorCols[i,2,] <- jet.col(10000)
 }
-FitAmongCols[1,] <- seq(0, MaxAmongFit, length.out = 10000)
-DispAmongCols[1,] <- seq(0, MaxAmongDisp, length.out = 10000)
-FitWithinCols[1,] <- seq(0, MaxWithinFit, length.out = 10000)
-DispWithinCols[1,] <- seq(0, MaxWithinDisp, length.out = 10000)
+FitAmongCols[1,] <- seq(MinAmongFit, MaxAmongFit, length.out = 10000)
+DispAmongCols[1,] <- seq(MinAmongDisp, MaxAmongDisp, length.out = 10000)
+FitWithinCols[1,] <- seq(MinWithinFit, MaxWithinFit, length.out = 10000)
+DispWithinCols[1,] <- seq(MinWithinDisp, MaxWithinDisp, length.out = 10000)
 FitAmongCols[2,] <- jet.col(10000)
 DispAmongCols[2,] <- jet.col(10000)
 FitWithinCols[2,] <- jet.col(10000)
@@ -127,9 +137,9 @@ DispWithinCols[2,] <- jet.col(10000)
 PlotNames <- c("Mu", "GenVar", "PhenVar")
 for(v in 1:3){
      ############# First the fitness graphs
-     Fit <- c(paste("Figures/", SpeedWord, "FitSector", PlotNames[v], ".pdf", sep = ""),
-              paste("Figures/", SpeedWord, "FitAmong", PlotNames[v], ".pdf", sep = ""),
-              paste("Figures/", SpeedWord, "FitWithin", PlotNames[v], ".pdf", sep = ""))
+     Fit <- c(paste(SpeedWords[SpeedIndex], "FitSector", PlotNames[v], ".pdf", sep = ""),
+              paste(SpeedWords[SpeedIndex], "FitAmong", PlotNames[v], ".pdf", sep = ""),
+              paste(SpeedWords[SpeedIndex], "FitWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Fit[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -139,9 +149,9 @@ for(v in 1:3){
                ColRange <- FindRange(minimum = min(SectorFit[i,,TimeSeq,v], na.rm = TRUE), 
                                      maximum = max(SectorFit[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = FitSectorCols[v,1,])
-               AbsMat <- RelToAbsolute(RelMat = SectorFit[i,,TimeSeq,v], BurnIn = 50,
-                                       LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                       RangeExtent = 121, BetaInit = 0, eta = 50)
+               AbsMat <- RelToAbsolute(RelMat = SectorFit[i,,TimeSeq,v], BurnIn = BurnIn,
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                       RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = FitSectorCols[v,2,ColRange], colkey = FALSE)
           
@@ -203,9 +213,9 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(AmongVarFit[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(AmongVarFit[i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitAmongCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = AmongVarFit[i,,TimeSeq], BurnIn = 50,
-                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarFit[i,,TimeSeq], BurnIn = BurnIn,
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
+                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = FitAmongCols[2,ColRange], colkey = FALSE)
           
@@ -266,11 +276,11 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(WithinVarFit[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(WithinVarFit[i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitWithinCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = WithinVarFit[i,,TimeSeq], BurnIn = 50,
-                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarFit[i,,TimeSeq], BurnIn = BurnIn,
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
+                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                            main = "", col = FitWithinCols[v,2,ColRange], colkey = FALSE)
+                            main = "", col = FitWithinCols[2,ColRange], colkey = FALSE)
           
                     # Add the axes
                     axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
@@ -322,9 +332,9 @@ for(v in 1:3){
      }
      
      ############# Now the dispersal graphs
-     Disp <- c(paste("Figures/", SpeedWord, "DispSector", PlotNames[v], ".pdf", sep = ""),
-              paste("Figures/", SpeedWord, "DispAmong", PlotNames[v], ".pdf", sep = ""),
-              paste("Figures/", SpeedWord, "DispWithin", PlotNames[v], ".pdf", sep = ""))
+     Disp <- c(paste(SpeedWords[RangeExtent], "DispSector", PlotNames[v], ".pdf", sep = ""),
+              paste(SpeedWords[RangeExtent], "DispAmong", PlotNames[v], ".pdf", sep = ""),
+              paste(SpeedWords[RangeExtent], "DispWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Disp[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -334,9 +344,9 @@ for(v in 1:3){
                ColRange <- FindRange(minimum = min(SectorDisp[i,,TimeSeq,v], na.rm = TRUE), 
                                      maximum = max(SectorDisp[i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = DispSectorCols[v,1,])
-               AbsMat <- RelToAbsolute(RelMat = SectorDisp[i,,TimeSeq,v], BurnIn = 50,
-                                       LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                       RangeExtent = 121, BetaInit = 0, eta = 50)
+               AbsMat <- RelToAbsolute(RelMat = SectorDisp[i,,TimeSeq,v], BurnIn = BurnIn,
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNum,
+                                       RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = DispSectorCols[v,2,ColRange], colkey = FALSE)
           
@@ -398,9 +408,9 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(AmongVarDisp[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(AmongVarDisp[i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispAmongCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[i,,TimeSeq], BurnIn = 50,
-                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[i,,TimeSeq], BurnIn = BurnIn,
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
+                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispAmongCols[2,ColRange], colkey = FALSE)
           
@@ -461,9 +471,9 @@ for(v in 1:3){
                     ColRange <- FindRange(minimum = min(WithinVarDisp[i,,TimeSeq], na.rm = TRUE), 
                                           maximum = max(WithinVarDisp[i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispWithinCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[i,,TimeSeq], BurnIn = 50,
-                                            LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                            RangeExtent = 121, BetaInit = 0, eta = 50)
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[i,,TimeSeq], BurnIn = BurnIn,
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
+                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispWithinCols[2,ColRange], colkey = FALSE)
           

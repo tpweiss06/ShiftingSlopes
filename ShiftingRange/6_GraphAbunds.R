@@ -1,11 +1,11 @@
 # This script will create the graphs from the abundance data.
-
-SpeedWord <- "Slow"
-SpeedNum <- 1
+SpeedIndex <- 1
+source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
+RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
 # Set the working directory
 setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
-            SpeedWord, sep = ""))
+            SpeedWords[SpeedIndex], sep = ""))
 library(plot3D)
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/SimFunctions.R")
 
@@ -22,7 +22,7 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-LocLabels <- seq(-60, 60 + 100*SpeedNum, length.out = 6)
+LocLabels <- seq(-60, 60 + 100*SpeedNums[SpeedIndex], length.out = 6)
 TimeSeq <- 1:200
 TimeLabels <- seq(0, 200, by = 40)
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
@@ -40,9 +40,9 @@ HighAdj <- 0.95
 EnvLineWidth <- 1
 
 # Create some useful objects for graphing the position of the range center
-RangeExtent <- 121 + 100*SpeedNum
+RangeExtent <- 121 + 100*SpeedNums[SpeedIndex]
 ZeroPos <- 61
-EndShift <- ZeroPos + 100*SpeedNum
+EndShift <- ZeroPos + 100*SpeedNums[SpeedIndex]
 DecimalZero <- ZeroPos / RangeExtent
 DecimalEndShift <- EndShift / RangeExtent
 
@@ -55,7 +55,7 @@ RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
      
      # Establish the location of beta throughout the simulation
      BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
-                                eta = eta, v = v) / 50
+                                eta = eta, v = v) / eta
      BetaCoord <- c(rep(BetaInit, BurnIn), BetaShift, rep(BetaShift[LengthShift], 
                                                           BurnOut))
      # Step through each generation and populate the absolute matrix
@@ -85,7 +85,7 @@ FindRange <- function(minimum, maximum, sequence){
 
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
-load(paste(SpeedWord, "ShiftingAbundResults.rdata", sep = ""))
+load(paste(SpeedWords[SpeedIndex], "ShiftingAbundResults.rdata", sep = ""))
 MaxAbund <- max(SectorMean, na.rm = TRUE)
 MaxWithinVar <- max(WithinVar, na.rm = TRUE)
 MaxAmongVar <- max(AmongVar, na.rm = TRUE)
@@ -102,7 +102,7 @@ WithinCols[2,] <- jet.col(10000)
 AmongCols[2,] <- jet.col(10000)
 
 # Make the mean abundance graph
-PlotName <- paste(SpeedWord, "MeanAbunds.pdf", sep = "")
+PlotName <- paste(SpeedWords[SpeedIndex], "MeanAbunds.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -111,9 +111,9 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(SectorMean[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AbundCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = SectorMean[i,,TimeSeq], BurnIn = 50,
-                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          AbsMat <- RelToAbsolute(RelMat = SectorMean[i,,TimeSeq], BurnIn = BurnIn,
+                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AbundCols[2,ColRange], colkey = FALSE)
           
@@ -167,7 +167,7 @@ dev.off()
 
 
 # Make the within variance graph
-PlotName <- paste(SpeedWord, "AbundWithinVar.pdf", sep = "")
+PlotName <- paste(SpeedWords[SpeedIndex], "AbundWithinVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -176,9 +176,9 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(WithinVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = WithinCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = WithinVar[i,,TimeSeq], BurnIn = 50,
-                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          AbsMat <- RelToAbsolute(RelMat = WithinVar[i,,TimeSeq], BurnIn = BurnIn,
+                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = WithinCols[2,ColRange], colkey = FALSE)
      
@@ -231,7 +231,7 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
 dev.off()
 
 # Make the among variance graph
-PlotName <- paste(SpeedWord, "AbundAmongVar.pdf", sep = "")
+PlotName <- paste(SpeedWords[SpeedIndex], "AbundAmongVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -240,9 +240,9 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq], na.rm = TRUE), 
                                 maximum = max(AmongVar[i,,TimeSeq], na.rm = TRUE),
                                 sequence = AmongCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = AmongVar[i,,TimeSeq], BurnIn = 50,
-                                  LengthShift = 100, BurnOut = 50, v = SpeedNum,
-                                  RangeExtent = 121, BetaInit = 0, eta = 50)
+          AbsMat <- RelToAbsolute(RelMat = AmongVar[i,,TimeSeq], BurnIn = BurnIn,
+                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                   main = "", col = AmongCols[2,ColRange], colkey = FALSE)
      

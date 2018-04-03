@@ -3,21 +3,17 @@ library(RColorBrewer)
 
 # Set the working directory
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/")
+source("ShiftParams.R")
+RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
 # Load the extinction data
-load("SlowExtinctions.rdata")
-slow <- Extinctions[,1:201]
+load("Extinctions.rdata")
+slow <- Extinctions[1,,]
+med <- Extinctions[2,,]
+fast <- Extinctions[3,,]
 for(i in 1:9){
      slow[i,] <- cumsum(slow[i,]) / 100
-}
-load("MedExtinctions.rdata")
-med <- Extinctions[,1:201]
-for(i in 1:9){
      med[i,] <- cumsum(med[i,]) / 100
-}
-load("FastExtinctions.rdata")
-fast <- Extinctions[,1:201]
-for(i in 1:9){
      fast[i,] <- cumsum(fast[i,]) / 100
 }
 
@@ -63,9 +59,9 @@ pdf(file = "Extinction.pdf", width = FigWidth, height = FigHeight, onefile = FAL
      for(i in 1:9){
           plot(NA, NA, xlim = c(1, 200), ylim = c(0, 1), xlab = "", ylab = "",
                main = "", xaxt = "n", yaxt = "n")
-          lines(x = 1:201, y = slow[SimSeq[i],], lwd = LineWidth, col = SlowCol)
-          lines(x = 1:201, y = med[SimSeq[i],], lwd = LineWidth, col = MedCol)
-          lines(x = 1:201, y = fast[SimSeq[i],], lwd = LineWidth, col = FastCol)
+          lines(x = 1:200, y = slow[SimSeq[i],], lwd = LineWidth, col = SlowCol)
+          lines(x = 1:200, y = med[SimSeq[i],], lwd = LineWidth, col = MedCol)
+          lines(x = 1:200, y = fast[SimSeq[i],], lwd = LineWidth, col = FastCol)
           
           # Add the axes
           axis(1, cex.axis = AxisSize)

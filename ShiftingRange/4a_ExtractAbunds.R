@@ -5,13 +5,19 @@
 #    (i.e. among simulation variance), and the variance among
 #    patches within the same sector (i.e. within simulation variance).
 
-# Set the number of processors available for this scrip
-nProc <- 24*18
+# Set the speed for the current script
+SpeedIndex <- 1
+
+# Set the number of processors available for this script
+nProc <- 2*24
 
 # Set the working directory
-setwd("~/ShiftingSlopes/StationaryRange/")
-library(Rmpi)
+setwd("~/ShiftingSlopes/ShiftingRange/")
+source("~/ShiftingSlopes/SimFunctions.R")
 library(parallel)
+library(Rmpi)
+source("ShiftParams.R")
+RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
 # Create an array to hold the abundance values from each simulation. Dimensions 
 #    of this array are: parameter combination, simulation number, time, x axis,
@@ -21,11 +27,15 @@ library(parallel)
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
 NumGens <- 200
-MaxGen <- 2000
 width <- 10
 RangeExtent <- 121
-ZeroPos <- 61
 AbundVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width))
+
+BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
+                           eta = RangeParams$eta[1], v = SpeedNums[SpeedIndex])
+BetaShift <- BetaShift / RangeParams$eta[1]
+BetaCoord <- c(rep(BetaInit, BurnIn), BetaShift, rep(BetaShift[LengthShift], BurnOut))
+ZeroPos <- 61
 
 # Create a data frame to index each simulation block in the above array
 AbundIndices <- expand.grid(params = 1:9, sim = 1:100)
@@ -34,33 +44,33 @@ AbundIndices <- expand.grid(params = 1:9, sim = 1:100)
 AbundExtract <- function(i){
      # Sort out the parameter combination and simulation under consideration
      Param <- AbundIndices$params[i]
-     AllSims <- list.files(paste("Params", Param, "/", sep = ""))
+     AllSims <- list.files(paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[SpeedIndex], 
+                                 "/Params", Param, "/", sep = ""))
      SimID <- AllSims[AbundIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
+     InFile <- paste("~/ShiftingSlopes/ShiftingRange", SpeedWords[SpeedIndex], 
+                     "/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of AbundVals to store the 
      #    abundances from this particular simulation
      Abunds <- array(NA, dim = c(NumGens, RangeExtent, width))
      
-     for(g in (MaxGen - NumGens + 1):MaxGen){
+     for(g in 1:NumGens){
           CurGen <- subset(SimData, (gen == g) & (abund > 0))
           if(dim(CurGen)[1] > 0){
                xRange <- range(CurGen$x)
                xSeq <- seq(xRange[1], xRange[2], by = 1)
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
-                    xArrInd <- ZeroPos + j
-                    if(xArrInd <= RangeExtent){
-                         for(k in 1:width){
-                              CurPatch <- subset(CurCol, y == k)
-                              if(dim(CurPatch)[1] == 1){
-                                   Abunds[g - (MaxGen - NumGens), xArrInd, k] <- CurPatch$abund
-                              }
+                    xArrInd <- ZeroPos + (j - BetaCoord[g])
+                    for(k in 1:width){
+                         CurPatch <- subset(CurCol, y == k)
+                         if(dim(CurPatch)[1] == 1){
+                              Abunds[g, xArrInd, k] <- CurPatch$abund
                          }
-                    }     
+                    }
                }
           } 
      }
@@ -71,8 +81,8 @@ AbundExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "AbundIndices"))
-temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/StationaryRange/"))
+clusterExport(cl, c("SpeedWords", "NumGens", "width", "RangeExtent", "ZeroPos", 
+                    "AbundIndices", "BetaCoord", "SpeedIndex"))
 
 # Run the simulations
 SimVec <- 1:dim(AbundIndices)[1]
@@ -112,22 +122,20 @@ AbundProcess <- function(p){
      return(TempList)
 }
 
-clusterExport(cl, "AbundVals")
-
-SimSummary <- clusterApply(cl, x = 1:9, fun = AbundProcess)
-
 # Now create the summary objects to be saved from this array
 SectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
 AmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 WithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
-     SectorMean[p,,] <- SimSummary[[p]]$SectorMean
-     AmongVar[p,,] <- SimSummary[[p]]$AmongVar
-     WithinVar[p,,] <- SimSummary[[p]]$WithinVar
+     SimSummary <- AbundProcess(p)
+     SectorMean[p,,] <- SimSummary$SectorMean
+     AmongVar[p,,] <- SimSummary$AmongVar
+     WithinVar[p,,] <- SimSummary$WithinVar
 }
 
 # Finally save the output
-save(SectorMean, AmongVar, WithinVar, file = "StationaryAbundResults.rdata")
+OutFile <- paste(SpeedWords[SpeedIndex], "ShiftingAbundResults.rdata", sep = "")
+save(SectorMean, AmongVar, WithinVar, file = OutFile)
 
 

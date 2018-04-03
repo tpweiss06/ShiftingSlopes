@@ -5,18 +5,13 @@
 #    standard deviation. Additionally, the within and among simulation variance
 #    will be calculated for the mean value of each trait.
 
-# Set the speed for the current script
-SpeedNum <- 1
-SpeedWord <- "Slow"
-
 # Set the number of processors available for this scrip
-nProc <- 2*24
+nProc <- 24*18
 
 # Set the working directory
-setwd("~/ShiftingSlopes/ShiftingRange/")
-source("~/ShiftingSlopes/SimFunctions.R")
-library(parallel)
+setwd("~/ShiftingSlopes/StationaryRange/")
 library(Rmpi)
+library(parallel)
 
 # Create arrays to hold the trait values from each simulation. Dimensions 
 #    of these arrays are: parameter combination, simulation number, time, x axis,
@@ -30,14 +25,12 @@ library(Rmpi)
 #    RangeExtent and ZeroPos below correspond to the mapping of unbounded real 
 #    number x values corresponding to patch centers to array indices
 NumGens <- 200
+MaxGen <- 2000
 width <- 10
 RangeExtent <- 121
+ZeroPos <- 61
 FitVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
 DispVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
-
-BetaShift <- ChangeClimate(BetaInit = 0, LengthShift = 100, eta = 50, v = SpeedNum) / 50
-BetaCoord <- c(rep(0, 50), BetaShift, rep(BetaShift[100], 50))
-ZeroPos <- 61
 
 # Create a data frame to index each simulation block in the above arrays
 TraitIndices <- expand.grid(params = 1:9, sim = 1:100)
@@ -46,11 +39,11 @@ TraitIndices <- expand.grid(params = 1:9, sim = 1:100)
 TraitExtract <- function(i){
      # Sort out the parameter combination and simulation under consideration
      Param <- TraitIndices$params[i]
-     AllSims <- list.files(paste(SpeedWord, "/Params", Param, "/", sep = ""))
+     AllSims <- list.files(paste("~/ShiftingSlopes/StationaryRange/Params", Param, "/", sep = ""))
      SimID <- AllSims[TraitIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste(SpeedWord, "/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
+     InFile <- paste("~/ShiftingSlopes/StationaryRange/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
      # Create an array matching the dimensions of the trait value arrays to 
@@ -58,25 +51,27 @@ TraitExtract <- function(i){
      Fit <- array(NA, dim = c(NumGens, RangeExtent, width, 3))
      Disp <- array(NA, dim = c(NumGens, RangeExtent, width, 3))
      
-     for(g in 1:NumGens){
+     for(g in (MaxGen - NumGens + 1):MaxGen){
           CurGen <- subset(SimData, (gen == g) & (abund > 0))
           if(dim(CurGen)[1] > 0){
                xRange <- range(CurGen$x)
                xSeq <- seq(xRange[1], xRange[2], by = 1)
                for(j in xSeq){
                     CurCol <- subset(CurGen, x == j)
-                    xArrInd <- ZeroPos + (j - BetaCoord[g])
-                    for(k in 1:width){
-                         CurPatch <- subset(CurCol, y == k)
-                         if(dim(CurPatch)[1] == 1){
-                              Fit[g, xArrInd, k, 1] <- CurPatch$muFit
-                              Fit[g, xArrInd, k, 2] <- CurPatch$sigmaFitPhen
-                              Fit[g, xArrInd, k, 3] <- CurPatch$sigmaFitGen
-                              Disp[g, xArrInd, k, 1] <- CurPatch$muDisp
-                              Disp[g, xArrInd, k, 2] <- CurPatch$sigmaDispPhen
-                              Disp[g, xArrInd, k, 3] <- CurPatch$sigmaDispGen
+                    xArrInd <- ZeroPos + j
+                    if(xArrInd <= RangeExtent){
+                         for(k in 1:width){
+                              CurPatch <- subset(CurCol, y == k)
+                              if(dim(CurPatch)[1] == 1){
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 1] <- CurPatch$muFit
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 2] <- CurPatch$sigmaFitPhen
+                                   Fit[g - (MaxGen - NumGens), xArrInd, k, 3] <- CurPatch$sigmaFitGen
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 1] <- CurPatch$muDisp
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 2] <- CurPatch$sigmaDispPhen
+                                   Disp[g - (MaxGen - NumGens), xArrInd, k, 3] <- CurPatch$sigmaDispGen
+                              }
                          }
-                    }
+                    }     
                }
           } 
      }
@@ -88,9 +83,7 @@ TraitExtract <- function(i){
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("SpeedWord", "NumGens", "width", "RangeExtent", "ZeroPos", 
-                    "TraitIndices", "BetaCoord"))
-temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange"))
+clusterExport(cl, c("NumGens", "MaxGen", "width", "RangeExtent", "ZeroPos", "TraitIndices"))
 
 # Run the simulations
 SimVec <- 1:dim(TraitIndices)[1]
@@ -162,8 +155,7 @@ for(p in 1:9){
 }
 
 # Finally save the output
-OutFile <- paste(SpeedWord, "ShiftingTraitResults.rdata", sep = "")
 save(SectorFit, AmongVarFit, WithinVarFit, SectorDisp, AmongVarDisp, WithinVarDisp,
-     file = OutFile)
+     file = "~/ShiftingSlopes/StationaryRange/StationaryTraitResults.rdata")
 
 

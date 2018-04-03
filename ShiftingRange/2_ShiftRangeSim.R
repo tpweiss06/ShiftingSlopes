@@ -13,23 +13,17 @@ RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 library(parallel)
 library(Rmpi)
 
-# Define the velocity conditions for shifting climate
-SpeedWords <- c("Slow", "Med", "Fast")
-SpeedNums <- c(1, 3, 5)
-
 # Now load in the parameters and compile all 9 combinations into a single list
 #    with sublists for the three speeds of climate change
 AllParams <- vector(mode = "list", length = 9)
 for(i in 1:9){
      ParamFile <- paste("ParamFiles/Params", i, ".R", sep = "")
      source(ParamFile)
+     source("ShiftParams.R")
      
      AllParams[[i]] <- vector(mode = "list", length = 3)
      names(AllParams[[i]]) <- SpeedWords
      for(j in 1:3){
-          BurnIn <- 50
-          LengthShift <- 100
-          BurnOut <- 50
           v <- SpeedNums[j]
           AllParams[[i]][[j]] <- list(BetaInit, gamma, tau, lambda, omega, U, Vm, Lf, Ld, Rmax,
                                  Kmax, width, kern, EnvGradType, monoecious, BurnIn, BurnOut, 
@@ -45,10 +39,11 @@ for(i in 1:9){
 
 # Write a function to be passed to various nodes
 SimFunc <- function(index){
-     j <- nchar(index)
-     i <- index / 10^(j-1)
-     InFile <- paste("~/ShiftingSlopes/ShiftingRange/InputMats/InputMat", i, ".rdata", sep = "")
-     load(InFile)
+     j <- nchar(ParamVec[index])
+     i <- round(ParamVec[index] / 10^(j-1), digits = 1)
+     InFile <- paste("~/ShiftingSlopes/StationaryRange/Params", i, "/", 
+                     StatSimIDVec[index], "/PopMat.csv", sep = "")
+     InputMat <- read.cvs(InFile)
      Params <- AllParams[[i]][[j]]
      NewDirectory <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[j], "/Params", i, "/", sep = "")
      setwd(NewDirectory)
@@ -57,17 +52,25 @@ SimFunc <- function(index){
 }
 
 # Create a vector of parameter index values for the parallel computation
-SimVec <- rep(c(1:9, 1:9*10, 1:9*100), each = NumSims)
-
+ParamVec <- rep(c(1:9, 1:9*10, 1:9*100), each = NumSims)
+StatSimIDVec <- NULL
+for(speed in 1:3){
+     for(p in 1:9){
+          FilePath <- paste("~/ShiftingSlopes/StationaryRange/Params", p ,sep = "")
+          SimFiles <- list.files(FilePath)
+          StatSimIDVec <- c(StatSimIDVec, SimFiles)
+     }
+}
+SimVec <- 1:(NumSims*9*3)
+     
 # Create the cluster and run the simulations
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("AllParams", "SimVec", "SpeedWords") )
+clusterExport(cl, c("AllParams", "SimVec", "SpeedWords", "ParamVec", "StatSimIDVec") )
 
 # Change the working directory of the worker nodes
 temp <- clusterEvalQ(cl, source("~/ShiftingSlopes/SimFunctions.R") )
-temp <- clusterEvalQ(cl, setwd("~/ShiftingSlopes/ShiftingRange/"))
 
 # Run the simulations
 Sims <- clusterApply(cl, x = SimVec, fun = SimFunc)
