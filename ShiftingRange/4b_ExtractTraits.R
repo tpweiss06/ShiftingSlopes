@@ -35,6 +35,7 @@ width <- 10
 RangeExtent <- 121
 FitVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
 DispVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width, 3))
+Success <- matrix(NA, nrow = 9, ncol = 100)
 
 BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
                            eta = RangeParams$eta[1], v = SpeedNums[SpeedIndex])
@@ -85,7 +86,13 @@ TraitExtract <- function(i){
                }
           } 
      }
-     results <- list(Fit = Fit, Disp = Disp)
+     GenExtinct <- max(SimData$gen) + 1
+     if(GenExtinct < (NumGens + 1)){
+          Ext <- TRUE
+     } else{
+          Ext <- FALSE
+     }
+     results <- list(Fit = Fit, Disp = Disp, Ext = Ext)
      return(results)
 }
 
@@ -104,10 +111,11 @@ SimTraits <- clusterApply(cl, x = SimVec, fun = TraitExtract)
 for(i in SimVec){
      FitVals[TraitIndices$params[i], TraitIndices$sim[i],,,,] <- SimTraits[[i]]$Fit
      DispVals[TraitIndices$params[i], TraitIndices$sim[i],,,,] <- SimTraits[[i]]$Disp
+     Success[AbundIndices$params[i], AbundIndices$sim[i]] <- !SimAbunds[[i]]$Ext
 }
 
 # Make another function to pass to the cluster
-TraitProcess <- function(p){
+TraitProcess <- function(p, FocalSims){
      ParamSectorFit <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamSectorDisp <- array(NA, dim = c(RangeExtent, NumGens, 3))
      ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
@@ -118,27 +126,27 @@ TraitProcess <- function(p){
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
                for(v in 1:3){
-                    FitMeans <- colMeans(FitVals[p,,j,i,,v], na.rm = TRUE)
+                    FitMeans <- colMeans(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
                     ParamSectorFit[i,j,v] <- mean(FitMeans, na.rm = TRUE)
                     
-                    DispMeans <- colMeans(DispVals[p,,j,i,,v], na.rm = TRUE)
+                    DispMeans <- colMeans(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
                     ParamSectorDisp[i,j,v] <- mean(DispMeans, na.rm = TRUE)
                }
                
                FitVars <- rep(NA, width)
                DispVars <- rep(NA, width)
                for(k in 1:width){
-                    FitVars[k] <- var(FitVals[p,,j,i,k,1], na.rm = TRUE)
-                    DispVars[k] <- var(DispVals[p,,j,i,k,1], na.rm = TRUE)
+                    FitVars[k] <- var(FitVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
+                    DispVars[k] <- var(DispVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
                }
                ParamAmongVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
                ParamAmongVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
                
-               FitVars <- rep(NA, 100)
-               DispVars <- rep(NA, 100)
-               for(k in 1:100){
-                    FitVars[k] <- var(FitVals[p,k,j,i,,1], na.rm = TRUE)
-                    DispVars[k] <- var(DispVals[p,k,j,i,,1], na.rm = TRUE)
+               FitVars <- rep(NA, length(FocalSims))
+               DispVars <- rep(NA, length(FocalSims))
+               for(k in 1:length(FocalSims)){
+                    FitVars[k] <- var(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
+                    DispVars[k] <- var(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
                }
                ParamWithinVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
                ParamWithinVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
@@ -150,26 +158,81 @@ TraitProcess <- function(p){
      return(TempList)
 }
 
-# Now create the summary objects to be saved from these arrays
-SectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-SectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-AmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-AmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
-WithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-WithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+# Now process the results for those simulations that successfully tracked climate
+#    change
+SuccessSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+SuccessSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+SuccessAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
-     SimSummary <- TraitProcess(p)
-     SectorFit[p,,,] <- SimSummary$SectorFit
-     SectorDisp[p,,,] <- SimSummary$SectorDisp
-     AmongVarFit[p,,] <- SimSummary$AmongVarFit
-     AmongVarDisp[p,,] <- SimSummary$AmongVarDisp
-     WithinVarFit[p,,] <- SimSummary$WithinVarFit
-     WithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+     ParamSims <- Success[p,]
+     SimSummary <- TraitProcess(p, FocalSims = which(ParamSims == TRUE))
+     SuccessSectorFit[p,,,] <- SimSummary$SectorFit
+     SuccessSectorDisp[p,,,] <- SimSummary$SectorDisp
+     SuccessAmongVarFit[p,,] <- SimSummary$AmongVarFit
+     SuccessAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
+     SuccessWithinVarFit[p,,] <- SimSummary$WithinVarFit
+     SuccessWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+}
+
+# Now the simulations that failed to track climate change
+FailureSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+FailureSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+FailureAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+
+for(p in 1:9){
+     ParamSims <- Success[p,]
+     SimSummary <- TraitProcess(p, FocalSims = which(ParamSims == FALSE))
+     FailureSectorFit[p,,,] <- SimSummary$SectorFit
+     FailureSectorDisp[p,,,] <- SimSummary$SectorDisp
+     FailureAmongVarFit[p,,] <- SimSummary$AmongVarFit
+     FailureAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
+     FailureWithinVarFit[p,,] <- SimSummary$WithinVarFit
+     FailureWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+}
+
+
+# Now all of them
+TotalSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+TotalSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
+TotalAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+
+for(p in 1:9){
+     ParamSims <- Success[p,]
+     SimSummary <- TraitProcess(p, FocalSims = 1:length(ParamSims))
+     TotalSectorFit[p,,,] <- SimSummary$SectorFit
+     TotalSectorDisp[p,,,] <- SimSummary$SectorDisp
+     TotalAmongVarFit[p,,] <- SimSummary$AmongVarFit
+     TotalAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
+     TotalWithinVarFit[p,,] <- SimSummary$WithinVarFit
+     TotalWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
 }
 
 # Finally save the output
 OutFile <- paste(SpeedWords[SpeedIndex], "ShiftingTraitResults.rdata", sep = "")
+SectorFit <- list(Success = SuccessSectorFit, Failure = FailureSectorFit, 
+                  Total = TotalSectorFit)
+AmongVarFit <- list(Success = SuccessAmongVarFit, Failure = FailureAmongVarFit, 
+                    Total = TotalAmongVarFit)
+WithinVarFit <- list(Success = SuccessWithinVarFit, Failure = FailureWithinVarFit, 
+                      Total = TotalWithinVarFit)
+SectorDisp <- list(Success = SuccessSectorDisp, Failure = FailureSectorDisp, 
+                   Total = TotalSectorDisp)
+AmongVarDisp <- list(Success = SuccessAmongVarDisp, Failure = FailureAmongVarDisp, 
+                     Total = TotalAmongVarDisp)
+WithinVarDisp <- list(Success = SuccessWithinVarDisp, Failure = FailureWithinVarDisp, 
+                      Total = TotalWithinVarDisp)
+
+# Save all the output
 save(SectorFit, AmongVarFit, WithinVarFit, SectorDisp, AmongVarDisp, WithinVarDisp,
      file = OutFile)
 

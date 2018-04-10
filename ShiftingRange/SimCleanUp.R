@@ -4,25 +4,42 @@
 
 setwd("~/ShiftingSlopes/ShiftingRange/Slow")
 
-for(p in 1:4){
+for(p in 1:9){
      NewDirectory <- paste("Params", p, sep = "")
-     #print(NewDirectory)
      SimFiles <- list.files(NewDirectory)
      for(j in 1:100){
           SubDirectory <- paste(NewDirectory, SimFiles[j], sep = "/")
-          #NumFiles <- length(list.files(SubDirectory))
-          #if(NumFiles < 3){
+          if(NumFiles < 3){
                SysCommand <- paste("rm -r ", SubDirectory, sep = "")
                system(SysCommand)
-     	  #     print(SysCommand)	
-          #}
+          }
      }
 }
 
-#NewDirectory <- "Params5"
-#SimFiles <- list.files(NewDirectory)
-#for(j in 1:62){
-#     SubDirectory <- paste(NewDirectory, SimFiles[j], sep = "/")
-#     SysCommand <- paste("rm -r ", SubDirectory, sep = "")
-#     system(SysCommand)
-#}
+setwd("~/ShiftingSlopes/ShiftingRange/Med")
+
+for(p in 1:9){
+     NewDirectory <- paste("Params", p, sep = "")
+     SimFiles <- list.files(NewDirectory)
+     for(j in 1:100){
+          SubDirectory <- paste(NewDirectory, SimFiles[j], sep = "/")
+          if(NumFiles < 3){
+               SysCommand <- paste("rm -r ", SubDirectory, sep = "")
+               system(SysCommand)
+          }
+     }
+}
+
+setwd("~/ShiftingSlopes/ShiftingRange/Fast")
+
+for(p in 1:9){
+     NewDirectory <- paste("Params", p, sep = "")
+     SimFiles <- list.files(NewDirectory)
+     for(j in 1:100){
+          SubDirectory <- paste(NewDirectory, SimFiles[j], sep = "/")
+          if(NumFiles < 3){
+               SysCommand <- paste("rm -r ", SubDirectory, sep = "")
+               system(SysCommand)
+          }
+     }
+}

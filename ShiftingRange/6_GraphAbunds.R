@@ -1,5 +1,8 @@
 # This script will create the graphs from the abundance data.
 SpeedIndex <- 1
+SuccessIndex <- 1
+
+SuccessWords <- c("Survived", "Extinct", "All")
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
 RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
@@ -86,9 +89,9 @@ FindRange <- function(minimum, maximum, sequence){
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
 load(paste(SpeedWords[SpeedIndex], "ShiftingAbundResults.rdata", sep = ""))
-MaxAbund <- max(SectorMean, na.rm = TRUE)
-MaxWithinVar <- max(WithinVar, na.rm = TRUE)
-MaxAmongVar <- max(AmongVar, na.rm = TRUE)
+MaxAbund <- max(SectorMean[[SuccessIndex]], na.rm = TRUE)
+MaxWithinVar <- max(WithinVar[[SuccessIndex]], na.rm = TRUE)
+MaxAmongVar <- max(AmongVar[[SuccessIndex]], na.rm = TRUE)
 
 AbundCols <- matrix(NA, nrow = 2, ncol = 10000)
 WithinCols <- matrix(NA, nrow = 2, ncol = 10000)
@@ -102,16 +105,16 @@ WithinCols[2,] <- jet.col(10000)
 AmongCols[2,] <- jet.col(10000)
 
 # Make the mean abundance graph
-PlotName <- paste(SpeedWords[SpeedIndex], "MeanAbunds.pdf", sep = "")
+PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "MeanAbunds.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(SectorMean[i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(SectorMean[i,,TimeSeq], na.rm = TRUE),
+          ColRange <- FindRange(minimum = min(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                 sequence = AbundCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = SectorMean[i,,TimeSeq], BurnIn = BurnIn,
+          AbsMat <- RelToAbsolute(RelMat = SectorMean[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                   LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
                                   RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -167,16 +170,16 @@ dev.off()
 
 
 # Make the within variance graph
-PlotName <- paste(SpeedWords[SpeedIndex], "AbundWithinVar.pdf", sep = "")
+PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "AbundWithinVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(WithinVar[i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(WithinVar[i,,TimeSeq], na.rm = TRUE),
+          ColRange <- FindRange(minimum = min(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                 sequence = WithinCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = WithinVar[i,,TimeSeq], BurnIn = BurnIn,
+          AbsMat <- RelToAbsolute(RelMat = WithinVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                   LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
                                   RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -231,16 +234,16 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
 dev.off()
 
 # Make the among variance graph
-PlotName <- paste(SpeedWords[SpeedIndex], "AbundAmongVar.pdf", sep = "")
+PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "AbundAmongVar.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(AmongVar[i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(AmongVar[i,,TimeSeq], na.rm = TRUE),
+          ColRange <- FindRange(minimum = min(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                maximum = max(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                 sequence = AmongCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = AmongVar[i,,TimeSeq], BurnIn = BurnIn,
+          AbsMat <- RelToAbsolute(RelMat = AmongVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                   LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
                                   RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
           image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",

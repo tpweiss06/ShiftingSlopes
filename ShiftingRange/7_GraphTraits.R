@@ -1,5 +1,8 @@
 # This script will create the graphs from the abundance data.
 SpeedIndex <- 1
+SuccessIndex <- 1
+
+SuccessWords <- c("Survived", "Extinct", "All")
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
 RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 
@@ -93,20 +96,20 @@ MinSectorDisp <- rep(NA, 3)
 
 
 for(i in 1:3){
-     MaxSectorFit[i] <- max(SectorFit[,,,i], na.rm = TRUE)
-     MaxSectorDisp[i] <- max(SectorDisp[,,,i], na.rm = TRUE)
+     MaxSectorFit[i] <- max(SectorFit[[SuccessIndex]][,,,i], na.rm = TRUE)
+     MaxSectorDisp[i] <- max(SectorDisp[[SuccessIndex]][,,,i], na.rm = TRUE)
      
-     MinSectorFit[i] <- min(SectorFit[,,,i], na.rm = TRUE)
-     MinSectorDisp[i] <- min(SectorDisp[,,,i], na.rm = TRUE)
+     MinSectorFit[i] <- min(SectorFit[[SuccessIndex]][,,,i], na.rm = TRUE)
+     MinSectorDisp[i] <- min(SectorDisp[[SuccessIndex]][,,,i], na.rm = TRUE)
 }
-MaxAmongFit <- max(AmongVarFit, na.rm = TRUE)
-MaxAmongDisp <- max(AmongVarDisp, na.rm = TRUE)
-MaxWithinFit <- max(WithinVarFit, na.rm = TRUE)
-MaxWithinDisp <- max(WithinVarDisp, na.rm = TRUE)
-MinAmongFit <- min(AmongVarFit, na.rm = TRUE)
-MinAmongDisp <- min(AmongVarDisp, na.rm = TRUE)
-MinWithinFit <- min(WithinVarFit, na.rm = TRUE)
-MinWithinDisp <- min(WithinVarDisp, na.rm = TRUE)
+MaxAmongFit <- max(AmongVarFit[[SuccessIndex]], na.rm = TRUE)
+MaxAmongDisp <- max(AmongVarDisp[[SuccessIndex]], na.rm = TRUE)
+MaxWithinFit <- max(WithinVarFit[[SuccessIndex]], na.rm = TRUE)
+MaxWithinDisp <- max(WithinVarDisp[[SuccessIndex]], na.rm = TRUE)
+MinAmongFit <- min(AmongVarFit[[SuccessIndex]], na.rm = TRUE)
+MinAmongDisp <- min(AmongVarDisp[[SuccessIndex]], na.rm = TRUE)
+MinWithinFit <- min(WithinVarFit[[SuccessIndex]], na.rm = TRUE)
+MinWithinDisp <- min(WithinVarDisp[[SuccessIndex]], na.rm = TRUE)
 
 FitSectorCols <- array(NA, dim = c(3,2,10000))
 DispSectorCols <- array(NA, dim = c(3,2,10000))
@@ -137,19 +140,19 @@ DispWithinCols[2,] <- jet.col(10000)
 PlotNames <- c("Mu", "GenVar", "PhenVar")
 for(v in 1:3){
      ############# First the fitness graphs
-     Fit <- c(paste(SpeedWords[SpeedIndex], "FitSector", PlotNames[v], ".pdf", sep = ""),
-              paste(SpeedWords[SpeedIndex], "FitAmong", PlotNames[v], ".pdf", sep = ""),
-              paste(SpeedWords[SpeedIndex], "FitWithin", PlotNames[v], ".pdf", sep = ""))
+     Fit <- c(paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitSector", PlotNames[v], ".pdf", sep = ""),
+              paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitAmong", PlotNames[v], ".pdf", sep = ""),
+              paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Fit[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
           par(mar = InnerMar, oma = OuterMar)
           for(i in SimSeq){
                # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(SectorFit[i,,TimeSeq,v], na.rm = TRUE), 
-                                     maximum = max(SectorFit[i,,TimeSeq,v], na.rm = TRUE),
+               ColRange <- FindRange(minimum = min(SectorFit[[SuccessIndex]][i,,TimeSeq,v], na.rm = TRUE), 
+                                     maximum = max(SectorFit[[SuccessIndex]][i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = FitSectorCols[v,1,])
-               AbsMat <- RelToAbsolute(RelMat = SectorFit[i,,TimeSeq,v], BurnIn = BurnIn,
+               AbsMat <- RelToAbsolute(RelMat = SectorFit[[SuccessIndex]][i,,TimeSeq,v], BurnIn = BurnIn,
                                        LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
                                        RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -210,10 +213,10 @@ for(v in 1:3){
                par(mar = InnerMar, oma = OuterMar)
                for(i in SimSeq){
                     # Find the color range for the current plot and make the figure
-                    ColRange <- FindRange(minimum = min(AmongVarFit[i,,TimeSeq], na.rm = TRUE), 
-                                          maximum = max(AmongVarFit[i,,TimeSeq], na.rm = TRUE),
+                    ColRange <- FindRange(minimum = min(AmongVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(AmongVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitAmongCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = AmongVarFit[i,,TimeSeq], BurnIn = BurnIn,
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarFit[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                             LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
                                             RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -273,10 +276,10 @@ for(v in 1:3){
                par(mar = InnerMar, oma = OuterMar)
                for(i in SimSeq){
                     # Find the color range for the current plot and make the figure
-                    ColRange <- FindRange(minimum = min(WithinVarFit[i,,TimeSeq], na.rm = TRUE), 
-                                          maximum = max(WithinVarFit[i,,TimeSeq], na.rm = TRUE),
+                    ColRange <- FindRange(minimum = min(WithinVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(WithinVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitWithinCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = WithinVarFit[i,,TimeSeq], BurnIn = BurnIn,
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarFit[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                             LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
                                             RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -332,19 +335,19 @@ for(v in 1:3){
      }
      
      ############# Now the dispersal graphs
-     Disp <- c(paste(SpeedWords[RangeExtent], "DispSector", PlotNames[v], ".pdf", sep = ""),
-              paste(SpeedWords[RangeExtent], "DispAmong", PlotNames[v], ".pdf", sep = ""),
-              paste(SpeedWords[RangeExtent], "DispWithin", PlotNames[v], ".pdf", sep = ""))
+     Disp <- c(paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispSector", PlotNames[v], ".pdf", sep = ""),
+              paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispAmong", PlotNames[v], ".pdf", sep = ""),
+              paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Disp[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
           par(mar = InnerMar, oma = OuterMar)
           for(i in SimSeq){
                # Find the color range for the current plot and make the figure
-               ColRange <- FindRange(minimum = min(SectorDisp[i,,TimeSeq,v], na.rm = TRUE), 
-                                     maximum = max(SectorDisp[i,,TimeSeq,v], na.rm = TRUE),
+               ColRange <- FindRange(minimum = min(SectorDisp[[SuccessIndex]][i,,TimeSeq,v], na.rm = TRUE), 
+                                     maximum = max(SectorDisp[[SuccessIndex]][i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = DispSectorCols[v,1,])
-               AbsMat <- RelToAbsolute(RelMat = SectorDisp[i,,TimeSeq,v], BurnIn = BurnIn,
+               AbsMat <- RelToAbsolute(RelMat = SectorDisp[[SuccessIndex]][i,,TimeSeq,v], BurnIn = BurnIn,
                                        LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNum,
                                        RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -405,10 +408,10 @@ for(v in 1:3){
                par(mar = InnerMar, oma = OuterMar)
                for(i in SimSeq){
                     # Find the color range for the current plot and make the figure
-                    ColRange <- FindRange(minimum = min(AmongVarDisp[i,,TimeSeq], na.rm = TRUE), 
-                                          maximum = max(AmongVarDisp[i,,TimeSeq], na.rm = TRUE),
+                    ColRange <- FindRange(minimum = min(AmongVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(AmongVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispAmongCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[i,,TimeSeq], BurnIn = BurnIn,
+                    AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                             LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
                                             RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
@@ -468,10 +471,10 @@ for(v in 1:3){
                par(mar = InnerMar, oma = OuterMar)
                for(i in SimSeq){
                     # Find the color range for the current plot and make the figure
-                    ColRange <- FindRange(minimum = min(WithinVarDisp[i,,TimeSeq], na.rm = TRUE), 
-                                          maximum = max(WithinVarDisp[i,,TimeSeq], na.rm = TRUE),
+                    ColRange <- FindRange(minimum = min(WithinVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                          maximum = max(WithinVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispWithinCols[1,])
-                    AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[i,,TimeSeq], BurnIn = BurnIn,
+                    AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
                                             LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
                                             RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",

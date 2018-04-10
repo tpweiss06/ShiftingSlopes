@@ -30,6 +30,7 @@ NumGens <- 200
 width <- 10
 RangeExtent <- 121
 AbundVals <- array(NA, dim = c(9, 100, NumGens, RangeExtent, width))
+Success <- matrix(NA, nrow = 9, ncol = 100)
 
 BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
                            eta = RangeParams$eta[1], v = SpeedNums[SpeedIndex])
@@ -74,7 +75,13 @@ AbundExtract <- function(i){
                }
           } 
      }
-     return(Abunds)
+     GenExtinct <- max(SimData$gen) + 1
+     if(GenExtinct < (NumGens + 1)){
+          Ext <- TRUE
+     } else{
+          Ext <- FALSE
+     }
+     return(list(Abunds = Abunds, Ext = Ext))
 }
 
 # Create the cluster and run the simulations
@@ -90,29 +97,30 @@ SimAbunds <- clusterApply(cl, x = SimVec, fun = AbundExtract)
 
 # Now populate the AbundVals array with the results
 for(i in SimVec){
-     AbundVals[AbundIndices$params[i], AbundIndices$sim[i],,,] <- SimAbunds[[i]]
+     AbundVals[AbundIndices$params[i], AbundIndices$sim[i],,,] <- SimAbunds[[i]]$Abunds
+     Success[AbundIndices$params[i], AbundIndices$sim[i]] <- !SimAbunds[[i]]$Ext
 }
 
 # Make another function to pass to the cluster
-AbundProcess <- function(p){
+AbundProcess <- function(p, FocalSims){
      ParamSectorMean <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      ParamAmongVar <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      ParamWithinVar <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
      
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
-               PatchMeans <- colMeans(AbundVals[p,,j,i,], na.rm = TRUE)
+               PatchMeans <- colMeans(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
                ParamSectorMean[i,j] <- mean(PatchMeans, na.rm = TRUE)
                
                PatchVars <- rep(NA, width)
                for(k in 1:width){
-                    PatchVars[k] <- var(AbundVals[p,,j,i,k], na.rm = TRUE)
+                    PatchVars[k] <- var(AbundVals[p,FocalSims,j,i,k], na.rm = TRUE)
                }
                ParamAmongVar[i,j] <- mean(PatchVars, na.rm = TRUE)
                
-               SimVars <- rep(NA, 100)
-               for(k in 1:100){
-                    SimVars[k] <- var(AbundVals[p,k,j,i,], na.rm = TRUE)
+               SimVars <- rep(NA, length(FocalSims))
+               for(k in 1:length(FocalSims)){
+                    SimVars[k] <- var(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE)
                }
                ParamWithinVar[i,j] <- mean(SimVars, na.rm = TRUE)
           }
@@ -122,20 +130,52 @@ AbundProcess <- function(p){
      return(TempList)
 }
 
-# Now create the summary objects to be saved from this array
-SectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
-AmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
-WithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+# Now process the results for those simulations that successfully tracked climate
+#    change
+SuccessSectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessAmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessWithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
-     SimSummary <- AbundProcess(p)
-     SectorMean[p,,] <- SimSummary$SectorMean
-     AmongVar[p,,] <- SimSummary$AmongVar
-     WithinVar[p,,] <- SimSummary$WithinVar
+     ParamSims <- Success[p,]
+     SimSummary <- AbundProcess(p, FocalSims = which(ParamSims == TRUE))
+     SuccessSectorMean[p,,] <- SimSummary$SectorMean
+     SuccessAmongVar[p,,] <- SimSummary$AmongVar
+     SuccessWithinVar[p,,] <- SimSummary$WithinVar
+}
+
+# Now those that failed to track climate change
+FailureSectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureAmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureWithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+
+for(p in 1:9){
+     ParamSims <- Success[p,]
+     SimSummary <- AbundProcess(p, FocalSims = which(ParamSims == FALSE))
+     FailureSectorMean[p,,] <- SimSummary$SectorMean
+     FailureAmongVar[p,,] <- SimSummary$AmongVar
+     FailureWithinVar[p,,] <- SimSummary$WithinVar
+}
+
+# Now all of them
+TotalSectorMean <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalAmongVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalWithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
+
+for(p in 1:9){
+     ParamSims <- Success[p,]
+     SimSummary <- AbundProcess(p, FocalSims = 1:length(ParamSims))
+     TotalSectorMean[p,,] <- SimSummary$SectorMean
+     TotalAmongVar[p,,] <- SimSummary$AmongVar
+     TotalWithinVar[p,,] <- SimSummary$WithinVar
 }
 
 # Finally save the output
 OutFile <- paste(SpeedWords[SpeedIndex], "ShiftingAbundResults.rdata", sep = "")
+SectorMean <- list(Success = SuccessSectorMean, Failure = FailureSectorMean,
+                   Total = TotalSectorMean)
+AmongVar <- list(Success = SuccessAmongVar, Failure = FailureAmongVar,
+                   Total = TotalAmongVar)
+WithinVar <- list(Success = SuccessWithinVar, Failure = FailureWithinVar,
+                   Total = TotalWithinVar)
 save(SectorMean, AmongVar, WithinVar, file = OutFile)
-
-

@@ -925,6 +925,15 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
      SumStats <- matrix(NA, nrow = SumMatSize, ncol = 11)
      CurStatsDim <- SumMatSize
      
+     # Check to ensure the input matrix doesn't immediately exceed the SumStats
+     #    inititial dimensions
+     NumPatches <- nrow(OccPatches)
+     if( (SumStatRow + NumPatches) > CurStatsDim){
+          NewMat <- matrix(NA, nrow = SumMatSize, ncol = 11)
+          SumStats <- rbind(SumStats, NewMat)
+          CurStatsDim <- CurStatsDim + SumMatSize
+     }
+     
      # Keep track of all summary statistics here
      for(i in 1:nrow(OccPatches)){
           PatchPop <- which((PopMat[,PopIndices$x0] == OccPatches[i, 1]) &

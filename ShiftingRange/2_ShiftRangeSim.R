@@ -43,7 +43,9 @@ SimFunc <- function(index){
      i <- round(ParamVec[index] / 10^(j-1), digits = 1)
      InFile <- paste("~/ShiftingSlopes/StationaryRange/Params", i, "/", 
                      StatSimIDVec[index], "/PopMat.csv", sep = "")
-     InputMat <- read.cvs(InFile)
+     InputMat <- read.csv(InFile)
+     InputMat$x1 <- InputMat$x0
+     InputMat$y1 <- InputMat$y0
      Params <- AllParams[[i]][[j]]
      NewDirectory <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[j], "/Params", i, "/", sep = "")
      setwd(NewDirectory)
