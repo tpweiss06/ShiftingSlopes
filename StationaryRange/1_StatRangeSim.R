@@ -86,9 +86,9 @@ for(i in 1:InitPopSize){
 }
 
 # Write a function to be passed to various nodes
-SimFunc <- function(i, InMat){
+SimFunc <- function(i){
      setwd(paste("~/ShiftingSlopes/StationaryRange/Params", i, "/", sep = ""))
-     FullSim(parameters = AllParams[[i]], parallel = TRUE, PopInit = InMat)
+     FullSim(parameters = AllParams[[i]], parallel = TRUE, PopInit = InputMat)
      return(i)
 }
 
@@ -99,13 +99,13 @@ SimVec <- rep(1:9, each = NumSims)
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("AllParams", "SimVec", "InputMat") )
+clusterExport(cl, c("AllParams", "InputMat") )
 
 # Change the working directory of the worker nodes
 temp <- clusterEvalQ(cl, source("~/ShiftingSlopes/SimFunctions.R") )
 
 # Run the simulations
-Sims <- clusterApply(cl, x = SimVec, fun = SimFunc, InMat = InputMat)
+Sims <- clusterApply(cl, x = SimVec, fun = SimFunc)
 
 # This implementation of openMPI doesn't seem to play nice with Rmpi,
 #    so instead of nicely shutting down the cluster within the script,

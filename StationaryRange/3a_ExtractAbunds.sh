@@ -1,12 +1,12 @@
 #!/bin/bash -l
-#PBS -l walltime=06:00:00,nodes=18:ppn=24,pmem=2580mb
+#PBS -l walltime=03:00:00,nodes=18:ppn=24,mem=150gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
 # Set the parameter combination to use and generate names of R scripts and log files
-Rscript=3_ExtractTraits.R
-LogFile=3_ExtractTraits.log
+Rscript=3a_ExtractAbunds.R
+LogFile=3a_ExtractAbunds.log
 
 # Change to the relevant working directory
 cd ~/ShiftingSlopes/StationaryRange

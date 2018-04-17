@@ -1,15 +1,15 @@
 #!/bin/bash -l
-#PBS -l walltime=02:00:00,nodes=2:ppn=24,mem=124gb
+#PBS -l walltime=00:10:00,nodes=1:ppn=1,mem=2gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
 # Set the parameter combination to use and generate names of R scripts and log files
-Rscript=4a_ExtractAbunds.R
-LogFile=4a_ExtractAbunds.log
+Rscript=2_SimCleanUp.R
+LogFile=2_SimCleanUp.log
 
 # Change to the relevant working directory
-cd ~/ShiftingSlopes/ShiftingRange
+cd ~/ShiftingSlopes/StationaryRange
 
 # Load R and MPI
 module load R/3.4.4

@@ -1,12 +1,12 @@
 #!/bin/bash -l
-#PBS -l walltime=02:00:00,nodes=2:ppn=24,mem=124gb
+#PBS -l walltime=06:00:00,nodes=18:ppn=24,mem=100gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
 # Set the parameter combination to use and generate names of R scripts and log files
-Rscript=4a_ExtractAbunds.R
-LogFile=4a_ExtractAbunds.log
+Rscript=2_ShiftRangeSim.R
+LogFile=2_ShiftRangeSim.log
 
 # Change to the relevant working directory
 cd ~/ShiftingSlopes/ShiftingRange
