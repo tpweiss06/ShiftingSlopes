@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  16 APR 2018 17:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  17 APR 2018 17:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -446,26 +446,56 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
- [4] [5]
-[6] [7] [8] [9]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 172.
- [10]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 172.
+
+<"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_x
+t".pdf, id=203, 505.89pt x 252.945pt>
+File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f
+_of_xt".pdf Graphic file (type pdf)
+
+<use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_
+of_xt".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
+/SchematicFigures/f_of_xt".pdf used on input line 68.
+(pdftex.def)             Requested size: 469.75502pt x 234.88133pt.
+ [4] [5 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures
+/f_of_xt.pdf>]
+<"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/LifeCy
+cle".pdf, id=225, 963.6pt x 542.025pt>
+File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/L
+ifeCycle".pdf Graphic file (type pdf)
+
+<use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Li
+feCycle".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
+/SchematicFigures/LifeCycle".pdf used on input line 80.
+(pdftex.def)             Requested size: 469.75502pt x 264.23819pt.
+ [6] [7 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures
+/LifeCycle.pdf>] [8] [9]
+Overfull \hbox (3.80266pt too wide) in paragraph at lines 149--151
+\OT1/cmr/m/n/10.95 where $\OML/cmm/m/it/10.95 !$ \OT1/cmr/m/n/10.95 de-fines th
+e strength of sta-bi-liz-ing se-lec-tion and $\OML/cmm/m/it/10.95 z[]$ \OT1/cmr
+/m/n/10.95 is an in-di-vid-ual's fit-ness phe-no-type ([]Lande[],
+ []
+
+[10] [11] [12] (./Main.bbl [13] [14] [15])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 188.
+ [16]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 188.
  (./Main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 172.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 172.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 188.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 188.
 Package rerunfilecheck Info: File `Main.out' has not changed.
 (rerunfilecheck)             Checksum: AE81FD2A47C5EA6F6EFC51536D5F46C6;1010.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 172.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 188.
  ) 
 Here is how much of TeX's memory you used:
- 7378 strings out of 493014
- 105506 string characters out of 6133351
- 201573 words of memory out of 5000000
- 10783 multiletter control sequences out of 15000+600000
- 11998 words of font info for 45 fonts, out of 8000000 for 9000
+ 7559 strings out of 493014
+ 110152 string characters out of 6133351
+ 205921 words of memory out of 5000000
+ 10910 multiletter control sequences out of 15000+600000
+ 12166 words of font info for 46 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,9n,28p,1861b,389s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,9n,28p,1895b,494s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -481,11 +511,12 @@ e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/
 2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
 016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/201
 6/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2016/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on Main.pdf (10 pages, 198801 bytes).
+texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2016/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on Main.pdf (16 pages, 306660 bytes).
 PDF statistics:
- 204 PDF objects out of 1000 (max. 8388607)
- 174 compressed objects within 2 object streams
- 43 named destinations out of 1000 (max. 500000)
- 121 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 415 PDF objects out of 1000 (max. 8388607)
+ 368 compressed objects within 4 object streams
+ 89 named destinations out of 1000 (max. 500000)
+ 131 words of extra memory for PDF output out of 10000 (max. 10000000)
 
