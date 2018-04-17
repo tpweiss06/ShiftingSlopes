@@ -1,0 +1,15 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Methods}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Overview}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Purpose}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{State variables and scales}{subsection.2.1}% 5
+\BOOKMARK [3][-]{subsubsection.2.1.3}{Process overview and scheduling}{subsection.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.2}{Design concepts}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Emergence}{subsection.2.2}% 8
+\BOOKMARK [3][-]{subsubsection.2.2.2}{Stochasticity}{subsection.2.2}% 9
+\BOOKMARK [3][-]{subsubsection.2.2.3}{Interactions}{subsection.2.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.2.4}{Desired output}{subsection.2.2}% 11
+\BOOKMARK [2][-]{subsection.2.3}{Details}{section.2}% 12
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Initialization}{subsection.2.3}% 13
+\BOOKMARK [3][-]{subsubsection.2.3.2}{Submodels}{subsection.2.3}% 14
+\BOOKMARK [2][-]{subsection.2.4}{Simulation descriptions}{section.2}% 15

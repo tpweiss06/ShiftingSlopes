@@ -1,0 +1,172 @@
+\documentclass[11pt, oneside]{article}
+\usepackage{geometry}                		
+\geometry{letterpaper}                   		
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{fancybox}
+\usepackage[centertags]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}			
+\usepackage{natbib}				
+\usepackage{fullpage}
+\usepackage{placeins}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{color}
+
+%\usepackage{figcaps}
+%\usepackage[tablesfirst,nolists]{endfloat}
+\usepackage{authblk}
+
+\DeclareRobustCommand{\firstsecond}[2]{#1}
+
+\newcommand{\mb}{\mathbf}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\wt}{\widetilde}
+\newcommand{\s}{^{(s)}}
+
+\title{Local adaptation and dispersal evolution interact to drive population response to climate change}
+
+\date{}
+
+\author[1]{Christopher Weiss-Lehman}
+\author[1]{Allison Shaw}
+
+
+\affil[1]{Ecology, Evolution, and Behavior, University of Minnesota}
+
+\begin{document}
+\maketitle
+
+\doublespacing
+\linenumbers
+
+\section{Introduction}
+Climate change is expected to dramatically reshape global biogeographic patterns as some species shift their ranges to track changing environmental conditions (CITATION). These range shifts are generally expected to proceed upwards in latitude, elevation, or both as average global temperatures continue to rise (CITATION). In fact, contemporary range shifts have already been observed in a wide range of taxa (CITATION). Such range shifts present significant challenges to current and future conservation efforts as they can result in the extinction of populations failing to track a changing climate (CITATION), the creation of novel species assemblages as not all species shift their ranges at the same rate or at all (CITATION), or both. It is therefore crucial to understand the dynamics of such climate induced range shifts to better inform current and future conservation work.
+
+While contemporary range shifts are a relatively new phenomenon, important insights can be gained from the related but distinct process of range expansion. Range expansions have been studied for decades, leading to a robust understanding of both the ecological (CITATIONS) and evolutionary (CITATIONS) mechanisms responsible for shaping such expansions. For example, while the speed of a range expansion can be well approximated by a combination of the species' intrinsic growth rate and dispersal ability (CITATIONS), recent research demonstrates that evolution in both of these traits can have important implications for both the mean and variance of expansion speed through time (CITATIONS). As range shifts also involve a leading edge of population advance, they are likely to be affected by similar ecological and evolutionary mechanisms as have been shown to drive dynamics in range expansions (CITATIONS). However, while such insights from range expansions are valuable for understanding and predicting dynamics of range shifts, it is important to recognize that these two processes have important differences as well.
+
+In particular, range expansions and range shifts due to climate change involve fundamentally distinct initial conditions. Range expansions typically begin from the successful establishment and subsequent spread of a small, founding population as typically occurs with the range expansions of invasive and reintroduced species (CITATIONS). Such founding populations represent samples from some larger source population and as such lack any initial spatial population structure. In contrast, range shifts involve entire populations with existing spatial structure within the initially stable range (CITATION). Such spatial structure can take the form of local adaptation within the range, degree of transition in population size from range core to edge, or some combination of the two (CITATION). 
+
+These different aspects of spatial population structure have been shown to dramatically impact the response of populations to climate change (CITATIONS). For example, the nature of the gradient forming the range edge (e.g. declines in birth rates vs. increases in extinction risk) can directly change the probability of extinction a species faces during a climate driven range shift (CITATION). A population's risk of extinction during a range shift has also been related to local adaptation within the range. Specifically, a broad environmental niche (i.e. little local adaptation) can decrease a population's ability to track a changing climate if dispersal occurs in a stepping stone manner, allowing some individuals to block dispersal of better adapted phenotypes (CITATION). Local adaptation also has the potential to interact with dispersal evolution during climate change, driving increased dispersal evolution in an asexual species (CITATION). While this result was independent of the structure of the gradient forming the range edge (CITATION), this is unlikely to hold true for sexually reproducing species. As the type of gradient forming the range edge can influence the distribution of dispersal phenotypes within the range (CITATION), it is likely that this would also influence the dynamics of local adaptation in sexually reproducing species in which different locally adapted genotypes are joined via gene flow. In fact, pollen dispersal in flowering plants has been shown to dramatically reduce the likelihood of a range shift in response to climate change (CITATION). Evolution during range shifts due to local adaptation and dispersal evolution are likely important drivers of range shift dynamics (CITATION) and it is therefore important to consider both when predicting the dynamics of populations responding to climate change.
+
+%Citation order for above paragraph: Henry et al. 2013; Atkins et al. 2010; Hargreaves et al. 2015; Hargreaves et al. 2015; Henry et al. 2013; Aguilee et al. 2016; Van Petegem et al. 2016
+
+Here, we use a complex, individual-based model incorporating evolution in both fitness and dispersal distance to determine the interaction between local adaptation and the starkness of the gradient at the range edge in driving population dynamics during climate change. Using this model, we simultaneously vary the strength of local adaptation, the starkness of the range boundary, and the speed of climate change to ascertain the relationship among them and how dispersal evolution interacts with local adaptation to help or hinder a population's ability to track a changing climate. We additionally compare the dynamics of successful versus doomed populations to understand the factors contributing to population extinction and identify warning signs for populations in danger of extinction as a result of a range shift.
+
+\section{Methods}
+\subsection{Overview}
+\subsubsection{Purpose}
+This model tests an evolving population's ability to track a changing climate under a variety of conditions. Specifically, populations are simulated with (1) stark or gradual range boundaries, (2) strong or weak local selection pressures, and (3) varying speeds of climate change. In all simulations, individual dispersal and relative fitness are defined by an explicit set of quantitative diploid loci subject to mutation, thus allowing both traits to evolve over time. All simulations begin with stable climate conditions for $2000$ generations to allow the populations to reach a spatial equilibrium before the onset of climate change. Climate change is then modeled as a constant, directional shift in the location of environmentally suitable habitat for the population (see the \textit{Submodels} section below). Finally, simulations end with another short period of climate stability to assess the population's ability to persist and recover after shifting its range.
+
+\subsubsection{State variables and scales}
+The model simulates monoecious (i.e. no defined sex) individuals characterized by spatial coordinates for their location and diploid loci for both fitness and dispersal. Space is modeled as a lattice of discrete patches overlaying a continuous Cartesian coordinate system with a fixed width along the y axis and without bounds on the x axis. To avoid edge effects along the y axis, the model employs wrapping boundaries such that if an individual disperses out of the landscape on one side, it appears at the opposite end of the same row of the landscape. Patches are defined by the location of the patch center in x and y coordinates and a patch width parameter defining the relationship between continuous Cartesian space and the discrete patches used for population dynamics (see the \textit{Submodels} section below). 
+
+The abiotic environment is defined by a parameter denoting the center of the range, the slope of the range boundary, and the width of the range. The range can then shift in space by altering the parameter defining the range center, which is how climate change is implemented in the model. Further, a gradient of phenotypic optimum values for fitness is imposed within the range to allow for local adaptation within the range boundaries. The shape and severity of this gradient is defined by the same parameter used to set the slope of the range boundary along with one other parameter describing the strength of local selection along the gradient (greater values of this parameter will lead to steeper gradients in phenotypic optima within the range). The attached figures demonstrate the shape of the range and phenotypic optima functions and how they vary with different parameter values (see equations in \textit{Submodels}).
+
+\subsubsection{Process overview and scheduling}
+Time is also modeled in discrete intervals defining single generations of the population. Within each generation, individuals first reproduce within their natal patch. After reproduction, all adults die and the offspring disperse according to their dispersal kernels (\textit{Submodels}), resulting in discrete, non-overlapping generations. Reproduction occurs according to a stochastic implementation of the logistic growth equation taking into account the mean fitness of individuals within the patch (\textit{Submodels}). For each offspring, two parents are randomly sampled (with replacement and weighted according to their fitness) from the local population. While all individuals are monoecious, selfing is allowed only when there is a single individual within a patch. Thus, high fitness individuals may produce many offspring while individuals with relatively low fitness may not produce any. Individuals inherit one allele from each parent at each loci (except in the case of selfing when individuals inherit both copies of a single parent's alleles). Loci are assumed to segregate independently and inherited loci are subject to mutation (\textit{Submodels}). Individual dispersal distance for each offspring is drawn from a dispersal kernel defined by their dispersal trait and the direction of dispersal is drawn from a uniform distribution. The next generation then begins with all offspring in their post dispersal locations and ready to reproduce. 
+
+\subsection{Design concepts}
+\subsubsection{Emergence}
+Emergent phenomena in this model include the spatial equilibrium of population abundances and trait values within the stable range, the demographic dynamics of the shifting population during climate change, and the evolutionary trajectories of both fitness and dispersal traits during climate change. These are all examined in the context of their impact on the population's ability to keep pace with the changing climate.  
+
+\subsubsection{Stochasticity}
+All biological processes in this model are stochastic including realized population growth in each patch, dispersal distances of each individual, and inheritance of loci. Environmental parameters are fixed, however, and the process of climate change (i.e. the movement of environmentally suitable habitat through time) is deterministic. Thus, the model accounts for demographic stochasticity but ignores environmental stochasticity.
+
+\subsubsection{Interactions}
+Individuals in the model interact via mating and density-dependent competition within patches. Other important interactions are the relationship between dispersal evolution and local adaption, particularly in edge populations, and how this relationship impacts a population's ability to avoid extinction and track a changing climate. These interactions are examined in the context of different configurations of the initial, stable range and different speeds of climate change.
+
+\subsubsection{Desired output}
+After each model run, full details of all surviving individuals at the last time point are recorded (spatial coordinates and loci values for both traits). If a population went extinct during the model run, the time of extinction is recorded. Throughout the simulation, certain aggregated values are calculated and recorded for each occupied patch including the population size and the mean and variance of allele values for each trait. 
+
+\subsection{Details}
+\subsubsection{Initialization}
+The following parameters are set at the beginning of each simulation and form the initial conditions of the model: the mean and variance for allele values of each trait, population size, location of environmentally suitable habitat, number of generations for the pre-, post-, and during climate change periods of the simulation, and all other necessary parameters for the submodels defined below. Simulated populations are initialized in the center of the range and allowed to spread and equilibrate throughout the range during the period of stable climate conditions. This ensures that the populations reacting to a changing climate truly represent the expected spatial distribution for a given range, rather than the initial parameter values used in the simulation.
+
+\subsubsection{Submodels}
+\paragraph{Environmentally suitable habitat}
+Environmentally suitable habitat is determined by the population's carrying capacity as it ranges in space ($K_{x}$). The maximum achievable carrying capacity ($K_{max}$) occurs in the center of the species' range and declines with increasing distance from the center. Specifically, the carrying capacity at a location $x$ is defined as a combination of $K_{max}$ and a function $f(x,t)$, where $f(x,t)$ ranges from $1$ in the range center to $0$ far away from the center and is defined as follows 
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{e^{\gamma(x-\beta_{t}+\tau)}}{1+e^{\gamma(x-\beta_{t}+\tau)}} & x \leq \beta_{t} \\
+	\frac{e^{-\gamma(x-\beta_{t}-\tau)}}{1+e^{-\gamma(x-\beta_{t}-\tau)}} & x > \beta_{t}
+\end{cases}
+\end{equation}
+where $beta_{t}$ defines the center of the area of suitable habitat at time $t$, $\tau$ sets the width of the range, and $\gamma$ affects the slope of the function at the range boundaries (See Figure 1). To understand the relationship between $\gamma$ and the slope of $f(x,t)$ at the range boundary, the partial derivative of $f(x,t)$ over the spatial dimension can be shown to be
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{e^{\gamma(x-\beta_{t}+\tau)}}{1+e^{\gamma(x-\beta_{t}+\tau}} & x \leq \beta_{t} \\
+	\frac{e^{-\gamma(x-\beta_{t}-\tau)}}{1+e^{-\gamma(x-\beta_{t}-\tau}} & x > \beta_{t}
+\end{cases}	
+\end{equation}
+yielding a derivative of $\pm\frac{\gamma}{4}$ at the inflection points on either side of the range center ($x=\beta_{t}\pm\tau$).
+
+Population dynamics occur within discrete patches, so to calculate a $K_{x}$ value for a discrete patch from the continuous function $f(x,t)$, we use another parameter defining the spatial scale of each patch ($\eta$; See Figure 1). The local carrying capacity of a patch centered on $x$ ($K_{x}$) is then calculated as the mean of $f(x,t)$ over the interval of the patch multiplied by $K_{max}$.
+\begin{equation}
+K_{x} = \frac{K_{max}}{\eta}\int_{x-\frac{\eta}{2}}^{x+\frac{\eta}{2}}f(x,t)dx
+\end{equation}
+
+By varying the parameters defining $f(x,t)$, we can change both the total achievable carrying capacity of the population throughout the range (by altering both $\tau$ and $\gamma$) and the slope at which $K_{x}$ declines to $0$ (by altering $\gamma$). We are primarily interested in the effect of altering the slope at which $K_{x}$ declines at the range boundaries, however as doing so can also alter the total achievable carrying capacity of the population, we control for this confounding factor by fixing the total area under the curve $f(x,t)$. The indefinite integral of $f(x,t)$ can be shown to be
+\begin{equation}
+\int_{-\infty}^{\infty}f(x,t)dx = \frac{2ln(e^{\gamma\tau}+1}{\gamma}
+\end{equation}
+which can be solved for $\tau$. Thus, if the total area under the curve is fixed, an appropriate value of $\tau$ can be calculated for each value of $\gamma$.
+
+Thus, $\gamma$ and $\tau$ are both fixed within a given simulation and $beta_{t}$ (the location of the center of suitable habitat) is used to simulate climate change. During the periods before and after climate change $\beta_{t}$ is constant, but to simulate climate change it varies with time as follows
+\begin{equation}
+\beta_{t}=\nu\eta(t-\hat{t})
+\end{equation}
+where $\nu$ is the velocity of climate change per generation in terms of discrete patches, $\eta$ is the spatial scale of each patch, $t$ is the current generation, and $\hat{t}$ is the last generation of stable climatic conditions before the onset of climate change.
+
+\paragraph{Local adaptation}
+To allow an arbitrary degree of local adaptation within the range, the local phenotypic optima ($z_{opt,x}$) is set as follows
+\begin{equation}
+z_{opt,x}=\lambda(x-\beta_{t})
+\end{equation}
+where $\lambda$ defines the strength of local selection with values close to $0$ resulting in little to no change in phenotypic optimum across the range and values of greater magnitude resulting in large differences in phenotypic optima across the range. Individual fitness ($w_{i,x}$) values are then calculated according to the following equation assuming stabilizing selection
+\begin{equation}
+w_{i,x}=e^{\frac{-(z_{i}-z_{opt,x})^{2}}{2\omega^{2}}}
+\end{equation}
+where $\omega$ defines the strength of stabilizing selection and $z_{i}$ is an individual's fitness phenotype (CITATION). All loci are assumed to contribute additively to the phenotype with no dominance or epistasis, meaning an individual's phenotype is simply the sum of the individual's allele values for the fitness trait.
+
+\paragraph{Population dynamics}
+Population growth within each patch is modeled with a stochastic implementation of the classic Ricker model (CITATIONS). To account for fitness effects on population growth, expected population growth is scaled by the mean relative fitness of individuals within the patch ($\bar{w_{x}}$). The expected number of new offspring in patch $x$ at time $t+1$ is then given by
+\begin{equation}
+\hat{N}_{t+1,x}=\bar{w_{x}}F_{t,x}\frac{R}{\psi}e^{\frac{-RN_{t,x}}{K_{x}}}
+\end{equation}
+where $F_{t,x}$ is the number of females in patch $x$ at time $t$, $R$ is the intrinsic growth rate for the population, $\psi$ is the expected sex ratio of the population, $N_{t,x}$ is the number of individuals (males and females) in patch $x$ at time $t$, and $K_{x}$ is the local carrying capacity based on the environmental conditions. To incorporate demographic stochasticity, the realized number of offspring for each patch is then drawn from a Poisson distribution.
+\begin{equation}
+N_{t+1,x}\sim Poisson(\hat{N}_{t+1,x})
+\end{equation}
+
+Parentage of the offspring is then assigned by random sampling of the local male and female population. The sampling is weighted by individual fitness and occurs with replacement so highly fit individuals are likely to have multiple offspring while low fitness individuals may not have any. Each offspring inherits one allele per locus from each parent, assuming no linkage among loci. After reproduction, all members of the previous generation die and the offspring disperse to begin the next generation.
+
+\paragraph{Mutation}
+Inherited alleles are subject to mutation such that some offspring might not inherit identical copies of certain alleles from tlheir parents. The mutation process is defined by two parameters for each trait $T$: the diploid mutation rate ($U^{T}$) and the mutational variance ($V_{m}^{T}$). Using these parameters along with the number of loci defining trait $T$ ($L^{T}$), the per locus probability of a mutation is
+\begin{equation}
+\frac{U^{T}}{2L^{T}}
+\end{equation}
+Mutational effects are drawn from a normal distribution with mean $0$ and a standard deviation of
+\begin{equation}
+\sqrt{V_{m}^{T}U^{T}}
+\end{equation}
+By defining the mutation process in this manner rather than setting a probability of mutation and mutational effect directly, similar mutational dynamics can be imposed regardless of the number of loci used in the simulation.
+
+\paragraph{Dispersal}
+Finally, individuals disperse according to an exponential dispersal kernel defined by each individual's dispersal phenotype. An individual's dispersal phenotype is the expected dispersal distance and is given by
+\begin{equation}
+d_{i} = \frac{D\eta e^{\rho\Sigma L^{D}}}{1+e^{\rho\Sigma L^{D}}} 
+\end{equation}
+where $D$ is the maximum expected dispersal distance in terms of discrete patches, $\eta$ is the spatial scale of discrete patches, $\rho$ is a constant determining the slope of the transition between $0$ and $D$, and the summation is the sum of all alleles contributing to dispersal. Thus, as with fitness, loci are assumed to contribute additively with no dominance or epistasis. The expected dispersal distance, $d_{i}$ is then used to draw a realized distance from an exponential dispersal kernel. The direction of dispersal is drawn from a uniform distribution bounded by $0$ and $2\pi$. If a dispersal trajectory takes an individual outside the bounds of the landscape in the $y$ axis, the individual reappears at the same $x$ coordinate but the opposite end of the $y$ axis, thus wrapping the top and bottom edges of the landscape to avoid edge effects. Dispersal occurs from the center of each patch and the individual's new patch is then determined according to its location in the overlaid grid of $\eta$ x $\eta$ patches (see Figure 1).
+
+\subsection{Simulation descriptions}
+To explore the interacting role of local adaptation and the slope of the decline in population abundance at the range edge on trait evolution and the dynamics of range shifts, we simulated $100$ populations each over a range of parameter values varying both the degree of local adaptation and the decline in population abundance at the range edge. Additionally, for each parameter combination we simulated three different speeds of climate change. Under 
+
+%\bibliographystyle{amnatnat}
+%\bibliography{main_bib}
+
+\end{document}
