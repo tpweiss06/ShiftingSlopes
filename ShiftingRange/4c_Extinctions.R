@@ -18,15 +18,13 @@ for(v in 1:3){
           FilePath <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[v],
                             "/Params", p, sep = "")
           SimFiles <- list.files(FilePath)
-          FullPaths <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[v],
-                             "/", SimFiles, sep = "")
-          SimVec <- c(SimVec, SimFiles)
+          FullPaths <- paste(FilePath, "/", SimFiles, "/SummaryStats.csv", sep = "")
+          SimVec <- c(SimVec, FullPaths)
      }
 }
 
 # Create a function to extract the abundance information I want from each simulation
-ExtinctExtract <- function(FilePath){
-     InFile <- paste(FilePath, "/SummaryStats.csv", sep = "")
+ExtinctExtract <- function(InFile){
      SimData <- read.csv(InFile)
      GenExtinct <- max(SimData$gen) + 1    # Generations stop being recorded at 0 population
      return(GenExtinct)

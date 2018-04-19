@@ -3,8 +3,8 @@ library(RColorBrewer)
 
 # Set the working directory
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/")
-source("ShiftParams.R")
-RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
+source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
+RangeParams <- read.csv("~/Desktop/RangeShifts/ShiftingSlopesOther/RangeParameters.csv")
 
 # Load the extinction data
 load("Extinctions.rdata")
@@ -52,7 +52,7 @@ SlowCol <- Cols[1]
 MedCol <- Cols[3]
 FastCol <- Cols[2]
 
-# Make the abundance graph
+# Make the extinction graph
 pdf(file = "Extinction.pdf", width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
@@ -75,6 +75,10 @@ pdf(file = "Extinction.pdf", width = FigWidth, height = FigHeight, onefile = FAL
                arrows(x0 = SideArrow[1,1], y0 = SideArrow[1,2], x1 = SideArrow[2,1], 
                       y1 = SideArrow[2,2], length = ArrowLength, lwd = ArrowWidth, 
                       xpd = NA)
+          }
+          if(i == 3){
+               legend("bottomright", bty = "n", legend = c("Slow", "Medium", "Fast"),
+                      lty = 1, lwd = LineWidth, col = c(SlowCol, MedCol, FastCol))
           }
      }
 

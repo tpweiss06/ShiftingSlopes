@@ -2,7 +2,7 @@
 #    parameters
 
 SpeedWords <- c("Slow", "Med", "Fast")
-SpeedNums <- c(1, 2, 3)
+SpeedNums <- c(0.5, 1, 2)
 BetaInit <- 0
 BurnIn <- 50
 LengthShift <- 100
