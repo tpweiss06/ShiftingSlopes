@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  17 APR 2018 17:41
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  19 APR 2018 15:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -448,7 +448,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 {/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
 
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_x
-t".pdf, id=203, 505.89pt x 252.945pt>
+t".pdf, id=207, 505.89pt x 252.945pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f
 _of_xt".pdf Graphic file (type pdf)
 
@@ -460,7 +460,7 @@ Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
  [4] [5 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures
 /f_of_xt.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/LifeCy
-cle".pdf, id=225, 963.6pt x 542.025pt>
+cle".pdf, id=229, 963.6pt x 542.025pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/L
 ifeCycle".pdf Graphic file (type pdf)
 
@@ -477,25 +477,48 @@ e strength of sta-bi-liz-ing se-lec-tion and $\OML/cmm/m/it/10.95 z[]$ \OT1/cmr
 /m/n/10.95 is an in-di-vid-ual's fit-ness phe-no-type ([]Lande[],
  []
 
-[10] [11] [12] (./Main.bbl [13] [14] [15])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 188.
- [16]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 188.
+[10] [11]
+Underfull \hbox (badness 10000) in paragraph at lines 200--201
+[]$\OT1/cmr/m/n/10.95 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 02$ for
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 201--202
+[]$\OT1/cmr/m/n/10.95 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 0004$ for
+ []
+
+
+Underfull \hbox (badness 2073) in paragraph at lines 202--203
+[]$\OT1/cmr/m/n/10.95 5$ for each
+ []
+
+
+LaTeX Warning: Float too large for page by 8.70293pt on input line 211.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 217--217
+[]\OT1/cmr/m/n/10.95 Habitat gra-di-ent at
+ []
+
+[12] [13] (./Main.bbl [14] [15] [16] [17])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 239.
+ [18]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 239.
  (./Main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 188.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 188.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 239.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 239.
 Package rerunfilecheck Info: File `Main.out' has not changed.
 (rerunfilecheck)             Checksum: AE81FD2A47C5EA6F6EFC51536D5F46C6;1010.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 188.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 239.
  ) 
 Here is how much of TeX's memory you used:
- 7559 strings out of 493014
- 110152 string characters out of 6133351
- 205921 words of memory out of 5000000
- 10910 multiletter control sequences out of 15000+600000
+ 7566 strings out of 493014
+ 110220 string characters out of 6133351
+ 218983 words of memory out of 5000000
+ 10913 multiletter control sequences out of 15000+600000
  12166 words of font info for 46 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,9n,28p,1895b,494s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,13n,28p,1922b,502s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -513,10 +536,10 @@ e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/
 6/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2016/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2016/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Main.pdf (16 pages, 306660 bytes).
+Output written on Main.pdf (18 pages, 311230 bytes).
 PDF statistics:
- 415 PDF objects out of 1000 (max. 8388607)
- 368 compressed objects within 4 object streams
- 89 named destinations out of 1000 (max. 500000)
+ 431 PDF objects out of 1000 (max. 8388607)
+ 382 compressed objects within 4 object streams
+ 93 named destinations out of 1000 (max. 500000)
  131 words of extra memory for PDF output out of 10000 (max. 10000000)
 

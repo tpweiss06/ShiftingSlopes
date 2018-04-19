@@ -49,7 +49,7 @@ While contemporary range shifts are a relatively new phenomenon, important insig
 
 In particular, range expansions and range shifts due to climate change involve fundamentally distinct initial conditions. Range expansions typically begin from the successful establishment and subsequent spread of a small, founding population as typically occurs with the range expansions of invasive and reintroduced species~\citep{hastings2005spatial}. Such founding populations represent samples from some larger source population and as such lack any initial spatial population structure. In contrast, range shifts involve entire populations with existing spatial structure within the initially stable range~\citep{hargreaves2014evolution}. Such spatial structure can take the form of local adaptation within the range, degree of transition in population size from range core to edge, or some combination of the two~\citep{hargreaves2014evolution, hargreaves2015fitness, henry2013eco}. 
 
-These different aspects of spatial population structure have been shown to dramatically impact the response of populations to climate change. For example, the nature of the gradient forming the range edge (e.g. declines in birth rates vs. increases in extinction risk) can directly change the probability of extinction a species faces during a climate driven range shift~\citep{henry2013eco}. A population's risk of extinction during a range shift has also been related to local adaptation within the range. Specifically, a broad environmental niche (i.e. little local adaptation) can decrease a population's ability to track a changing climate if dispersal occurs in a stepping stone manner, allowing some individuals to block dispersal of better adapted phenotypes~\citep{atkins2010local}. Local adaptation also has the potential to interact with dispersal evolution during climate change, driving increased dispersal evolution in an asexual species~\citep{hargreaves2015fitness}, though it is unclear if this result will hold for sexually reproducing species in which locally adapted genotypes interact via gene flow. As the gradient forming the range edge can influence the distribution of dispersal phenotypes within the range~\citep{henry2013eco}, it is likely that this would also result in an altered interaction between dispersal evolution and local adaptation in sexually reproducing species. In fact, pollen dispersal in flowering plants has been shown to dramatically reduce the likelihood of a range shift in response to climate change~\citep{aguilee2016pollen}. Evolution during range shifts due to local adaptation and dispersal evolution are both potentially important drivers of range shift dynamics~\citep{van2016spatial} and it is therefore important to consider both when predicting the dynamics of populations responding to climate change.
+These different aspects of spatial population structure have been shown to dramatically impact the response of populations to climate change. For example, the nature of the gradient forming the range edge (e.g. declines in birth rates vs. increases in extinction risk) can directly change the probability of extinction a species faces during a climate driven range shift~\citep{henry2013eco}. A population's risk of extinction during a range shift has also been related to local adaptation within the range. Specifically, a broad environmental niche (i.e. little local adaptation) can decrease a population's ability to track a changing climate if dispersal occurs in a stepping stone manner, allowing some individuals to block dispersal of better adapted phenotypes~\citep{atkins2010local}. Local adaptation also has the potential to interact with dispersal evolution during climate change, driving increased dispersal evolution in an asexual species~\citep{hargreaves2015fitness}, though it is unclear if this result will hold for sexually reproducing species in which locally adapted genotypes interact via gene flow. As the gradient forming the range edge can influence the distribution of dispersal phenotypes within the range~\citep{henry2013eco, hargreaves2014evolution}, it is likely that this would also result in an altered interaction between dispersal evolution and local adaptation in sexually reproducing species. In fact, pollen dispersal in flowering plants has been shown to dramatically reduce the likelihood of a range shift in response to climate change~\citep{aguilee2016pollen}. Evolution during range shifts due to local adaptation and dispersal evolution are both potentially important drivers of range shift dynamics~\citep{van2016spatial} and it is therefore important to consider both when predicting the dynamics of populations responding to climate change.
 
 Here, we use a complex, individual-based model incorporating evolution in both fitness and dispersal distance to determine the interaction between local adaptation and the starkness of the gradient at the range edge in driving population dynamics during climate change for a sexually reproducing species. Using this model, we simultaneously vary the strength of local adaptation, the starkness of the range boundary, and the speed of climate change to ascertain the relationship among them and test how dispersal evolution interacts with local adaptation to help or hinder a population's ability to track a changing climate. We additionally compare the dynamics of successful versus doomed simulated populations to understand the factors contributing to population extinction and identify warning signs for populations in danger of extinction as a result of a range shift.
 
@@ -162,7 +162,7 @@ N_{t+1,x}\sim Poisson(\hat{N}_{t+1,x})
 Parentage of the offspring is then assigned by random sampling of the local male and female population. The sampling is weighted by individual fitness and occurs with replacement so highly fit individuals are likely to have multiple offspring while low fitness individuals may not have any. Each offspring inherits one allele per locus from each parent, assuming no linkage among loci. After reproduction, all members of the previous generation die and the offspring disperse to begin the next generation.
 
 \paragraph{Mutation}
-Inherited alleles are subject to mutation such that some offspring might not inherit identical copies of certain alleles from tlheir parents. The mutation process is defined by two parameters for each trait $T$: the diploid mutation rate ($U^{T}$) and the mutational variance ($V_{m}^{T}$). Using these parameters along with the number of loci defining trait $T$ ($L^{T}$), the per locus probability of a mutation is
+Inherited alleles are subject to mutation such that some offspring might not inherit identical copies of certain alleles from their parents. The mutation process is defined by two parameters for each trait $T$: the diploid mutation rate ($U^{T}$) and the mutational variance ($V_{m}^{T}$). Using these parameters along with the number of loci defining trait $T$ ($L^{T}$), the per locus probability of a mutation is
 \begin{equation}
 \frac{U^{T}}{2L^{T}}
 \end{equation}
@@ -177,10 +177,61 @@ Finally, individuals disperse according to an exponential dispersal kernel defin
 \begin{equation}
 d_{i} = \frac{D\eta e^{\rho\Sigma L^{D}}}{1+e^{\rho\Sigma L^{D}}} 
 \end{equation}
-where $D$ is the maximum expected dispersal distance in terms of discrete patches, $\eta$ is the spatial scale of discrete patches, $\rho$ is a constant determining the slope of the transition between $0$ and $D$, and the summation is the sum of all alleles contributing to dispersal. Thus, as with fitness, loci are assumed to contribute additively with no dominance or epistasis. The expected dispersal distance, $d_{i}$ is then used to draw a realized distance from an exponential dispersal kernel. The direction of dispersal is drawn from a uniform distribution bounded by $0$ and $2\pi$. If a dispersal trajectory takes an individual outside the bounds of the landscape in the $y$ axis, the individual reappears at the same $x$ coordinate but the opposite end of the $y$ axis, thus wrapping the top and bottom edges of the landscape to avoid edge effects. Dispersal occurs from the center of each patch and the individual's new patch is then determined according to its location in the overlaid grid of $\eta$ x $\eta$ patches (see Figure 1).
+where $D$ is the maximum expected dispersal distance in terms of discrete patches, $\eta$ is the spatial scale of discrete patches, $\rho$ is a constant determining the slope of the transition between $0$ and $D$, and the summation is the sum of all alleles contributing to dispersal. Thus, as with fitness, loci are assumed to contribute additively with no dominance or epistasis. The expected dispersal distance, $d_{i}$ is then used to draw a realized distance from an exponential dispersal kernel. The direction of dispersal is drawn from a uniform distribution bounded by $0$ and $2\pi$. If a dispersal trajectory takes an individual outside the bounds of the landscape in the $y$ axis, the individual reappears at the same $x$ coordinate but the opposite end of the $y$ axis, thus wrapping the top and bottom edges of the landscape to avoid edge effects. Dispersal occurs from the center of each patch and the individual's new patch is then determined according to its location in the overlaid grid of $\eta$ x $\eta$ patches (see Figure~\ref{fig:EnvFunction}).
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{2cm} | p{8cm} | p{2cm} }
+    \hline
+    Parameter & Description & Value \\ \hline \hline
+    $N_{1}$ & Initial population size (seeded across multiple patches) when beginning the simulations & $2500$ \\
+    $\beta_{1}$ & Center of environmentally suitable habitat before climate change & $0$ \\
+    $\eta$ & Spatial dimensions of habitat patches in continuous space & $50$ \\
+    $y_{max}$ & Number of patches the discrete lattice extends in the $y$ direction & $10$ \\
+    $\hat{t}$ & Last time point of stable climate conditions & $2000$ \\
+    $t_{\Delta}$ & Duration of climate change & $100$ \\
+    $t_{max}$ & Total number of time points in the simulation & $2150$ \\
+    $R$ & Intrinsic growth rate of the population & $2$ \\
+    $K_{max}$ & Maximum achievable carrying capacity in the range & $100$ \\ 
+    $\psi$ & Expected sex ratio in the population & $0.5$ \\
+    $D$ & Maximum achievable dispersal phenotype & $1000$ \\
+    $\rho$ & Determines the slope of the transition in dispersal phenotypes from $0$ to $D$ & $0.5$ \\
+    $\omega$ & Defines the strength of stabilizing selection on fitness traits & $3$ \\
+    $U^{T}$ & Diploid mutation rate for each trait & $0.02$ for each trait \\
+    $V_{m}^{T}$ & Mutational variance for each trait & $0.0004$ for each trait \\
+    $L^{T}$ & The number of diploid loci defining each trait & $5$ for each trait \\
+    $\mu_{1}^{f}$ & The initial mean allele value for the fitness trait & $0$ \\
+    $\mu_{1}^{d}$ & The initial mean allele value for the dispersal trait & $-1$ \\
+    $\sigma_{1}^{f}$ & The initial standard deviation of allele values for fitness & $0.025$ \\
+    $\sigma_{1}^{d}$ & The initial standard deviation of allele values for dispersal & $1$ \\
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Simulation parameters held constant across all scenarios presented here.}
+\label{table:ConstPars}
+\end{table}
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{4cm} | p{4cm} | p{1.5cm} | p{1.5cm} | p{1.5cm} }
+    \hline
+    Habitat gradient at range edge & Strength of local adaptation & $\gamma$ & $\tau$ & $\lambda$  \\ \hline \hline
+     & None & $0.0025$ & $250$ & $0$ \\
+    Shallow & Moderate & $0.0025$ & $250$ & $0.004$ \\
+     & Strong & $0.0025$ & $250$ & $0.008$ \\ \hline
+     & None & $0.025$ & $421.479$ & $0$ \\
+    Moderate & Moderate & $0.025$ & $421.479$ & $0.004$ \\
+     & Strong & $0.025$ & $421.479$ & $0.008$ \\ \hline
+     & None & $0.25$ & $421.48$ & $0$ \\
+    Stark & Moderate & $0.25$ & $421.48$ & $0.004$ \\
+     & Strong & $0.25$ & $421.48$ & $0.008$ \\ 
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Descriptions and parameter values for the $9$ different scenarios examined here. For each scenario, $\nu$ (the speed of climate change) was varied among $0.5$, $1$, and $2$.}
+\label{table:Scenarios}
+\end{table}
 
 \subsection{Simulation descriptions}
-To explore the interacting role of local adaptation and the slope of the decline in population abundance at the range edge on trait evolution and the dynamics of range shifts, we simulated $100$ populations each over a range of parameter values varying both the degree of local adaptation and the decline in population abundance at the range edge (See Table 1). Additionally, for each parameter combination we simulated three different speeds of climate change. All simulations were performed in R version $3.4.4$~\citep{team2000r} and the code is available at \url{https://github.com/tpweiss06/ShiftingSlopes}. 
+Most of the parameters described above were held constant over all simulations we performed (Table ~\ref{table:ConstPars}). We varied certain parameter values to explore the interacting roles of local adaptation, the habitat gradient at the range edge, and the speed of climate change in the dynamics of range shifts. Specifically, we considered a factorial combination of three severities of habitat quality decline at the range edge, three degrees of local adaptation within the range, and three speeds of climate change (Table~\ref{table:Scenarios}) for a total of $27$ different model scenarios. For each scenario, we performed $100$ simulations to assess the interacting ecological and evolutionary dynamics of climate driven range shifts. All simulations were performed in R version $3.4.4$~\citep{team2000r} and the code is available at \url{https://github.com/tpweiss06/ShiftingSlopes}. 
 
 \bibliographystyle{amnatnat}
 \bibliography{main_bib}
