@@ -109,25 +109,18 @@ AbundProcess <- function(p, FocalSims){
      
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
+               ParamSectorMean[i,j] <- mean(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
+               ParamAmongVar[i,j] <- sd(AbundVals[p,FocalSims,j,i,], na.rm = TRUE) / 
+                    ParamSectorMean[i,j]
                if(length(FocalSims) > 1){
-                    PatchMeans <- colMeans(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
-                    ParamSectorMean[i,j] <- mean(PatchMeans, na.rm = TRUE)
-               
-                    PatchVars <- rep(NA, width)
-                    for(k in 1:width){
-                         PatchVars[k] <- var(AbundVals[p,FocalSims,j,i,k], na.rm = TRUE)
-                    }
-                    ParamAmongVar[i,j] <- mean(PatchVars, na.rm = TRUE)
-               
-                    SimVars <- rep(NA, length(FocalSims))
+                    SimCVs <- rep(NA, length(FocalSims))
                     for(k in 1:length(FocalSims)){
-                         SimVars[k] <- var(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE)
+                         SimCVs[k] <- sd(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE) / 
+                              mean(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE)
                     }
                     ParamWithinVar[i,j] <- mean(SimVars, na.rm = TRUE)
                } else{
-                    ParamSectorMean[i,j] <- mean(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
-                    ParamAmongVar[i,j] <- NA
-                    ParamWithinVar[i,j] <- var(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
+                    ParamWithinVar[i,j] <- ParamAmongVar[i,j]
                }
           }
      }

@@ -125,39 +125,28 @@ TraitProcess <- function(p, FocalSims){
      
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
+               for(v in 1:3){
+                    ParamSectorFit[i,j,v] <- mean(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
+                    ParamSectorDisp[i,j,v] <- mean(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
+               }
+               ParamAmongVarFit[i,j] <- sd(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE) / 
+                    ParamSectorFit[i,j,1]
+               ParamAmongVarDisp[i,j] <- sd(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE) / 
+                    ParamSectorDisp[i,j,1]
                if(length(FocalSims) > 1){
-                    for(v in 1:3){
-                         FitMeans <- colMeans(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-                         ParamSectorFit[i,j,v] <- mean(FitMeans, na.rm = TRUE)
-                         
-                         DispMeans <- colMeans(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-                         ParamSectorDisp[i,j,v] <- mean(DispMeans, na.rm = TRUE)
-                    }
-                    
-                    FitVars <- rep(NA, width)
-                    DispVars <- rep(NA, width)
-                    for(k in 1:width){
-                         FitVars[k] <- var(FitVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
-                         DispVars[k] <- var(DispVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
-                    }
-                    ParamAmongVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
-                    ParamAmongVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
-                    
                     FitVars <- rep(NA, length(FocalSims))
                     DispVars <- rep(NA, length(FocalSims))
                     for(k in 1:length(FocalSims)){
-                         FitVars[k] <- var(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
-                         DispVars[k] <- var(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
+                         FitVars[k] <- sd(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
+                              mean(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
+                         DispVars[k] <- sd(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
+                              mean(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
                     }
                     ParamWithinVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
                     ParamWithinVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
                } else{
-                    ParamSectorFit[i,j,] <- colMeans(FitVals[p,FocalSims,j,i,,], na.rm = TRUE)
-                    ParamSectorDisp[i,j,] <- colMeans(DispVals[p,FocalSims,j,i,,], na.rm = TRUE)
-                    ParamAmongVarFit[i,j] <- NA
-                    ParamAmongVarDisp[i,j] <- NA
-                    ParamWithinVarFit[i,j] <- var(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE)
-                    ParamWithinVarDisp[i,j] <- var(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE)
+                    ParamWithinVarFit[i,j] <- ParamAmongVarFit[i,j]
+                    ParamWithinVarDisp[i,j] <- ParamAmongVarDisp[i,j]
                }
           }
      }
