@@ -6,7 +6,7 @@
 #    patches within the same sector (i.e. within simulation variance).
 
 # Set the speed for the current script
-SpeedIndex <- 1
+SpeedIndex <- 3
 
 # Set the number of processors available for this script
 nProc <- 2*24
@@ -50,7 +50,7 @@ AbundExtract <- function(i){
      SimID <- AllSims[AbundIndices$sim[i]]
      
      # Load the corresponding summary statistics
-     InFile <- paste("~/ShiftingSlopes/ShiftingRange", SpeedWords[SpeedIndex], 
+     InFile <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[SpeedIndex], 
                      "/Params", Param, "/", SimID, "/SummaryStats.csv", sep = "")
      SimData <- read.csv(InFile)
      
@@ -109,20 +109,26 @@ AbundProcess <- function(p, FocalSims){
      
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
-               PatchMeans <- colMeans(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
-               ParamSectorMean[i,j] <- mean(PatchMeans, na.rm = TRUE)
+               if(length(FocalSims) > 1){
+                    PatchMeans <- colMeans(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
+                    ParamSectorMean[i,j] <- mean(PatchMeans, na.rm = TRUE)
                
-               PatchVars <- rep(NA, width)
-               for(k in 1:width){
-                    PatchVars[k] <- var(AbundVals[p,FocalSims,j,i,k], na.rm = TRUE)
-               }
-               ParamAmongVar[i,j] <- mean(PatchVars, na.rm = TRUE)
+                    PatchVars <- rep(NA, width)
+                    for(k in 1:width){
+                         PatchVars[k] <- var(AbundVals[p,FocalSims,j,i,k], na.rm = TRUE)
+                    }
+                    ParamAmongVar[i,j] <- mean(PatchVars, na.rm = TRUE)
                
-               SimVars <- rep(NA, length(FocalSims))
-               for(k in 1:length(FocalSims)){
-                    SimVars[k] <- var(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE)
+                    SimVars <- rep(NA, length(FocalSims))
+                    for(k in 1:length(FocalSims)){
+                         SimVars[k] <- var(AbundVals[p,FocalSims[k],j,i,], na.rm = TRUE)
+                    }
+                    ParamWithinVar[i,j] <- mean(SimVars, na.rm = TRUE)
+               } else{
+                    ParamSectorMean[i,j] <- mean(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
+                    ParamAmongVar[i,j] <- NA
+                    ParamWithinVar[i,j] <- var(AbundVals[p,FocalSims,j,i,], na.rm = TRUE)
                }
-               ParamWithinVar[i,j] <- mean(SimVars, na.rm = TRUE)
           }
      }
      TempList <- list(SectorMean = ParamSectorMean, AmongVar = ParamAmongVar,
@@ -138,10 +144,13 @@ SuccessWithinVar <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
      ParamSims <- Success[p,]
-     SimSummary <- AbundProcess(p, FocalSims = which(ParamSims == TRUE))
-     SuccessSectorMean[p,,] <- SimSummary$SectorMean
-     SuccessAmongVar[p,,] <- SimSummary$AmongVar
-     SuccessWithinVar[p,,] <- SimSummary$WithinVar
+     SuccessSims <- which(ParamSims == TRUE)
+     if(length(SuccessSims > 0)){
+          SimSummary <- AbundProcess(p, FocalSims = SuccessSims)
+          SuccessSectorMean[p,,] <- SimSummary$SectorMean
+          SuccessAmongVar[p,,] <- SimSummary$AmongVar
+          SuccessWithinVar[p,,] <- SimSummary$WithinVar
+     }
 }
 
 # Now those that failed to track climate change

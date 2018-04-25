@@ -111,7 +111,7 @@ SimTraits <- clusterApply(cl, x = SimVec, fun = TraitExtract)
 for(i in SimVec){
      FitVals[TraitIndices$params[i], TraitIndices$sim[i],,,,] <- SimTraits[[i]]$Fit
      DispVals[TraitIndices$params[i], TraitIndices$sim[i],,,,] <- SimTraits[[i]]$Disp
-     Success[AbundIndices$params[i], AbundIndices$sim[i]] <- !SimAbunds[[i]]$Ext
+     Success[TraitIndices$params[i], TraitIndices$sim[i]] <- !SimTraits[[i]]$Ext
 }
 
 # Make another function to pass to the cluster
@@ -125,31 +125,40 @@ TraitProcess <- function(p, FocalSims){
      
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
-               for(v in 1:3){
-                    FitMeans <- colMeans(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-                    ParamSectorFit[i,j,v] <- mean(FitMeans, na.rm = TRUE)
+               if(length(FocalSims) > 1){
+                    for(v in 1:3){
+                         FitMeans <- colMeans(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
+                         ParamSectorFit[i,j,v] <- mean(FitMeans, na.rm = TRUE)
+                         
+                         DispMeans <- colMeans(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
+                         ParamSectorDisp[i,j,v] <- mean(DispMeans, na.rm = TRUE)
+                    }
                     
-                    DispMeans <- colMeans(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-                    ParamSectorDisp[i,j,v] <- mean(DispMeans, na.rm = TRUE)
+                    FitVars <- rep(NA, width)
+                    DispVars <- rep(NA, width)
+                    for(k in 1:width){
+                         FitVars[k] <- var(FitVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
+                         DispVars[k] <- var(DispVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
+                    }
+                    ParamAmongVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
+                    ParamAmongVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
+                    
+                    FitVars <- rep(NA, length(FocalSims))
+                    DispVars <- rep(NA, length(FocalSims))
+                    for(k in 1:length(FocalSims)){
+                         FitVars[k] <- var(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
+                         DispVars[k] <- var(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
+                    }
+                    ParamWithinVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
+                    ParamWithinVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
+               } else{
+                    ParamSectorFit[i,j,] <- colMeans(FitVals[p,FocalSims,j,i,,], na.rm = TRUE)
+                    ParamSectorDisp[i,j,] <- colMeans(DispVals[p,FocalSims,j,i,,], na.rm = TRUE)
+                    ParamAmongVarFit[i,j] <- NA
+                    ParamAmongVarDisp[i,j] <- NA
+                    ParamWithinVarFit[i,j] <- var(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE)
+                    ParamWithinVarDisp[i,j] <- var(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE)
                }
-               
-               FitVars <- rep(NA, width)
-               DispVars <- rep(NA, width)
-               for(k in 1:width){
-                    FitVars[k] <- var(FitVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
-                    DispVars[k] <- var(DispVals[p,FocalSims,j,i,k,1], na.rm = TRUE)
-               }
-               ParamAmongVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
-               ParamAmongVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
-               
-               FitVars <- rep(NA, length(FocalSims))
-               DispVars <- rep(NA, length(FocalSims))
-               for(k in 1:length(FocalSims)){
-                    FitVars[k] <- var(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
-                    DispVars[k] <- var(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
-               }
-               ParamWithinVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
-               ParamWithinVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
           }
      }
      TempList <- list(SectorFit = ParamSectorFit, SectorDisp = ParamSectorDisp, AmongVarDisp = ParamAmongVarDisp,
@@ -169,13 +178,16 @@ SuccessWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
      ParamSims <- Success[p,]
-     SimSummary <- TraitProcess(p, FocalSims = which(ParamSims == TRUE))
-     SuccessSectorFit[p,,,] <- SimSummary$SectorFit
-     SuccessSectorDisp[p,,,] <- SimSummary$SectorDisp
-     SuccessAmongVarFit[p,,] <- SimSummary$AmongVarFit
-     SuccessAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
-     SuccessWithinVarFit[p,,] <- SimSummary$WithinVarFit
-     SuccessWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+     SuccessSims <- which(ParamSims == TRUE)
+     if(length(SuccessSims) > 0){
+          SimSummary <- TraitProcess(p, FocalSims = SuccessSims)
+          SuccessSectorFit[p,,,] <- SimSummary$SectorFit
+          SuccessSectorDisp[p,,,] <- SimSummary$SectorDisp
+          SuccessAmongVarFit[p,,] <- SimSummary$AmongVarFit
+          SuccessAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
+          SuccessWithinVarFit[p,,] <- SimSummary$WithinVarFit
+          SuccessWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+     }
 }
 
 # Now the simulations that failed to track climate change
