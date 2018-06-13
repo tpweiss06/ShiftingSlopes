@@ -1,13 +1,13 @@
 # This script will create the graphs from the abundance data.
-SpeedIndex <- 1
-SuccessIndex <- 1
+SpeedIndex <- 3
+SuccessIndex <- 3
 
 SuccessWords <- c("Survived", "Extinct", "All")
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
-RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
+RangeParams <- read.csv("~/Desktop/RangeShifts/ShiftingSlopesOther/RangeParameters.csv")
 
 # Set the working directory
-setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
+setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/",
             SpeedWords[SpeedIndex], sep = ""))
 library(plot3D)
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/SimFunctions.R")
@@ -41,20 +41,25 @@ SideArrow <- matrix(c(-0.45, -2.5, -0.45, 0.8), nrow = 2, ncol = 2, byrow = TRUE
 LowAdj <- 0.05
 HighAdj <- 0.95
 EnvLineWidth <- 1
+#nMessageX <- 0.8
+#nMessageY <- 0.1
+#MessageSize <- 1.25
 
 # Create some useful objects for graphing the position of the range center
-RangeExtent <- 121 + 100*SpeedNums[SpeedIndex]
-ZeroPos <- 61
-EndShift <- ZeroPos + 100*SpeedNums[SpeedIndex]
-DecimalZero <- ZeroPos / RangeExtent
-DecimalEndShift <- EndShift / RangeExtent
+LengthShift <- 100
+StatRangeExtent <- 121
+ShiftRangeExtent <- StatRangeExtent + LengthShift*SpeedNums[SpeedIndex]
+ZeroPos <- ceiling(StatRangeExtent / 2)
+EndShift <- ZeroPos + LengthShift*SpeedNums[SpeedIndex]
+DecimalZero <- ZeroPos / ShiftRangeExtent
+DecimalEndShift <- EndShift / ShiftRangeExtent
 
 # Create a function to convert the matrix of relative locations to absolute
 #    locations
-RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
+RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, ShiftRangeExtent,
                           BetaInit, eta){
      # Create a new matrix for the absolute locations of the appropriate size
-     AbsMat <- matrix(NA, nrow = RangeExtent + v*LengthShift, ncol = ncol(RelMat))
+     AbsMat <- matrix(NA, nrow = ShiftRangeExtent, ncol = ncol(RelMat))
      
      # Establish the location of beta throughout the simulation
      BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
@@ -63,7 +68,7 @@ RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
                                                           BurnOut))
      # Step through each generation and populate the absolute matrix
      for(g in 1:ncol(RelMat)){
-          AbsXcoord <- 1:RangeExtent + BetaCoord[g]
+          AbsXcoord <- 1:ShiftRangeExtent + BetaCoord[g]
           vals <- which(!is.na(RelMat[,g]))
           for(i in vals){
                AbsMat[AbsXcoord[i],g] <- RelMat[i,g]
@@ -104,21 +109,34 @@ AbundCols[2,] <- jet.col(10000)
 WithinCols[2,] <- jet.col(10000)
 AmongCols[2,] <- jet.col(10000)
 
+#if(SuccessIndex == 1){
+#     NumSims <- rowSums(Success)
+#} else if(SuccessIndex == 2){
+#     NumSims <- ncol(Sucess) - rowSums(Success)
+#} else if(SuccessIndex == 3){
+#     NumSims <- ncol(Success)
+#}
+
 # Make the mean abundance graph
-PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "MeanAbunds.pdf", sep = "")
+PlotName <- paste("Abundance/", SuccessWords[SuccessIndex], "Mean.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
-          # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
-                                sequence = AbundCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = SectorMean[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
-                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
-          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                  main = "", col = AbundCols[2,ColRange], colkey = FALSE)
+          #if(sum(Success[i,]) > 0){
+          if(i != 9){
+               # Find the color range for the current plot and make the figure
+               ColRange <- FindRange(minimum = min(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                     maximum = max(SectorMean[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
+                                     sequence = AbundCols[1,])
+               AbsMat <- RelToAbsolute(RelMat = SectorMean[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                       ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, eta = RangeParams$eta[1])
+               image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                       main = "", col = AbundCols[2,ColRange], colkey = FALSE)
+          } else{
+               box()
+          }
           
           # Add the axes
           axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
@@ -143,6 +161,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
                    lwd =  EnvLineWidth)
           segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                    lwd =  EnvLineWidth)
+          
+          # Add in the number of simulations
+          #SimMessage <- paste("n = ", NumSims[i], sep = "")
+          #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
      }
 
      # Add the color key
@@ -170,20 +192,26 @@ dev.off()
 
 
 # Make the within variance graph
-PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "AbundWithinVar.pdf", sep = "")
+PlotName <- paste("Abundance/", SuccessWords[SuccessIndex], "MeanWithinCV.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
-                                sequence = WithinCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = WithinVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
-                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
-          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                  main = "", col = WithinCols[2,ColRange], colkey = FALSE)
+          #if(sum(Success[i,]) > 0){
+          if(i != 9){
+               # Find the color range for the current plot and make the figure
+               ColRange <- FindRange(minimum = min(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                     maximum = max(WithinVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
+                                     sequence = WithinCols[1,])
+               AbsMat <- RelToAbsolute(RelMat = WithinVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                       ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, eta = RangeParams$eta[1])
+               image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                       main = "", col = AbundCols[2,ColRange], colkey = FALSE)
+          } else{
+               box()
+          }
      
           # Add the axes
           axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
@@ -208,6 +236,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
                    lwd =  EnvLineWidth)
           segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                    lwd =  EnvLineWidth)
+          
+          # Add in the number of simulations
+          #SimMessage <- paste("n = ", NumSims[i], sep = "")
+          #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
      }
 
      # Add the color key
@@ -234,21 +266,26 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
 dev.off()
 
 # Make the among variance graph
-PlotName <- paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "AbundAmongVar.pdf", sep = "")
+PlotName <- paste("Abundance/", SuccessWords[SuccessIndex], "AmongCV.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
-          # Find the color range for the current plot and make the figure
-          ColRange <- FindRange(minimum = min(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
-                                maximum = max(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
-                                sequence = AmongCols[1,])
-          AbsMat <- RelToAbsolute(RelMat = AmongVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                  LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
-                                  RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
-          image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
-                  main = "", col = AmongCols[2,ColRange], colkey = FALSE)
-     
+          #if(sum(Success[i,]) > 0){
+          if(i < 8){
+               # Find the color range for the current plot and make the figure
+               ColRange <- FindRange(minimum = min(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE), 
+                                     maximum = max(AmongVar[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
+                                     sequence = AmongCols[1,])
+               AbsMat <- RelToAbsolute(RelMat = AmongVar[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                       ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, eta = RangeParams$eta[1])
+               image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+                       main = "", col = AbundCols[2,ColRange], colkey = FALSE)
+          } else{
+               box()
+          }
+
           # Add the axes
           axis(1, at = seq(0, 1, by = 0.2), labels = LocLabels, cex.axis = AxisSize)
           axis(1, at = seq(0, 1, by = 0.05), labels = FALSE, tcl = -0.25)
@@ -272,6 +309,10 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
                    lwd =  EnvLineWidth)
           segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                    lwd =  EnvLineWidth)
+          
+          # Add in the number of simulations
+          #SimMessage <- paste("n = ", NumSims[i], sep = "")
+          #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
      }
 
      # Add the color key

@@ -116,125 +116,179 @@ for(i in SimVec){
 
 # Make another function to pass to the cluster
 TraitProcess <- function(p, FocalSims){
-     ParamSectorFit <- array(NA, dim = c(RangeExtent, NumGens, 3))
-     ParamSectorDisp <- array(NA, dim = c(RangeExtent, NumGens, 3))
-     ParamAmongVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     ParamAmongVarDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     ParamWithinVarFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     ParamWithinVarDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
-     
+     MeanPhenotypeFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     MeanPhenotypeDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     MeanPatchPhenCVFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     MeanPatchPhenCVDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     MeanPatchGenSigmaFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     MeanPatchGenSigmaDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     WithinPhenCVFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     WithinPhenCVDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     AmongPhenCVFit <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+     AmongPhenCVDisp <- matrix(NA, nrow = RangeExtent, ncol = NumGens)
+
      for(i in 1:RangeExtent){
           for(j in 1:NumGens){
-               for(v in 1:3){
-                    ParamSectorFit[i,j,v] <- mean(FitVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-                    ParamSectorDisp[i,j,v] <- mean(DispVals[p,FocalSims,j,i,,v], na.rm = TRUE)
-               }
-               ParamAmongVarFit[i,j] <- sd(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE) / 
-                    ParamSectorFit[i,j,1]
-               ParamAmongVarDisp[i,j] <- sd(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE) / 
-                    ParamSectorDisp[i,j,1]
+               MeanPhenotypeFit[i,j] <- mean(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE)
+               MeanPhenotypeDisp[i,j] <- mean(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE)
+               
+               MeanPatchPhenCVFit[i,j] <- mean(FitVals[p,FocalSims,j,i,,2] / FitVals[p,FocalSims,j,i,,1],
+                                               na.rm = TRUE)
+               MeanPatchPhenCVDisp[i,j] <- mean(DispVals[p,FocalSims,j,i,,2] / DispVals[p,FocalSims,j,i,,1],
+                                               na.rm = TRUE)
+               MeanPatchGenSigmaFit[i,j] <- mean(FitVals[p,FocalSims,j,i,,3], na.rm = TRUE)
+               MeanPatchGenSigmaDisp[i,j] <- mean(DispVals[p,FocalSims,j,i,,3], na.rm = TRUE)
+               
+               AmongPhenCVFit[i,j] <- sd(FitVals[p,FocalSims,j,i,,1], na.rm = TRUE) /
+                                        MeanPhenotypeFit[i,j]
+               AmongPhenCVDisp <- sd(DispVals[p,FocalSims,j,i,,1], na.rm = TRUE) /
+                                        MeanPhenotypeDisp[i,j]
                if(length(FocalSims) > 1){
-                    FitVars <- rep(NA, length(FocalSims))
-                    DispVars <- rep(NA, length(FocalSims))
+                    FitCVs <- rep(NA, length(FocalSims))
+                    DispCVs <- rep(NA, length(FocalSims))
                     for(k in 1:length(FocalSims)){
-                         FitVars[k] <- sd(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
+                         FitCVs[k] <- sd(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
                               mean(FitVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
-                         DispVars[k] <- sd(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
+                         DispCVs[k] <- sd(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE) / 
                               mean(DispVals[p,FocalSims[k],j,i,,1], na.rm = TRUE)
                     }
-                    ParamWithinVarFit[i,j] <- mean(FitVars, na.rm = TRUE)
-                    ParamWithinVarDisp[i,j] <- mean(DispVars, na.rm = TRUE)
+                    WithinPhenCVFit[i,j] <- mean(FitVars, na.rm = TRUE)
+                    WithinPhenCVDisp[i,j] <- mean(DispVars, na.rm = TRUE)
                } else{
-                    ParamWithinVarFit[i,j] <- ParamAmongVarFit[i,j]
-                    ParamWithinVarDisp[i,j] <- ParamAmongVarDisp[i,j]
+                    WithinPhenCVFit[i,j] <- ParamAmongVarFit[i,j]
+                    WithinPhenCVDisp[i,j] <- ParamAmongVarDisp[i,j]
                }
           }
      }
-     TempList <- list(SectorFit = ParamSectorFit, SectorDisp = ParamSectorDisp, AmongVarDisp = ParamAmongVarDisp,
-                      AmongVarFit = ParamAmongVarFit, WithinVarDisp = ParamWithinVarDisp,
-                      WithinVarFit = ParamWithinVarFit)
+     TempList <- list(MeanPhenotypeFit = MeanPhenotypeFit,
+                      MeanPhenotypeDisp = MeanPhenotypeDisp,
+                      MeanPatchPhenCVFit = MeanPatchPhenCVFit,
+                      MeanPatchPhenCVDisp = MeanPatchPhenCVDisp,
+                      MeanPatchGenSigmaFit = MeanPatchGenSigmaFit,
+                      MeanPatchGenSigmaDisp = MeanPatchGenSigmaDisp,
+                      WithinPhenCVFit = WithinPhenCVFit,
+                      WithinPhenCVDisp = WithinPhenCVDisp,
+                      AmongPhenCVFit = AmongPhenCVFit,
+                      AmongPhenCVDisp = AmongPhenCVDisp)
      return(TempList)
 }
 
 # Now process the results for those simulations that successfully tracked climate
 #    change
-SuccessSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-SuccessSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-SuccessAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-SuccessAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
-SuccessWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-SuccessWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPhenotypeFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPhenotypeDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPatchPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPatchPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPatchGenSigmaFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessMeanPatchGenSigmaDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessWithinPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessWithinPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessAmongPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+SuccessAmongPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
      ParamSims <- Success[p,]
      SuccessSims <- which(ParamSims == TRUE)
      if(length(SuccessSims) > 0){
           SimSummary <- TraitProcess(p, FocalSims = SuccessSims)
-          SuccessSectorFit[p,,,] <- SimSummary$SectorFit
-          SuccessSectorDisp[p,,,] <- SimSummary$SectorDisp
-          SuccessAmongVarFit[p,,] <- SimSummary$AmongVarFit
-          SuccessAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
-          SuccessWithinVarFit[p,,] <- SimSummary$WithinVarFit
-          SuccessWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+          SuccessMeanPhenotypeFit[p,,] <- SimSummary$MeanPhenotypeFit
+          SuccessMeanPhenotypeDisp[p,,] <- SimSummary$MeanPhenotypeDisp
+          SuccessMeanPatchPhenCVFit[p,,] <- SimSummary$MeanPatchPhenCVFit
+          SuccessMeanPatchPhenCVDisp[p,,] <- SimSummary$MeanPatchPhenCVDisp
+          SuccessMeanPatchGenSigmaFit[p,,] <- SimSummary$MeanPatchGenSigmaFit
+          SuccessMeanPatchGenSigmaDisp[p,,] <- SimSummary$MeanPatchGenSigmaDisp
+          SuccessWithinPhenCVFit[p,,] <- SimSummary$WithinPhenCVFit
+          SuccessWithinPhenCVDisp[p,,] <- SimSummary$WithinPhenCVDisp
+          SuccessAmongPhenCVFit[p,,] <- SimSummary$AmongPhenCVFit
+          SuccessAmongPhenCVDisp[p,,] <- SimSummary$AmongPhenCVDisp
      }
 }
 
 # Now the simulations that failed to track climate change
-FailureSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-FailureSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-FailureAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-FailureAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
-FailureWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-FailureWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPhenotypeFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPhenotypeDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPatchPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPatchPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPatchGenSigmaFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureMeanPatchGenSigmaDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureWithinPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureWithinPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureAmongPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+FailureAmongPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
      ParamSims <- Success[p,]
-     SimSummary <- TraitProcess(p, FocalSims = which(ParamSims == FALSE))
-     FailureSectorFit[p,,,] <- SimSummary$SectorFit
-     FailureSectorDisp[p,,,] <- SimSummary$SectorDisp
-     FailureAmongVarFit[p,,] <- SimSummary$AmongVarFit
-     FailureAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
-     FailureWithinVarFit[p,,] <- SimSummary$WithinVarFit
-     FailureWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+     FailureSims <- which(ParamSims == FALSE)
+     if(length(FailureSims) > 0){
+          SimSummary <- TraitProcess(p, FocalSims = FailureSims)
+          FailureMeanPhenotypeFit[p,,] <- SimSummary$MeanPhenotypeFit
+          FailureMeanPhenotypeDisp[p,,] <- SimSummary$MeanPhenotypeDisp
+          FailureMeanPatchPhenCVFit[p,,] <- SimSummary$MeanPatchPhenCVFit
+          FailureMeanPatchPhenCVDisp[p,,] <- SimSummary$MeanPatchPhenCVDisp
+          FailureMeanPatchGenSigmaFit[p,,] <- SimSummary$MeanPatchGenSigmaFit
+          FailureMeanPatchGenSigmaDisp[p,,] <- SimSummary$MeanPatchGenSigmaDisp
+          FailureWithinPhenCVFit[p,,] <- SimSummary$WithinPhenCVFit
+          FailureWithinPhenCVDisp[p,,] <- SimSummary$WithinPhenCVDisp
+          FailureAmongPhenCVFit[p,,] <- SimSummary$AmongPhenCVFit
+          FailureAmongPhenCVDisp[p,,] <- SimSummary$AmongPhenCVDisp
+     }
 }
 
-
 # Now all of them
-TotalSectorFit <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-TotalSectorDisp <- array(NA, dim = c(9, RangeExtent, NumGens, 3))
-TotalAmongVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-TotalAmongVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
-TotalWithinVarFit <- array(NA, dim = c(9, RangeExtent, NumGens))
-TotalWithinVarDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPhenotypeFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPhenotypeDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPatchPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPatchPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPatchGenSigmaFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalMeanPatchGenSigmaDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalWithinPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalWithinPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalAmongPhenCVFit <- array(NA, dim = c(9, RangeExtent, NumGens))
+TotalAmongPhenCVDisp <- array(NA, dim = c(9, RangeExtent, NumGens))
 
 for(p in 1:9){
      ParamSims <- Success[p,]
-     SimSummary <- TraitProcess(p, FocalSims = 1:length(ParamSims))
-     TotalSectorFit[p,,,] <- SimSummary$SectorFit
-     TotalSectorDisp[p,,,] <- SimSummary$SectorDisp
-     TotalAmongVarFit[p,,] <- SimSummary$AmongVarFit
-     TotalAmongVarDisp[p,,] <- SimSummary$AmongVarDisp
-     TotalWithinVarFit[p,,] <- SimSummary$WithinVarFit
-     TotalWithinVarDisp[p,,] <- SimSummary$WithinVarDisp
+     TotalSims <- 1:length(ParamSims)
+     if(length(TotalSims) > 0){
+          SimSummary <- TraitProcess(p, FocalSims = TotalSims)
+          TotalMeanPhenotypeFit[p,,] <- SimSummary$MeanPhenotypeFit
+          TotalMeanPhenotypeDisp[p,,] <- SimSummary$MeanPhenotypeDisp
+          TotalMeanPatchPhenCVFit[p,,] <- SimSummary$MeanPatchPhenCVFit
+          TotalMeanPatchPhenCVDisp[p,,] <- SimSummary$MeanPatchPhenCVDisp
+          TotalMeanPatchGenSigmaFit[p,,] <- SimSummary$MeanPatchGenSigmaFit
+          TotalMeanPatchGenSigmaDisp[p,,] <- SimSummary$MeanPatchGenSigmaDisp
+          TotalWithinPhenCVFit[p,,] <- SimSummary$WithinPhenCVFit
+          TotalWithinPhenCVDisp[p,,] <- SimSummary$WithinPhenCVDisp
+          TotalAmongPhenCVFit[p,,] <- SimSummary$AmongPhenCVFit
+          TotalAmongPhenCVDisp[p,,] <- SimSummary$AmongPhenCVDisp
+     }
 }
 
 # Finally save the output
 OutFile <- paste(SpeedWords[SpeedIndex], "ShiftingTraitResults.rdata", sep = "")
-SectorFit <- list(Success = SuccessSectorFit, Failure = FailureSectorFit, 
-                  Total = TotalSectorFit)
-AmongVarFit <- list(Success = SuccessAmongVarFit, Failure = FailureAmongVarFit, 
-                    Total = TotalAmongVarFit)
-WithinVarFit <- list(Success = SuccessWithinVarFit, Failure = FailureWithinVarFit, 
-                      Total = TotalWithinVarFit)
-SectorDisp <- list(Success = SuccessSectorDisp, Failure = FailureSectorDisp, 
-                   Total = TotalSectorDisp)
-AmongVarDisp <- list(Success = SuccessAmongVarDisp, Failure = FailureAmongVarDisp, 
-                     Total = TotalAmongVarDisp)
-WithinVarDisp <- list(Success = SuccessWithinVarDisp, Failure = FailureWithinVarDisp, 
-                      Total = TotalWithinVarDisp)
+MeanPhenotypeFit <- list(Success = SuccessMeanPhenotypeFit, Failure = FailureMeanPhenotypeFit, 
+                  Total = TotalMeanPhenotypeFit)
+MeanPhenotypeDisp <- list(Success = SuccessMeanPhenotypeDisp, Failure = FailureMeanPhenotypeDisp, 
+                          Total = TotalMeanPhenotypeDisp)
+MeanPatchPhenCVFit <- list(Success = SuccessMeanPatchPhenCVFit, Failure = FailureMeanPatchPhenCVFit, 
+                           Total = TotalMeanPatchPhenCVFit)
+MeanPatchPhenCVDisp <- list(Success = SuccessPatchPhenCVDisp, Failure = FailurePatchPhenCVDisp, 
+                            Total = TotalPatchPhenCVDisp)
+MeanPatchGenSigmaFit <- list(Success = SuccessMeanPatchGenSigmaFit, Failure = FailureMeanPatchGenSigmaFit, 
+                             Total = TotalMeanPatchGenSigmaFit)
+MeanPatchGenSigmaDisp <- list(Success = SuccessMeanPatchGenSigmaDisp, Failure = FailureMeanPatchGenSigmaDisp, 
+                              Total = TotalMeanPatchGenSigmaDisp)
+WithinPhenCVFit <- list(Success = SuccessWithinPhenCVFit, Failure = FailureWithinPhenCVFit, 
+                        Total = TotalWithinPhenCVFit)
+WithinPhenCVDisp <- list(Success = SuccessWithinPhenCVDisp, Failure = FailureWithinPhenCVDisp, 
+                         Total = TotalWithinPhenCVDisp)
+AmongPhenCVFit <- list(Success = SuccessAmongPhenCVFit, Failure = FailureAmongPhenCVFit, 
+                       Total = TotalAmongPhenCVFit)
+AmongPhenCVDisp <- list(Success = SuccessAmongPhenCVDisp, Failure = FailureAmongPhenCVDisp, 
+                        Total = TotalAmongPhenCVDisp)
 
 # Save all the output
-save(SectorFit, AmongVarFit, WithinVarFit, SectorDisp, AmongVarDisp, WithinVarDisp,
-     file = OutFile)
-
+save(MeanPhenotypeFit, MeanPhenotypeDisp, MeanPatchPhenCVFit, MeanPatchPhenCVDisp, 
+     MeanPatchGenSigmaFit, MeanPatchGenSigmaDisp, WithinPhenCVFit, WithinPhenCVDisp,
+     AmongPhenCVFit, AmongPhenCVDisp, Success, file = OutFile)
 

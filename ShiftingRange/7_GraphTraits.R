@@ -1,10 +1,10 @@
 # This script will create the graphs from the abundance data.
 SpeedIndex <- 1
-SuccessIndex <- 1
+SuccessIndex <- 3
 
 SuccessWords <- c("Survived", "Extinct", "All")
 source("~/Desktop/RangeShifts/ShiftingSlopesCode/ShiftingRange/ShiftParams.R")
-RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
+RangeParams <- read.csv("~/Desktop/RangeShifts/ShiftingSlopesOther/RangeParameters.csv")
 
 # Set the working directory
 setwd(paste("~/Desktop/RangeShifts/ShiftingSlopesOther/ShiftingRange/", 
@@ -41,20 +41,25 @@ SideArrow <- matrix(c(-0.45, -2.5, -0.45, 0.8), nrow = 2, ncol = 2, byrow = TRUE
 LowAdj <- 0.05
 HighAdj <- 0.95
 EnvLineWidth <- 1
+#nMessageX <- 0.8
+#nMessageY <- 0.1
+#MessageSize <- 1.25
 
 # Create some useful objects for graphing the position of the range center
-RangeExtent <- 121 + 100*SpeedNums[SpeedIndex]
-ZeroPos <- 61
-EndShift <- ZeroPos + 100*SpeedNums[SpeedIndex]
-DecimalZero <- ZeroPos / RangeExtent
-DecimalEndShift <- EndShift / RangeExtent
+LengthShift <- 100
+StatRangeExtent <- 121
+ShiftRangeExtent <- StatRangeExtent + LengthShift*SpeedNums[SpeedIndex]
+ZeroPos <- ceiling(StatRangeExtent / 2)
+EndShift <- ZeroPos + LengthShift*SpeedNums[SpeedIndex]
+DecimalZero <- ZeroPos / ShiftRangeExtent
+DecimalEndShift <- EndShift / ShiftRangeExtent
 
 # Create a function to convert the matrix of relative locations to absolute
 #    locations
-RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
+RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, ShiftRangeExtent,
                           BetaInit, eta){
      # Create a new matrix for the absolute locations of the appropriate size
-     AbsMat <- matrix(NA, nrow = RangeExtent + v*LengthShift, ncol = ncol(RelMat))
+     AbsMat <- matrix(NA, nrow = ShiftRangeExtent, ncol = ncol(RelMat))
      
      # Establish the location of beta throughout the simulation
      BetaShift <- ChangeClimate(BetaInit = BetaInit, LengthShift = LengthShift, 
@@ -63,7 +68,7 @@ RelToAbsolute <- function(RelMat, BurnIn, LengthShift, BurnOut, v, RangeExtent,
                                                           BurnOut))
      # Step through each generation and populate the absolute matrix
      for(g in 1:ncol(RelMat)){
-          AbsXcoord <- 1:RangeExtent + BetaCoord[g]
+          AbsXcoord <- 1:ShiftRangeExtent + BetaCoord[g]
           vals <- which(!is.na(RelMat[,g]))
           for(i in vals){
                AbsMat[AbsXcoord[i],g] <- RelMat[i,g]
@@ -89,6 +94,10 @@ FindRange <- function(minimum, maximum, sequence){
 # Get the appropriate ranges for the abundance and sigma values and set up
 #    color matrices appropriately
 load(paste(SpeedWords[SpeedIndex], "ShiftingTraitResults.rdata", sep = ""))
+
+# Change the mean dispersal phenotype results to the log scale
+SectorDisp[[SuccessIndex]][,,TimeSeq,1] <- log(SectorDisp[[SuccessIndex]][,,TimeSeq,1], base = 10)
+
 MaxSectorFit <- rep(NA, 3)
 MaxSectorDisp <- rep(NA, 3)
 MinSectorFit <- rep(NA, 3)
@@ -134,15 +143,23 @@ DispAmongCols[2,] <- jet.col(10000)
 FitWithinCols[2,] <- jet.col(10000)
 DispWithinCols[2,] <- jet.col(10000)
 
+#if(SuccessIndex == 1){
+#     NumSims <- rowSums(Success)
+#} else if(SuccessIndex == 2){
+#     NumSims <- ncol(Sucess) - rowSums(Success)
+#} else if(SuccessIndex == 3){
+#     NumSims <- ncol(Success)
+#}
+
 # --------------------- Now use a loop to make a mean, among replicate variance,
 #    and within replicate variance graph for both fitness and dispersal for each
 #    summary value (expected trait value, genetic variance, phenotypic variance)
 PlotNames <- c("Mu", "GenVar", "PhenVar")
 for(v in 1:3){
      ############# First the fitness graphs
-     Fit <- c(paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitSector", PlotNames[v], ".pdf", sep = ""),
-              paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitAmong", PlotNames[v], ".pdf", sep = ""),
-              paste(SuccessWords[SuccessIndex], SpeedWords[SpeedIndex], "FitWithin", PlotNames[v], ".pdf", sep = ""))
+     Fit <- c(paste("Fitness/", SuccessWords[SuccessIndex], "FitSector", PlotNames[v], ".pdf", sep = ""),
+              paste("Fitness/", SuccessWords[SuccessIndex], "FitAmong", PlotNames[v], ".pdf", sep = ""),
+              paste("Fitness/", SuccessWords[SuccessIndex], "FitWithin", PlotNames[v], ".pdf", sep = ""))
      # Sector mean
      pdf(file = Fit[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -154,7 +171,8 @@ for(v in 1:3){
                                      sequence = FitSectorCols[v,1,])
                AbsMat <- RelToAbsolute(RelMat = SectorFit[[SuccessIndex]][i,,TimeSeq,v], BurnIn = BurnIn,
                                        LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
-                                       RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                       ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                       eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = FitSectorCols[v,2,ColRange], colkey = FALSE)
           
@@ -181,6 +199,10 @@ for(v in 1:3){
                         lwd =  EnvLineWidth)
                segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                         lwd =  EnvLineWidth)
+               
+               # Add in the number of simulations
+               #SimMessage <- paste("n = ", NumSims[i], sep = "")
+               #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
           }
      
           # Add the color key
@@ -217,8 +239,9 @@ for(v in 1:3){
                                           maximum = max(AmongVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitAmongCols[1,])
                     AbsMat <- RelToAbsolute(RelMat = AmongVarFit[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
-                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                            ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                            eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = FitAmongCols[2,ColRange], colkey = FALSE)
           
@@ -245,6 +268,10 @@ for(v in 1:3){
                              lwd =  EnvLineWidth)
                     segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                              lwd =  EnvLineWidth)
+                    
+                    # Add in the number of simulations
+                    #SimMessage <- paste("n = ", NumSims[i], sep = "")
+                    #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
                }
      
                # Add the color key
@@ -280,8 +307,9 @@ for(v in 1:3){
                                           maximum = max(WithinVarFit[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = FitWithinCols[1,])
                     AbsMat <- RelToAbsolute(RelMat = WithinVarFit[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
-                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                            ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                            eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = FitWithinCols[2,ColRange], colkey = FALSE)
           
@@ -308,6 +336,10 @@ for(v in 1:3){
                              lwd =  EnvLineWidth)
                     segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                              lwd =  EnvLineWidth)
+                    
+                    # Add in the number of simulations
+                    #SimMessage <- paste("n = ", NumSims[i], sep = "")
+                    #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
                }
           
                # Add the color key
@@ -335,9 +367,9 @@ for(v in 1:3){
      }
      
      ############# Now the dispersal graphs
-     Disp <- c(paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispSector", PlotNames[v], ".pdf", sep = ""),
-              paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispAmong", PlotNames[v], ".pdf", sep = ""),
-              paste(SuccessWords[SuccessIndex], SpeedWords[RangeExtent], "DispWithin", PlotNames[v], ".pdf", sep = ""))
+     Disp <- c(paste("Dispersal/", SuccessWords[SuccessIndex], "DispSector", PlotNames[v], ".pdf", sep = ""), 
+              paste("Dispersal/", SuccessWords[SuccessIndex], "DispAmong", PlotNames[v], ".pdf", sep = ""),   
+              paste("Dispersal/", SuccessWords[SuccessIndex], "DispWithin", PlotNames[v], ".pdf", sep = ""))  
      # Sector mean
      pdf(file = Disp[1], width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           layout(FigMat)
@@ -348,8 +380,9 @@ for(v in 1:3){
                                      maximum = max(SectorDisp[[SuccessIndex]][i,,TimeSeq,v], na.rm = TRUE),
                                      sequence = DispSectorCols[v,1,])
                AbsMat <- RelToAbsolute(RelMat = SectorDisp[[SuccessIndex]][i,,TimeSeq,v], BurnIn = BurnIn,
-                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNum,
-                                       RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                       LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                       ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                       eta = RangeParams$eta[1])
                image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                        main = "", col = DispSectorCols[v,2,ColRange], colkey = FALSE)
           
@@ -376,6 +409,10 @@ for(v in 1:3){
                         lwd =  EnvLineWidth)
                segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                         lwd =  EnvLineWidth)
+               
+               # Add in the number of simulations
+               #SimMessage <- paste("n = ", NumSims[i], sep = "")
+               #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
           }
      
           # Add the color key
@@ -412,8 +449,9 @@ for(v in 1:3){
                                           maximum = max(AmongVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispAmongCols[1,])
                     AbsMat <- RelToAbsolute(RelMat = AmongVarDisp[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
-                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                            ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                            eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispAmongCols[2,ColRange], colkey = FALSE)
           
@@ -440,6 +478,10 @@ for(v in 1:3){
                              lwd =  EnvLineWidth)
                     segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                              lwd =  EnvLineWidth)
+                    
+                    # Add in the number of simulations
+                    #SimMessage <- paste("n = ", NumSims[i], sep = "")
+                    #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
                }
      
                # Add the color key
@@ -475,8 +517,9 @@ for(v in 1:3){
                                           maximum = max(WithinVarDisp[[SuccessIndex]][i,,TimeSeq], na.rm = TRUE),
                                           sequence = DispWithinCols[1,])
                     AbsMat <- RelToAbsolute(RelMat = WithinVarDisp[[SuccessIndex]][i,,TimeSeq], BurnIn = BurnIn,
-                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[RangeExtent],
-                                            RangeExtent = 121, BetaInit = BetaInit, eta = RangeParams$eta[1])
+                                            LengthShift = LengthShift, BurnOut = BurnOut, v = SpeedNums[SpeedIndex],
+                                            ShiftRangeExtent = ShiftRangeExtent, BetaInit = BetaInit, 
+                                            eta = RangeParams$eta[1])
                     image2D(z = AbsMat, xaxt = "n", yaxt = "n", xlab = "", ylab = "",
                             main = "", col = DispWithinCols[2,ColRange], colkey = FALSE)
           
@@ -503,6 +546,10 @@ for(v in 1:3){
                              lwd =  EnvLineWidth)
                     segments(x0 = DecimalZero, y0 = 0.25, x1 = DecimalEndShift, y1 = 0.75,
                              lwd =  EnvLineWidth)
+                    
+                    # Add in the number of simulations
+                    #SimMessage <- paste("n = ", NumSims[i], sep = "")
+                    #text(x = nMessageX, y = nMessageY, labels = SimMessage, cex = MessageSize)
                }
      
                # Add the color key

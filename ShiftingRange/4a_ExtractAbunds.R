@@ -180,4 +180,4 @@ AmongVar <- list(Success = SuccessAmongVar, Failure = FailureAmongVar,
                    Total = TotalAmongVar)
 WithinVar <- list(Success = SuccessWithinVar, Failure = FailureWithinVar,
                    Total = TotalWithinVar)
-save(SectorMean, AmongVar, WithinVar, file = OutFile)
+save(SectorMean, AmongVar, WithinVar, Success, file = OutFile)
