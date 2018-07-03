@@ -1,7 +1,7 @@
 # This script will make an appropriate graph of the initial dispersal values
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
-load("InitDispData.rdata")
-CurSpeed <- 1
+load("SimData/InitDispData.rdata")
+CurSpeed <- 2
 SpeedWords <- c("Slow", "Main", "Fast")
 
 # Sort the disp values into the appropriate lists
@@ -14,67 +14,76 @@ xMax <- 0
 for(p in 1:9){
      AllVals <- NULL
      ExtantVals <- NULL
-     for(i in 1:100){
-          AllVals <- c(AllVals, DispList[[p]][[i]][-1])
-          if(DispList[[p]][[i]][1] == 1){
+     for(i in 1:NumSims){
+          AllVals <- c(AllVals, DispInit[[p]][[i]]$ExpDists)
+          
+          if(DispInit[[p]][[i]]$Ext[CurSpeed] == 1){
                NumExtant[p] <- NumExtant[p] + 1
-               ExtantVals <- c(ExtantVals, DispList[[p]][[i]][-1])
+               ExtantVals <- c(ExtantVals, DispInit[[p]][[i]]$ExpDists)
           }
      }
      AllSims[[p]] <- log(AllVals, base = 10)
-     ExtantSims[[p]] <- log(ExtantVals, base = 10)
+     if(!is.null(ExtantVals)){
+          ExtantSims[[p]] <- log(ExtantVals, base = 10)
+     }
      xMin <- min(c(xMin, AllSims[[p]]))
      xMax <- max(c(xMax, AllSims[[p]]))
 }
 xRange <- c(xMin, xMax)
 
 # Set some graphical parameters to use for the subsequent figures
+options(scipen = -10)
 FigMat <- matrix(NA, nrow = 3, ncol = 12)
 FigMat[1,] <- c(rep(1,4), rep(2,4), rep(3,4))
 FigMat[2,] <- c(rep(4,4), rep(5,4), rep(6,4))
 FigMat[3,] <- c(rep(7,4), rep(8,4), rep(9,4))
-OuterMar <- c(4, 10, 5, 2)
-InnerMar <- c(1.5, 1.5, 1.5, 1.5)
+OuterMar <- c(4, 12, 5, 2)
+InnerMar <- c(1.5, 2.25, 1.5, 2.25)
 TextSize <- 1.5
-AxisSize <- 1.05
+AxisSize <- 1.15
 ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-DispAxisLabel <- expression(paste("Initial ", italic("log"), "(", bar(italic("d")), ")", sep = ""))
+DispAxisLabel <- expression(paste("Initial ", italic("log"), "(", italic("d"), ")", sep = ""))
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 xLabLine <- 2
-yLabLine <- 1.75
+yLabLine <- 3
 GradLabLine <- 3
 GradSubLine <- 1.5
-AdaptLabLine <- 7
-AdaptSubLine <- 5
-TopArrow <- matrix(c(-0.5, 2750, 13, 2750), nrow = 2, ncol = 2, byrow = TRUE)
-SideArrow <- matrix(c(-3.5, -5500, -3.5, 1500), nrow = 2, ncol = 2, byrow = TRUE)
+AdaptLabLine <- 9
+AdaptSubLine <- 7
+TopArrow <- matrix(c(-0.75, 260000, 17, 260000), nrow = 2, ncol = 2, byrow = TRUE)
+SideArrow <- matrix(c(-5.75, -550000, -5.75, 175000), nrow = 2, ncol = 2, byrow = TRUE)
 LowAdj <- 0.05
 HighAdj <- 0.95
 AllCol <- "grey50"
 ExtantCol <- "springgreen4"
-HistBreaks <- seq(-1.4, 3.2, by = 0.2)
+HistBreaks <- seq(-1.8, 3.4, by = 0.2)
 xticks <- seq(-1, 3, by = 0.2)
-PlotName <- paste(SpeedWords[CurSpeed], "InitDispVals.pdf", sep = "")
+PlotName <- paste("ResultFigures/", SpeedWords[CurSpeed], "InitDispVals.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
      layout(FigMat)
      par(mar = InnerMar, oma = OuterMar)
      for(i in SimSeq){
           AllHist <- hist(AllSims[[i]], plot = FALSE, breaks = HistBreaks)
           plot(AllHist, col = AllCol, main = "", xlab = "", ylab = "", cex.axis = AxisSize,
-               las = 1, xlim = xRange)
-          hist(ExtantSims[[i]], col = ExtantCol, breaks = HistBreaks, add = TRUE)
+               las = 1, xlim = xRange, xaxt = "n")
+          if(NumExtant[i] > 0){
+               hist(ExtantSims[[i]], col = ExtantCol, breaks = HistBreaks, add = TRUE)
+          }
+          options(scipen = 10)
+          axis(1, cex.axis = AxisSize)
           axis(1, at = xticks, labels = FALSE, tcl = -0.25)
           # Add in the number of simulations
           SimMessage <- paste("n = ", NumExtant[i], sep = "")
+          options(scipen = -10)
           if(i > 3){
                legend("topleft", legend = SimMessage, lty = 0, text.col = ExtantCol,
-                      bty = "n")
+                      bty = "n", cex = AxisSize)
           } else{
                legend("topleft", legend = SimMessage, lty = 0, text.col = ExtantCol,
-                      bty = "n")
+                      bty = "n", cex = AxisSize)
           }
      
           # Add the selection and environmental gradient arrows
