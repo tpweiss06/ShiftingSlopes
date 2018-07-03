@@ -5,7 +5,7 @@ RangeParams <- read.csv("RangeParameters.csv")
 NumSims <- 200
 
 # Load the extinction data
-load("Extinctions.rdata")
+load("SimData/Extinctions.rdata")
 for(i in 1:3){
      for(p in 1:9){
           Extinctions[i,p,] <- cumsum(Extinctions[i,p,]) / NumSims
@@ -34,7 +34,7 @@ Col <- "darkred"
 # Make the extinction graph for all three speeds
 SpeedWords <- c("Slow", "Main", "Fast")
 for(i in 1:3){
-     PlotName <- paste(SpeedWords[i], "Extinction.pdf", sep = "")
+     PlotName <- paste("ResultFigures/", SpeedWords[i], "Extinction.pdf", sep = "")
      pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
           par(mfrow = c(1,3), oma = OuterMar)
           # No local adaptation
