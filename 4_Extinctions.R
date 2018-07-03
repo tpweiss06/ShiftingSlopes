@@ -1,22 +1,23 @@
 # This script will extract the extinction information from the simulations
 
-setwd("~/ShiftingSlopes/ShiftingRange")
+setwd("~/ShiftingSlopes/")
 library(parallel)
 library(Rmpi)
 nProc <- 24*2
-source("ShiftParams.R")
 
 # Calculate the time period to assess extinctions over
-TotalTime <- BurnIn + LengthShift + BurnOut
+LengthShift <- 100
+TotalTime <- 2150
+BurnIn <- 2000
 
 # Create an object to hold the extinction data
-Extinctions <- array(NA, dim = c(3, 9, TotalTime))
+Extinctions <- array(NA, dim = c(3, 9, LengthShift))
 
 SimVec <- NULL
+SpeedWords <- c("Slow", "MainSim", "Fast")
 for(v in 1:3){
      for(p in 1:9){
-          FilePath <- paste("~/ShiftingSlopes/ShiftingRange/", SpeedWords[v],
-                            "/Params", p, sep = "")
+          FilePath <- paste("~/ShiftingSlopes/", SpeedWords[v], "/Params", p, sep = "")
           SimFiles <- list.files(FilePath)
           FullPaths <- paste(FilePath, "/", SimFiles, "/SummaryStats.csv", sep = "")
           SimVec <- c(SimVec, FullPaths)
@@ -42,7 +43,10 @@ for(v in 1:3){
           for(i in 1:length(CurIndices)){
                CurExtGens[i] <- ExtGens[[CurIndices[i]]]
           }
-          for(t in 1:TotalTime){
+          if(v == 2){
+               CurExtGens <- CurExtGens - BurnIn
+          }
+          for(t in 1:LengthShift){
                Extinctions[v,p,t] <- sum(CurExtGens == t)
           }
      }

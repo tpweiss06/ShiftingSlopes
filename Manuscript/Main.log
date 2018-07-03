@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  14 JUN 2018 11:07
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  21 JUN 2018 14:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -443,17 +443,12 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 40.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
+) [1
 
-Package natbib Warning: Citation `shaw2015dispersal' on page 1 undefined on inp
-ut line 48.
-
-[1
-
-{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-[2] [3] [4]
+{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
+ [4]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_x
-t".pdf, id=217, 505.89pt x 252.945pt>
+t".pdf, id=244, 505.89pt x 252.945pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f
 _of_xt".pdf Graphic file (type pdf)
 
@@ -465,7 +460,7 @@ Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
  [5 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_o
 f_xt.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/LifeCy
-cle".pdf, id=233, 963.6pt x 542.025pt>
+cle".pdf, id=259, 963.6pt x 542.025pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/L
 ifeCycle".pdf Graphic file (type pdf)
 
@@ -476,61 +471,107 @@ Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
 (pdftex.def)             Requested size: 469.75502pt x 264.23819pt.
  [6 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Lif
 eCycle.pdf>] [7] [8] [9]
-Overfull \hbox (3.80266pt too wide) in paragraph at lines 147--149
+Overfull \hbox (16.79056pt too wide) in paragraph at lines 147--149
 \OT1/cmr/m/n/10.95 where $\OML/cmm/m/it/10.95 !$ \OT1/cmr/m/n/10.95 de-fines th
 e strength of sta-bi-liz-ing se-lec-tion and $\OML/cmm/m/it/10.95 z[]$ \OT1/cmr
-/m/n/10.95 is an in-di-vid-ual's fit-ness phe-no-type ([]Lande[],
+/m/n/10.95 is an in-di-vid-ual's en-vi-ron-men-tal niche ([]Lande[],
  []
 
-[10] [11]
-Underfull \hbox (badness 10000) in paragraph at lines 198--199
+[10] [11] [12]
+<"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/SimExa
+mple".pdf, id=362, 578.16pt x 180.675pt>
+File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/S
+imExample".pdf Graphic file (type pdf)
+
+<use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Si
+mExample".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
+/SchematicFigures/SimExample".pdf used on input line 185.
+(pdftex.def)             Requested size: 469.75502pt x 146.79807pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 209--210
 []$\OT1/cmr/m/n/10.95 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 02$ for
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 199--200
+Underfull \hbox (badness 10000) in paragraph at lines 210--211
 []$\OT1/cmr/m/n/10.95 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 0004$ for
  []
 
 
-Underfull \hbox (badness 2073) in paragraph at lines 200--201
+Underfull \hbox (badness 2073) in paragraph at lines 211--212
 []$\OT1/cmr/m/n/10.95 5$ for each
  []
 
 
-LaTeX Warning: Float too large for page by 8.70293pt on input line 209.
+LaTeX Warning: Float too large for page by 22.30293pt on input line 220.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 215--215
+Underfull \hbox (badness 10000) in paragraph at lines 226--226
 []\OT1/cmr/m/n/10.95 Habitat gra-di-ent at
  []
 
-(./Main.bbl [12] [13] [14] [15] [16])
+[13 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Sim
+Example.pdf>] [14]
+<"/Users/Topher/Desktop/PaperGraphs/Extinction".pdf, id=379, 578.16pt x 216.81p
+t>
+File: "/Users/Topher/Desktop/PaperGraphs/Extinction".pdf Graphic file (type pdf
+)
+ <use "/Users/Topher/Desktop/PaperGraphs/Extinction".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/PaperGraphs/Extinction".pdf use
+d on input line 248.
+(pdftex.def)             Requested size: 469.75502pt x 176.15768pt.
+ [15]
+<"/Users/Topher/Desktop/PaperGraphs/InitDispVals".pdf, id=388, 578.16pt x 433.6
+2pt>
+File: "/Users/Topher/Desktop/PaperGraphs/InitDispVals".pdf Graphic file (type p
+df)
+ <use "/Users/Topher/Desktop/PaperGraphs/InitDispVals".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/PaperGraphs/InitDispVals".pdf u
+sed on input line 261.
+(pdftex.def)             Requested size: 469.75502pt x 352.31538pt.
 
-Package natbib Warning: There were undefined citations.
+<"/Users/Topher/Desktop/PaperGraphs/InitFitSpace6Panel".pdf, id=389, 578.16pt x
+ 289.08pt>
+File: "/Users/Topher/Desktop/PaperGraphs/InitFitSpace6Panel".pdf Graphic file (
+type pdf)
+ <use "/Users/Topher/Desktop/PaperGraphs/InitFitSpace6Panel".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/PaperGraphs/InitFitSpace6Panel"
+.pdf used on input line 269.
+(pdftex.def)             Requested size: 469.75502pt x 234.8769pt.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 237.
-[17]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 237.
+[16 </Users/Topher/Desktop/PaperGraphs/Extinction.pdf>] [17 </Users/Topher/Desk
+top/PaperGraphs/InitDispVals.pdf>] [18 </Users/Topher/Desktop/PaperGraphs/InitF
+itSpace6Panel.pdf>]
+<"/Users/Topher/Desktop/PaperGraphs/DispEvolHists".pdf, id=425, 578.16pt x 433.
+62pt>
+File: "/Users/Topher/Desktop/PaperGraphs/DispEvolHists".pdf Graphic file (type 
+pdf)
+ <use "/Users/Topher/Desktop/PaperGraphs/DispEvolHists".pdf>
+Package pdftex.def Info: "/Users/Topher/Desktop/PaperGraphs/DispEvolHists".pdf 
+used on input line 282.
+(pdftex.def)             Requested size: 469.75502pt x 352.31538pt.
+ [19] [20 </Users/Topher/Desktop/PaperGraphs/DispEvolHists.pdf>] [21] [22] (./M
+ain.bbl
+[23] [24] [25] [26])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 305.
+ [27]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 305.
  (./Main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 237.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 237.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 305.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 305.
 Package rerunfilecheck Info: File `Main.out' has not changed.
-(rerunfilecheck)             Checksum: AE81FD2A47C5EA6F6EFC51536D5F46C6;1010.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 237.
+(rerunfilecheck)             Checksum: E7C53C1D2F434223D5416D53A10E14BE;1367.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 305.
  ) 
 Here is how much of TeX's memory you used:
- 7566 strings out of 493014
- 110232 string characters out of 6133351
- 218992 words of memory out of 5000000
- 10914 multiletter control sequences out of 15000+600000
+ 7627 strings out of 493014
+ 112062 string characters out of 6133351
+ 218186 words of memory out of 5000000
+ 10947 multiletter control sequences out of 15000+600000
  12166 words of font info for 46 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,13n,28p,2364b,500s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,13n,28p,2372b,510s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -548,10 +589,10 @@ e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/
 6/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2016/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2016/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Main.pdf (17 pages, 312106 bytes).
+Output written on Main.pdf (27 pages, 438738 bytes).
 PDF statistics:
- 430 PDF objects out of 1000 (max. 8388607)
- 382 compressed objects within 4 object streams
- 92 named destinations out of 1000 (max. 500000)
- 131 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 558 PDF objects out of 1000 (max. 8388607)
+ 489 compressed objects within 5 object streams
+ 114 named destinations out of 1000 (max. 500000)
+ 204 words of extra memory for PDF output out of 10000 (max. 10000000)
 

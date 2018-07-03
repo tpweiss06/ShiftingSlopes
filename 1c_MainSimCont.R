@@ -3,11 +3,11 @@
 #    combinations to be explored.
 
 # Set the number of processors and number of simulations to be run
-nProc <- 24*18
-NumSims <- 100
+nProc <- 24*6
+NumSims <- 200
 
 # Set the working directory and load necessary data and libraries
-setwd("~/ShiftingSlopes/StationaryRange/")
+setwd("~/ShiftingSlopes/MainSim/")
 source("~/ShiftingSlopes/SimFunctions.R")
 RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
 library(parallel)
@@ -27,9 +27,9 @@ kern <- "exp"
 EnvGradType <- "K"
 monoecious <- FALSE
 BurnIn <- 2000
-BurnOut <- 0
-LengthShift <- 0
-v <- 0
+BurnOut <- 50
+LengthShift <- 100
+v <- 1
 InitPopSize <- 2500
 FitInit <- 0
 FitDiv <- 0.025
@@ -40,9 +40,9 @@ z <- 0.5
 dmax <- 1000
 rho <- 0.5
 
-AllParams <- vector(mode = "list", length = 9)
+AllParams <- vector(mode = "list", length = 3)
 
-for(i in 1:9){
+for(i in 1:3){
      gamma <- RangeParams$gamma[i]
      lambda <- RangeParams$lambda[i]
      tau <- RangeParams$tau[i]
@@ -87,13 +87,13 @@ for(i in 1:InitPopSize){
 
 # Write a function to be passed to various nodes
 SimFunc <- function(i){
-     setwd(paste("~/ShiftingSlopes/StationaryRange/Params", i, "/", sep = ""))
+     setwd(paste("~/ShiftingSlopes/MainSim/Params", i, "/", sep = ""))
      FullSim(parameters = AllParams[[i]], parallel = TRUE, PopInit = InputMat)
      return(i)
 }
 
 # Create a vector of parameter index values for the parallel computation
-SimVec <- rep(1:9, each = NumSims)
+SimVec <- rep(1:3, each = NumSims)
 
 # Create the cluster and run the simulations
 cl <- makeCluster(nProc - 1, type = "MPI")
