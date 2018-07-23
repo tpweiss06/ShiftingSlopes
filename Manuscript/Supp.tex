@@ -1,0 +1,316 @@
+\documentclass[12pt, oneside]{article}
+\usepackage{geometry}                		
+\geometry{letterpaper}                   		
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{fancybox}
+\usepackage[centertags]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}			
+\usepackage{natbib}				
+\usepackage{fullpage}
+\usepackage{placeins}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{color}
+\usepackage{authblk}
+\usepackage{mathptmx}
+
+\DeclareRobustCommand{\firstsecond}[2]{#1}
+
+\newcommand{\mb}{\mathbf}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\wt}{\widetilde}
+\newcommand{\s}{^{(s)}}
+
+\title{Supplementary materials: Local adaptation and dispersal evolution interact to drive population response to climate change}
+
+\date{}
+
+\author[1]{Christopher Weiss-Lehman}
+\author[1]{Allison K. Shaw}
+
+\affil[1]{Ecology, Evolution, and Behavior, University of Minnesota}
+
+\begin{document}
+\maketitle
+
+\doublespacing
+\linenumbers
+
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+%% Make sure I get the table numbering to also begin with an S like above for the figures. Also, think through the section structure and labeling here.
+\section*{Model overview}
+\subsection*{Purpose} 
+This model tests an evolving population's ability to track a changing climate under a variety of conditions. Specifically, populations are simulated under different combinations of (1) the starkness of the range boundary and (2) the potential for local adaptation. In all simulations, an individual's expected dispersal distance and environmental niche are defined by an explicit set of quantitative diploid loci subject to mutation, thus allowing both traits to evolve over time. All simulations begin with stable climate conditions for $2000$ generations to allow the populations to reach a spatial equilibrium before the onset of climate change. Climate change is then modeled as a constant, directional shift in the location of environmentally suitable habitat (see \textit{Submodels} below). Finally, simulations end with another short period of climate stability to assess the population's ability to persist and recover after shifting its range.
+
+\subsection*{State variables and scales} 
+The model simulates a population of males and females characterized by spatial coordinates for their location and by diploid loci for both their expected dispersal distance and environmental niche. Space is modeled as a lattice of discrete patches overlaying a continuous Cartesian coordinate system with a fixed width along the $y$ axis and without bounds on the $x$ axis. To avoid edge effects along the y axis, the model employs wrapping boundaries such that if an individual disperses out of the landscape on one side, it appears at the opposite end of the same column of the landscape. Patches are defined by the location of the patch center in $x$ and $y$ coordinates and a patch width parameter defining the relationship between continuous Cartesian space and the discrete patches used for population dynamics (\textit{Submodels}). 
+
+The model implements climate change by shifting the location of a population's available habitat along the $x$ axis of the landscape. Available habitat (i.e. a population's potential range) is defined by a center location on the $x$ axis, the severity of the decline in habitat quality at the edge, and the width of the available habitat along the $x$ axis (See Figure~\ref{fig:EnvFunction}). Further, a gradient in environmental conditions is imposed throughout the landscape to allow for local adaptation via matching of an individual's environmental niche to the local environmental conditions (\textit{Submodels}). The severity of this gradient can be altered to change the potential for local adaptation (e.g. a shallower gradient will result in more similar environmental conditions throughout the range and therefore reduce the potential for local adaptation).
+
+\subsection*{Process overview and scheduling} 
+Time is modeled in discrete intervals defining single generations of the population (Fig. S1). Within each generation, individuals first disperse from their natal patches according to their dispersal phenotypes. After dispersal, reproduction occurs according to a stochastic implementation of the classic Ricker model~\citep{ricker1954stock} taking into account the mean fitness of individuals within the patch. Reproduction occurs via random sampling of the local population (with replacement) weighted by individual relative fitness such that individuals with high relative fitness (as determined by the match between their environmental niche and local conditions) are likely to produce multiple offspring while individuals with low relative fitness may not produce any. Individuals inherit one allele from each parent at each loci, assuming independent segregation and a mutation process. After reproduction, all individuals in the current generation perish and the offspring begin the next generation with dispersal, resulting in discrete, non-overlapping generations. See \textit{Submodels} in the online supplemental materials for details. 
+
+\section*{Design concepts}
+\subsection*{Emergence} 
+Emergent phenomena in this model include the spatial equilibrium of population abundances and trait values within the stable range, the demographic dynamics of the shifting population during climate change, and the evolutionary trajectories of both expected dispersal distances and environmental niches during climate change.
+
+\subsection*{Stochasticity} 
+All biological processes in this model are stochastic including realized population growth in each patch, dispersal distances of each individual, and inheritance of loci. Environmental parameters are fixed, however, and the process of climate change (i.e. the movement of environmentally suitable habitat through time) is deterministic. Thus, the model removes the confounding influence of environmental stochasticity to focus on demographic and evolutionary dynamics of range shifts.
+
+\subsection*{Interactions} 
+Individuals in the model interact via mating and density-dependent competition within patches. Other important interactions are the relationship between dispersal evolution and local adaption, particularly in edge populations, and how this relationship impacts a population's ability to avoid extinction and track a changing climate.
+
+\subsection*{Desired output} 
+After each model run, full details of all surviving individuals at the last time point are recorded (spatial coordinates and loci values for both traits). If a population went extinct during the model run, the time of extinction is recorded. For each occupied patch throughout the simulation, we aggregated and reported data on population size, the dispersal trait, and local adaptation to environmental conditions. 
+
+\section*{Details}
+\subsection*{Initialization} 
+The following parameters are set at the beginning of each simulation and form the initial conditions of the model: the mean and variance for allele values of each trait, population size, location of environmentally suitable habitat, number of generations for the pre-, post-, and during climate change periods of the simulation, and all other necessary parameters for the submodels defined below. Simulated populations are initialized in the center of the range and allowed to spread and equilibrate throughout the range during the period of stable climate conditions. This ensures that the populations reacting to a changing climate truly represent the expected spatial distribution for a given range, rather than the initial parameter values used in the simulation. See Tables S1 \& S2 for a full list of parameter values used in the simulations described here.
+
+\subsection*{Submodels}
+\paragraph{Environmentally suitable habitat}
+Environmentally suitable habitat is determined by the population's carrying capacity as it ranges in space ($K_{x}$). The carrying capacity is maximized in the center of the species' range ($K_{max}$) and declines with increasing distance from the center. Specifically, the carrying capacity at a location $x$ is defined as the product of $K_{max}$ and a function $f(x,t)$, where $f(x,t)$ ranges from $1$ in the range center to $0$ far away from the center and is defined as follows 
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{e^{\gamma(x-\beta_{t}+\tau)}}{1+e^{\gamma(x-\beta_{t}+\tau)}} & x \leq \beta_{t} \\
+	\frac{e^{-\gamma(x-\beta_{t}-\tau)}}{1+e^{-\gamma(x-\beta_{t}-\tau)}} & x > \beta_{t}
+\end{cases}
+\end{equation}
+where $\beta_{t}$ defines the center of the area of suitable habitat at time $t$, $\tau$ sets the width of the range, and $\gamma$ affects the slope of the function at the range boundaries (See Figure~\ref{fig:EnvFunction}). To understand the relationship between $\gamma$ and the slope of $f(x,t)$ at the range boundary, the partial derivative of $f(x,t)$ over the spatial dimension can be shown to be
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{\gamma e^{\gamma(x-\beta_{t}+\tau)}}{(1+e^{\gamma(x-\beta_{t}+\tau})^{2}} & x \leq \beta_{t} \\
+	\frac{-\gamma e^{-\gamma(x-\beta_{t}-\tau)}}{(1+e^{-\gamma(x-\beta_{t}-\tau})^{2}} & x > \beta_{t}
+\end{cases}	
+\end{equation}
+yielding a derivative of $\pm\frac{\gamma}{4}$ at the inflection points on either side of the range center ($x=\beta_{t}\pm\tau$).
+
+Population dynamics occur within discrete patches, so to calculate a $K_{x}$ value for a discrete patch from the continuous function $f(x,t)$, we use another parameter defining the spatial scale of each patch ($\eta$; See Figure~\ref{fig:EnvFunction}). The local carrying capacity of a patch centered on $x$ ($K_{x}$) is then calculated as the mean of $f(x,t)$ over the interval of the patch multiplied by $K_{max}$.
+\begin{equation}
+K_{x} = \frac{K_{max}}{\eta}\int_{x-\frac{\eta}{2}}^{x+\frac{\eta}{2}}f(x,t)dx
+\end{equation}
+
+By varying the parameters defining $f(x,t)$, we can change both the total achievable carrying capacity of the population throughout the range (by altering both $\tau$ and $\gamma$) and the slope at which $K_{x}$ declines to $0$ (by altering $\gamma$). Changing the slope affects not only the rate at which $K_{x}$ declines at the range boundaries (our focus), but it also alters the total achievable carrying capacity of the population. To avoid this confounding factor, we fix the total area under the curve $f(x,t)$. The indefinite integral of $f(x,t)$ can be shown to be
+\begin{equation}
+\int_{-\infty}^{\infty}f(x,t)dx = \frac{2ln(e^{\gamma\tau}+1)}{\gamma}
+\end{equation}
+which can be solved for $\tau$. For a given fixed total area under the curve, an appropriate value of $\tau$ can be calculated for each value of $\gamma$.
+
+Thus, $\gamma$ and $\tau$ are both fixed within a given simulation and $\beta_{t}$ (the location of the center of suitable habitat) is used to simulate climate change. During the periods before and after climate change $\beta_{t}$ is constant, but to simulate climate change it varies with time as follows
+\begin{equation}
+\beta_{t}=\nu\eta(t-\hat{t})
+\end{equation}
+where $\nu$ is the velocity of climate change per generation in terms of discrete patches, $\eta$ is the spatial scale of each patch, $t$ is the current generation, and $\hat{t}$ is the last generation of stable climatic conditions before the onset of climate change.
+
+\paragraph{Local adaptation}
+To allow an arbitrary degree of local adaptation within the range, the local environmental conditions determining the phenotypic optima ($z_{opt,x}$) are set as follows
+\begin{equation}
+z_{opt,x}=\lambda(x-\beta_{t})
+\end{equation}
+where $\lambda$ defines the potential for local adaptation with values close to $0$ resulting in little to no change in phenotypic optimum across the range and values of greater magnitude resulting in large differences in phenotypic optima across the range. Individual relative fitness ($w_{i,x}$) values are then calculated according to the following equation assuming stabilizing selection
+\begin{equation}
+w_{i,x}=e^{\frac{-(z_{i}-z_{opt,x})^{2}}{2\omega^{2}}}
+\end{equation}
+where $\omega$ defines the strength of stabilizing selection and $z_{i}$ is an individual's environmental niche~\citep{lande1976natural}. Thus, an individual's realized fitness will be higher the closer its environmental niche ($z_[i]$) is to the local environmental conditions of the patch it occupies ($z_{opt,x}$). All loci are assumed to contribute additively to an individual's environmental niche value with no dominance or epistasis, meaning an individual's phenotype is simply the sum of the individual's allele values.
+
+\paragraph{Population dynamics}
+Population growth within each patch is modeled with a stochastic implementation of the classic Ricker model~\citep{ricker1954stock, melbourne2008extinction}. To account for fitness effects on population growth, expected population growth is scaled by the mean relative fitness of individuals within the patch ($\bar{w_{x}}$). The expected number of new offspring in patch $x$ at time $t+1$ is then given by
+\begin{equation}
+\hat{N}_{t+1,x}=\bar{w_{x}}F_{t,x}\frac{R}{\psi}e^{\frac{-RN_{t,x}}{K_{x}}}
+\end{equation}
+where $F_{t,x}$ is the number of females in patch $x$ at time $t$, $R$ is the intrinsic growth rate for the population, $\psi$ is the expected sex ratio of the population, $N_{t,x}$ is the number of individuals (males and females) in patch $x$ at time $t$, and $K_{x}$ is the local carrying capacity based on the environmental conditions. To incorporate demographic stochasticity, the realized number of offspring for each patch is then drawn from a Poisson distribution.
+\begin{equation}
+N_{t+1,x}\sim Poisson(\hat{N}_{t+1,x})
+\end{equation}
+
+Parentage of the offspring is then assigned by random sampling of the local male and female population (i.e. polygynandrous mating). The sampling is weighted by individual fitness and occurs with replacement so highly fit individuals are likely to have multiple offspring while low fitness individuals may not have any. Each offspring inherits one allele per locus from each parent, assuming no linkage among loci. After reproduction, all members of the previous generation die and the offspring disperse to begin the next generation.
+
+\paragraph{Mutation}
+Inherited alleles are subject to mutation such that some offspring might not inherit identical copies of certain alleles from their parents. The mutation process is defined by two parameters for each trait $T$: the diploid mutation rate ($U^{T}$) and the mutational variance ($V_{m}^{T}$). Using these parameters along with the number of loci defining trait $T$ ($L^{T}$), the per locus probability of a mutation is
+\begin{equation}
+\frac{U^{T}}{2L^{T}}
+\end{equation}
+Mutational effects are drawn from a normal distribution with mean $0$ and a standard deviation of
+\begin{equation}
+\sqrt{V_{m}^{T}U^{T}}
+\end{equation}
+By defining the mutation process in this manner rather than setting a probability of mutation and mutational effect directly, similar mutational dynamics can be imposed regardless of the number of loci used in the simulation.
+
+\paragraph{Dispersal}
+Finally, individuals disperse according to an exponential dispersal kernel defined by each individual's dispersal phenotype. An individual's dispersal phenotype is the expected dispersal distance and is given by
+\begin{equation}
+d_{i} = \frac{D\eta e^{\rho\Sigma L^{D}}}{1+e^{\rho\Sigma L^{D}}} 
+\end{equation}
+where $D$ is the maximum expected dispersal distance in terms of discrete patches, $\eta$ is the spatial scale of discrete patches, $\rho$ is a constant determining the slope of the transition between $0$ and $D$, and the summation is taken across all alleles contributing to dispersal. Thus, as with fitness, loci are assumed to contribute additively with no dominance or epistasis. The expected dispersal distance, $d_{i}$ is then used to draw a realized distance from an exponential dispersal kernel. The direction of dispersal is drawn from a uniform distribution bounded by $0$ and $2\pi$. If a dispersal trajectory takes an individual outside the bounds of the landscape in the $y$ axis, the individual reappears at the same $x$ coordinate but the opposite end of the $y$ axis, thus wrapping the top and bottom edges of the landscape to avoid edge effects. Dispersal occurs from the center of each patch and the individual's new patch is then determined according to its location in the overlaid grid of $\eta$ x $\eta$ patches (see Figure~\ref{fig:EnvFunction}).
+
+\bibliographystyle{ecology}
+\bibliography{supp_bib}
+
+\newpage
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{2cm} | p{8cm} | p{2cm} }
+    \hline
+    Parameter & Description & Value \\ \hline \hline
+    $N_{1}$ & Initial population size (seeded across multiple patches) when beginning the simulations & $2500$ \\
+    $\beta_{1}$ & Center of environmentally suitable habitat before climate change & $0$ \\
+    $\eta$ & Spatial dimensions of habitat patches in continuous space & $50$ \\
+    $y_{max}$ & Number of patches the discrete lattice extends in the $y$ direction & $10$ \\
+    $\hat{t}$ & Last time point of stable climate conditions & $2000$ \\
+    $t_{\Delta}$ & Duration of climate change & $100$ \\
+    $t_{max}$ & Total number of time points in the simulation & $2150$ \\
+    $R$ & Intrinsic growth rate of the population & $2$ \\
+    $K_{max}$ & Maximum achievable carrying capacity in the range & $100$ \\ 
+    $\psi$ & Expected sex ratio in the population & $0.5$ \\
+    $D$ & Maximum achievable dispersal phenotype & $1000$ \\
+    $\rho$ & Determines the slope of the transition in dispersal phenotypes from $0$ to $D$ & $0.5$ \\
+    $\omega$ & Defines the strength of stabilizing selection on fitness traits & $3$ \\
+    $U^{T}$ & Diploid mutation rate for each trait & $0.02$ for each trait \\
+    $V_{m}^{T}$ & Mutational variance for each trait & $0.0004$ for each trait \\
+    $L^{T}$ & Number of diploid loci defining each trait & $5$ for each trait \\
+    $\mu_{1}^{f}$ & Initial mean allele value for the environmental niche trait & $0$ \\
+    $\mu_{1}^{d}$ & Initial mean allele value for the dispersal trait & $-1$ \\
+    $\sigma_{1}^{f}$ & Initial standard deviation of allele values for the environmental niche trait & $0.025$ \\
+    $\sigma_{1}^{d}$ & Initial standard deviation of allele values for the dispersal trait & $1$ \\
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Simulation parameters held constant across all scenarios.}
+\label{table:ConstPars}
+\end{table}
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{4cm} | p{4cm} | p{1.5cm} | p{1.5cm} | p{1.5cm} }
+    \hline
+    Habitat gradient at range edge & Potential for local adaptation & $\gamma$ & $\tau$ & $\lambda$  \\ \hline \hline
+     & None & $0.0025$ & $250$ & $0$ \\
+    Shallow & Low & $0.0025$ & $250$ & $0.004$ \\
+     & High & $0.0025$ & $250$ & $0.008$ \\ \hline
+     & None & $0.025$ & $421.479$ & $0$ \\
+    Moderate & Low & $0.025$ & $421.479$ & $0.004$ \\
+     & High & $0.025$ & $421.479$ & $0.008$ \\ \hline
+     & None & $0.25$ & $421.48$ & $0$ \\
+    Stark & Low & $0.25$ & $421.48$ & $0.004$ \\
+     & High & $0.25$ & $421.48$ & $0.008$ \\ 
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Descriptions and parameter values for the $9$ different experimental scenarios.}
+\label{table:Scenarios}
+\end{table}
+
+\clearpage
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_xt"}
+\vspace{-5mm}
+\caption[LoF entry]{Example of the environmentally suitable habitat available to a population, as defined by $f(x,t)$ in Cartesian space. The parameters of $f(x,t)$ are shown on the figure at significant points along the $x$ axis. The lattice of discrete patches in which population dynamics occur is shown beneath. As described in the \textit{Submodels} section of the supplemental materials, $f(x,t)$ determines the carrying capacity of the discrete $\eta$ x $\eta$ patches. Carrying capacities vary with $f(x,t)$ along the $x$ dimension of the lattice and remain constant within each column along the $y$ dimension. Dispersal is unbounded in the $x$ dimension and implemented with wrapping boundaries in the $y$ dimension.}
+\label{fig:EnvFunction}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/LifeCycle"}
+\vspace{-5mm}
+\caption[LoF entry]{The life cycle of simulated populations is shown divided between events contributing to reproduction and dispersal. Each generation begins with new offspring dispersing according to their phenotype, after which reproduction occurs in local populations defined by the discrete lattice. After reproduction, all parental individuals perish, resulting in discrete, non-overlapping generations.}
+\label{fig:LifeCycle}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowExtinction"}
+\vspace{-5mm}
+\caption[LoF entry]{The cumulative probability of extinction due to climate change in different experimental scenarios under a slow speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) low, and (c) high potential for local adaptation, and in environments characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) gradient at the range edge.}
+\label{fig:ExtProbSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastExtinction"}
+\vspace{-5mm}
+\caption[LoF entry]{The cumulative probability of extinction due to climate change in different experimental scenarios under a fast speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) low, and (c) high potential for local adaptation, and in environments characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) gradient at the range edge.}
+\label{fig:ExtProbFast}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the change in the mean dispersal phenotypes in each patch from the beginning of the period of climate change to the end. Positive values indicate an increase in average dispersal ability in the patch. Each patch was defined by its location relative to the range center ($\beta_{t}$) so changes in dispersal correspond to relative (e.g. leading and trailing edge patches), as opposed to absolute (i.e. fixed spatial coordinates), locations in the range.  For those simulated populations that went extinct during climate change, we calculated the change in dispersal phenotype using the last time point with at least $10$ individuals in the patch as described in the text. The values associated with populations that survived climate change are shown in dark blue. Each histogram represents one of the $9$ experimental scenarios examined here, with potential for local adaptation increasing from none to high from bottom to top and the severity of the gradient at the range edge increasing from gradual to severe from left to right as indicated on the figure. Results are shown for a slow speed of climate change.}
+\label{fig:DispEvolSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the change in the mean dispersal phenotypes in each patch from the beginning of the period of climate change to the end. Positive values indicate an increase in average dispersal ability in the patch. Each patch was defined by its location relative to the range center ($\beta_{t}$) so changes in dispersal correspond to relative (e.g. leading and trailing edge patches), as opposed to absolute (i.e. fixed spatial coordinates), locations in the range.  For those simulated populations that went extinct during climate change, we calculated the change in dispersal phenotype using the last time point with at least $10$ individuals in the patch as described in the text. The values associated with populations that survived climate change are shown in dark blue. Each histogram represents one of the $9$ experimental scenarios examined here, with potential for local adaptation increasing from none to high from bottom to top and the severity of the gradient at the range edge increasing from gradual to severe from left to right as indicated on the figure. Results are shown for a moderate speed of climate change.}
+\label{fig:DispEvolMain}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the change in the mean dispersal phenotypes in each patch from the beginning of the period of climate change to the end. Positive values indicate an increase in average dispersal ability in the patch. Each patch was defined by its location relative to the range center ($\beta_{t}$) so changes in dispersal correspond to relative (e.g. leading and trailing edge patches), as opposed to absolute (i.e. fixed spatial coordinates), locations in the range.  For those simulated populations that went extinct during climate change, we calculated the change in dispersal phenotype using the last time point with at least $10$ individuals in the patch as described in the text. The values associated with populations that survived climate change are shown in dark blue. Each histogram represents one of the $9$ experimental scenarios examined here, with potential for local adaptation increasing from none to high from bottom to top and the severity of the gradient at the range edge increasing from gradual to severe from left to right as indicated on the figure. Results are shown for a fast speed of climate change.}
+\label{fig:DispEvolFast}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the log transformed dispersal phenotypes making up populations after $2000$ generations of stable climate conditions. On each histogram, the values associated with populations surviving climate change are shown in dark blue and the total number of simulated populations to survive climate change is indicated in the top left corner. Each histogram represents one of the $9$ experimental scenarios examined here, denoted by the text and arrows on the figure. Extinct and extant simulations are shown for a slow speed of climate change.}
+\label{fig:InitDispSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the log transformed dispersal phenotypes making up populations after $2000$ generations of stable climate conditions. On each histogram, the values associated with populations surviving climate change are shown in dark blue and the total number of simulated populations to survive climate change is indicated in the top left corner. Each histogram represents one of the $9$ experimental scenarios examined here, denoted by the text and arrows on the figure. Extinct and extant simulations are shown for a moderate speed of climate change.}
+\label{fig:InitDispMain}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Histograms of the log transformed dispersal phenotypes making up populations after $2000$ generations of stable climate conditions. On each histogram, the values associated with populations surviving climate change are shown in dark blue and the total number of simulated populations to survive climate change is indicated in the top left corner. Each histogram represents one of the $9$ experimental scenarios examined here, denoted by the text and arrows on the figure. Extinct and extant simulations are shown for a fast speed of climate change.}
+\label{fig:InitDispFast}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitFitSpace"}
+\vspace{-5mm}
+\caption[LoF entry]{Mean individual fitness along the $x$ dimensions of the landscape after $2000$ generations of stable climate conditions for both extant (those populations that ultimately survived climate change) and extinct populations. Points represent the mean value across simulations and error bars are interquartile ranges. The experimental scenario corresponding to each panel is shown on the graph and simulations with no potential for local adaptation are not shown as, by definition, patch fitness does not vary spatially. Extinct and extant simulations are shown for a slow speed of climate change.}
+\label{fig:InitFitSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitFitSpace"}
+\caption[LoF entry]{Mean individual fitness along the $x$ dimensions of the landscape after $2000$ generations of stable climate conditions for both extant (those populations that ultimately survived climate change) and extinct populations. Points represent the mean value across simulations and error bars are interquartile ranges. The experimental scenario corresponding to each panel is shown on the graph and simulations with no potential for local adaptation are not shown as, by definition, patch fitness does not vary spatially. Extinct and extant simulations are shown for a moderate speed of climate change.}
+\vspace{-5mm}
+\label{fig:InitFit}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitFitSpace"}
+\vspace{-5mm}
+\caption[LoF entry]{Mean individual fitness along the $x$ dimensions of the landscape after $2000$ generations of stable climate conditions for both extant (those populations that ultimately survived climate change) and extinct populations. Points represent the mean value across simulations and error bars are interquartile ranges. The experimental scenario corresponding to each panel is shown on the graph and simulations with no potential for local adaptation are not shown as, by definition, patch fitness does not vary spatially. Extinct and extant simulations are shown for a fast speed of climate change.}
+\label{fig:InitFitFast}
+\end{figure}
+
+\end{document}

@@ -1,0 +1,23 @@
+\begin{thebibliography}{3}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+
+\bibitem[{Lande(1976)}]{lande1976natural}
+Lande, R. 1976.
+\newblock Natural selection and random genetic drift in phenotypic evolution.
+\newblock Evolution, {\bf 30}:314--334.
+
+\bibitem[{Melbourne and Hastings(2008)}]{melbourne2008extinction}
+Melbourne, B.~A. and A.~Hastings. 2008.
+\newblock Extinction risk depends strongly on factors contributing to
+  stochasticity.
+\newblock Nature, {\bf 454}:100.
+
+\bibitem[{Ricker(1954)}]{ricker1954stock}
+Ricker, W.~E. 1954.
+\newblock Stock and recruitment.
+\newblock Journal of the Fisheries Board of Canada, {\bf 11}:559--623.
+
+\end{thebibliography}

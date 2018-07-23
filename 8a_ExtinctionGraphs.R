@@ -45,7 +45,7 @@ for(i in 1:3){
                 col = Col)
           lines(x = 1:100, y = Extinctions[i,3,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
-          text(x = LetterPos[1], y = LetterPos[2], labels = "(a)", cex = TextSize)
+          text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("a")), cex = TextSize)
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)
@@ -59,7 +59,7 @@ for(i in 1:3){
                 col = Col)
           lines(x = 1:100, y = Extinctions[i,6,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
-          text(x = LetterPos[1], y = LetterPos[2], labels = "(b)", cex = TextSize)
+          text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("b")), cex = TextSize)
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)
@@ -75,7 +75,7 @@ for(i in 1:3){
                 col = Col)
           lines(x = 1:100, y = Extinctions[i,9,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
-          text(x = LetterPos[1], y = LetterPos[2], labels = "(c)", cex = TextSize)
+          text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("c")), cex = TextSize)
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)

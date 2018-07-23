@@ -1,47 +1,46 @@
 This is BibTeX, Version 0.99d (TeX Live 2016)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: Main.aux
-The style file: amnatnat.bst
+The style file: ecology.bst
 Database file #1: main_bib.bib
-Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-You've used 38 entries,
-            3251 wiz_defined-function locations,
-            907 strings with 12226 characters,
-and the built_in function-call counts, 24918 in all, are:
-= -- 2071
-> -- 1348
-< -- 15
-+ -- 466
-- -- 414
-* -- 1842
-:= -- 4076
-add.period$ -- 152
-call.type$ -- 38
-change.case$ -- 326
-chr.to.int$ -- 38
-cite$ -- 38
-duplicate$ -- 1727
-empty$ -- 1677
-format.name$ -- 534
-if$ -- 4887
+You've used 30 entries,
+            2710 wiz_defined-function locations,
+            786 strings with 10326 characters,
+and the built_in function-call counts, 16634 in all, are:
+= -- 1555
+> -- 1007
+< -- 12
++ -- 342
+- -- 300
+* -- 1444
+:= -- 3020
+add.period$ -- 120
+call.type$ -- 30
+change.case$ -- 249
+chr.to.int$ -- 30
+cite$ -- 30
+duplicate$ -- 677
+empty$ -- 1067
+format.name$ -- 390
+if$ -- 3233
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 364
-newline$ -- 194
-num.names$ -- 152
-pop$ -- 677
+missing$ -- 30
+newline$ -- 157
+num.names$ -- 120
+pop$ -- 298
 preamble$ -- 1
-purify$ -- 288
+purify$ -- 219
 quote$ -- 0
-skip$ -- 475
+skip$ -- 380
 stack$ -- 0
-substring$ -- 1302
-swap$ -- 795
+substring$ -- 1032
+swap$ -- 81
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 342
+type$ -- 270
 warning$ -- 0
-while$ -- 181
+while$ -- 143
 width$ -- 0
-write$ -- 496
+write$ -- 395
