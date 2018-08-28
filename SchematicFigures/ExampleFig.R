@@ -59,16 +59,19 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      mtext("Abundance", side = 3, line = 0.5, cex = TextSize)
      abline(h = LineSeq[1:8], lty = 1, lwd = LineWidth, col = "white")
      text(x = -0.125, y = LineSeq - 0.05, labels = TimeLabels, cex = TimeSize, xpd = NA)
+     text(x = 0.05, y = LineSeq[9] - 0.05, labels = expression(bold("a")), cex = TextSize, col = "white")
      # Dispersal
      image2D(z = FigMats[2,,], xlab = "", ylab = "", main = "", xaxt = "n", 
              yaxt = "n", NAcol = "black", col = ColFunc(10000))
      mtext("Dispersal", side = 3, line = 0.5, cex = TextSize)
      abline(h = LineSeq[1:8], lty = 1, lwd = LineWidth, col = "white")
      text(x = -0.125, y = LineSeq - 0.05, labels = TimeLabels, cex = TimeSize, xpd = NA)
+     text(x = 0.05, y = LineSeq[9] - 0.05, labels = expression(bold("b")), cex = TextSize, col = "white")
      # Fitness
      image2D(z = FigMats[3,,], xlab = "", ylab = "", main = "", xaxt = "n", 
              yaxt = "n", NAcol = "black", col = ColFunc(10000))
      mtext("Fitness", side = 3, line = 0.5, cex = TextSize)
      abline(h = LineSeq[1:8], lty = 1, lwd = LineWidth, col = "white")
      text(x = -0.125, y = LineSeq - 0.05, labels = TimeLabels, cex = TimeSize, xpd = NA)
+     text(x = 0.05, y = LineSeq[9] - 0.05, labels = expression(bold("c")), cex = TextSize, col = "white")
 dev.off()

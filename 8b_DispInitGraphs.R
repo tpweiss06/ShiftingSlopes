@@ -1,8 +1,16 @@
 # This script will make an appropriate graph of the initial dispersal values
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
 load("SimData/InitDispData.rdata")
-CurSpeed <- 3
+CurSpeed <- 2
 SpeedWords <- c("Slow", "Main", "Fast")
+
+# Calculate the dispersal phenotype corresponding to the current speed of climate
+#    change
+r <- log(2)
+patch_speeds <- c(0.5, 1, 2)
+eta <- 50
+v <- patch_speeds[CurSpeed]*eta
+DispPhen <- sqrt(v^2 / r)
 
 # Sort the disp values into the appropriate lists
 AllSims <- vector(length = 9, mode = "list")
@@ -74,6 +82,8 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
           if(NumExtant[i] > 0){
                hist(ExtantSims[[i]], col = ExtantCol, breaks = HistBreaks, add = TRUE)
           }
+          # Add a vertical line at the dispersal phenotype tracking climate change
+          abline(v = log(DispPhen, base = 10), lty = 2, col = "red", lwd = 2)
           options(scipen = 10)
           axis(1, cex.axis = AxisSize)
           axis(1, at = xticks, labels = FALSE, tcl = -0.25)
