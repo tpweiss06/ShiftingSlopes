@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  5 AUG 2018 13:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  30 AUG 2018 13:31
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -516,13 +516,9 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 76.
 
-[5]
-
-Package hyperref Warning: Suppressing empty link on input line 80.
-
-[6] [7] [8] [9] [10] [11] [12] (./Main.bbl [13] [14] [15]) [16] [17]
+[5] [6] [7] [8] [9] [10] [11] [12] (./Main.bbl [13] [14] [15]) [16] [17]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/SimExa
-mple".pdf, id=228, 578.16pt x 180.675pt>
+mple".pdf, id=231, 578.16pt x 180.675pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/S
 imExample".pdf Graphic file (type pdf)
 
@@ -534,7 +530,7 @@ Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
  [18 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Si
 mExample.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainExtin
-ction".pdf, id=240, 578.16pt x 216.81pt>
+ction".pdf, id=243, 578.16pt x 216.81pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/Main
 Extinction".pdf Graphic file (type pdf)
 
@@ -548,7 +544,7 @@ Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
  </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainExtin
 ction.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/DispCompo
-site".pdf, id=252, 578.16pt x 433.62pt>
+site".pdf, id=255, 578.16pt x 433.62pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/Disp
 Composite".pdf Graphic file (type pdf)
 
@@ -571,25 +567,26 @@ Package rerunfilecheck Info: File `Main.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 152.
  ) 
 Here is how much of TeX's memory you used:
- 7621 strings out of 493014
- 111253 string characters out of 6133351
+ 7626 strings out of 493014
+ 111280 string characters out of 6133351
  205220 words of memory out of 5000000
  10979 multiletter control sequences out of 15000+600000
- 36803 words of font info for 84 fonts, out of 8000000 for 9000
+ 38933 words of font info for 89 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,7n,26p,1896b,485s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,7n,26p,1896b,477s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
 ive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texliv
-e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive
-/2016/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2016/texm
-f-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2016/texmf-dist/fon
-ts/type1/urw/times/utmri8a.pfb>
-Output written on Main.pdf (20 pages, 289151 bytes).
+e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive
+/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/
+2016/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2016/texmf
+-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2016/texmf-dist/font
+s/type1/urw/times/utmri8a.pfb>
+Output written on Main.pdf (20 pages, 297450 bytes).
 PDF statistics:
- 305 PDF objects out of 1000 (max. 8388607)
- 267 compressed objects within 3 object streams
+ 311 PDF objects out of 1000 (max. 8388607)
+ 272 compressed objects within 3 object streams
  63 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

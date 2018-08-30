@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  20 JUL 2018 16:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  30 AUG 2018 13:35
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -542,11 +542,6 @@ Underfull \hbox (badness 1521) in paragraph at lines 179--180
 
 LaTeX Warning: Float too large for page by 49.80109pt on input line 188.
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 194--194
-[]\OT1/ptm/m/n/12 Habitat gra-di-ent at
- []
-
 [10] [11]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_x
 t".pdf, id=108, 505.89pt x 252.945pt>
@@ -734,7 +729,7 @@ dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2016/texmf-dist/fonts/
 type1/urw/times/utmb8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/
 times/utmr8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/times/utmr
 i8a.pfb>
-Output written on Supp.pdf (23 pages, 322928 bytes).
+Output written on Supp.pdf (23 pages, 323684 bytes).
 PDF statistics:
  333 PDF objects out of 1000 (max. 8388607)
  265 compressed objects within 3 object streams

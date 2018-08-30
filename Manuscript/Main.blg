@@ -5,7 +5,7 @@ The style file: ecology.bst
 Database file #1: main_bib.bib
 You've used 30 entries,
             2710 wiz_defined-function locations,
-            786 strings with 10326 characters,
+            784 strings with 10281 characters,
 and the built_in function-call counts, 16634 in all, are:
 = -- 1555
 > -- 1007
