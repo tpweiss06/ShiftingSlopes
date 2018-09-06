@@ -104,7 +104,7 @@ Disperse <- function(traits, width, kern, eta, angles, AngleIndex, rho,
      
      # Next generate the dispersal distances according to the type of kernel
      if(kern == "norm"){
-          sigma <- (d^2 * pi) / 2
+          sigma <- (d * sqrt(pi)) / sqrt(2)
           dists <- abs(rnorm(n = PopSize, mean = 0, sd = sigma))
      } else if(kern == "exp"){
           dists <- rexp(n = PopSize, rate = 1 / d)
