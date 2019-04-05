@@ -1,7 +1,7 @@
 # This script will create the simplified composite graph incorporating dispersal
 #    evolution and initial dispersal
 
-setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
+setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/")
 load("SimData/InitDispData.rdata")
 load("SimData/DispEvolData.rdata")
 CurSpeed <- 2
@@ -41,7 +41,7 @@ FigHeight <- 6
 AllCol <- "lightskyblue"
 ExtantCol <- "navyblue"
 EvolDispAxisLabel <- expression(paste(Delta, bar(d), sep = ""))
-InitDispAxisLabel <- expression(paste("Initial ", italic("log"), "(", italic("d"), ")", sep = ""))
+InitDispAxisLabel <- expression(paste("Equilibrium ", italic("log"), "(", italic("d"), ")", sep = ""))
 EvolHistBreaks <- seq(-375, 475, by = 5)
 InitHistBreaks <- seq(-1.8, 3.4, by = 0.2)
 xEvolRange <- c(-100, 100)

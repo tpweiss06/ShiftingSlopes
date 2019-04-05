@@ -1,5 +1,5 @@
 # This script will create the graphs from the extinction data.
-setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
+setwd("~/Desktop/PostdocResearch/ShiftingSlopesOther/")
 library(RColorBrewer)
 RangeParams <- read.csv("RangeParameters.csv")
 NumSims <- 200
@@ -17,7 +17,7 @@ OuterMar <- c(1,1,0,0)
 TextSize <- 1.15
 LegTextSize <- 1.5
 AxisSize <- 1.25
-LetterPos <- c(2, 0.975)
+LetterPos <- c(2, 0.925)
 FigWidth <- 8
 FigHeight <- 3
 xRange <- c(0,100)
@@ -46,6 +46,7 @@ for(i in 1:3){
           lines(x = 1:100, y = Extinctions[i,3,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
           text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("a")), cex = TextSize)
+          abline(h = 1, lty = 1, col = "grey") #lty = 4
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)
@@ -60,6 +61,7 @@ for(i in 1:3){
           lines(x = 1:100, y = Extinctions[i,6,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
           text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("b")), cex = TextSize)
+          abline(h = 1, lty = 1, col = "grey")
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)
@@ -76,6 +78,7 @@ for(i in 1:3){
           lines(x = 1:100, y = Extinctions[i,9,], lty = GradLineType[3], lwd = LineWidth,
                 col = Col)
           text(x = LetterPos[1], y = LetterPos[2], labels = expression(bold("c")), cex = TextSize)
+          abline(h = 1, lty = 1, col = "grey")
           # Add the axes
           axis(1, at = TimeAxisSeq1, cex.axis = AxisSize)
           axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)

@@ -4,6 +4,7 @@
 
 setwd("~/ShiftingSlopes/MainSim/")
 NumSims <- rep(NA, 9)
+MaxSims <- 200
 
 for(p in 1:9){
      ParamDirectory <- paste("~/ShiftingSlopes/MainSim/Params", p, sep = "")
@@ -21,6 +22,13 @@ for(p in 1:9){
                     system(SysCommand)
                }
           }
+     }
+     TotalSims <- length(list.files(ParamDirectory))
+     while(TotalSims > MaxSims){
+          ParamSims <- list.files(ParamDirectory)
+          SysCommand <- paste("rm -r ", ParamDirectory, "/", ParamSims[1], sep = "")
+          system(SysCommand)
+          TotalSims <- length(list.files(ParamDirectory))
      }
      NumSims[p] <- length(list.files(ParamDirectory))
 }

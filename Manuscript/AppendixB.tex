@@ -1,0 +1,152 @@
+\documentclass[12pt, oneside]{article}
+\usepackage{geometry}                		
+\geometry{letterpaper}                   		
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{fancybox}
+\usepackage[centertags]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}			
+\usepackage{natbib}				
+\usepackage{fullpage}
+\usepackage{placeins}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{color}
+\usepackage{authblk}
+\usepackage{mathptmx}
+
+\DeclareRobustCommand{\firstsecond}[2]{#1}
+
+\newcommand{\mb}{\mathbf}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\wt}{\widetilde}
+\newcommand{\s}{^{(s)}}
+
+\title{Appendix B: Supplementary results for varying speeds of climate change}
+
+\date{}
+
+\author[1]{Christopher Weiss-Lehman}
+\author[1]{Allison K. Shaw}
+
+\affil[1]{Ecology, Evolution, and Behavior, University of Minnesota}
+
+\begin{document}
+\maketitle
+
+\doublespacing
+\linenumbers
+
+\renewcommand{\thefigure}{B\arabic{figure}}
+\renewcommand{\thetable}{B\arabic{table}}
+\renewcommand{\theequation}{B\arabic{equation}}
+
+\section*{Extinction probability}
+As in the main text, we calculated the cumulative probability of extinction for both slow and fast speeds of climate change here. The figures in this section use the same layout and line types as Figure 2 in the main text to allow for direct comparisons.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowExtinction"}
+\vspace{-5mm}
+\caption[LoF entry]{Extinction probabilities for a slow speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) gradual, and (c) rapid change in the niche optimum across space and in ranges characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) range edge.}
+\label{fig:ExtProbSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastExtinction"}
+\vspace{-5mm}
+\caption[LoF entry]{Extinction probabilities for a fast speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) gradual, and (c) rapid change in the niche optimum across space and in ranges characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) range edge.}
+\label{fig:ExtProbFast}
+\end{figure}
+
+\newpage
+
+\section*{Initial fitness throughout the landscape}
+To assess trends in realized fitness values throughout the landscape, we calculated the patch-level mean individual fitness value for each landscape just prior to the onset of climate change. To simplify the figures, we averaged over the $y$ dimension in which environmental conditions do not vary. By separating the results for both extinction populations and those that successfully tracked climate change, we identified a trend in which the edge populations displayed lower fitness in populations that were ultimately successful, particularly in simulations with a gradual environmental gradient at the range edge and the potential for local adaptation. As realized fitness values do not vary spatially in simulations with no potential for local adaptation, the following figures only show results for scenarios with a moderate or high potential for local adaptation.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitFitSpace"}
+\vspace{-5mm}
+\caption[LoF entry]{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a slow speed of climate change.}
+\label{fig:InitFitSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitFitSpace"}
+\caption[LoF entry]{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a moderate speed of climate change.}
+\vspace{-5mm}
+\label{fig:InitFit}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitFitSpace"}
+\vspace{-5mm}
+\caption[LoF entry]{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a fast speed of climate change.}
+\label{fig:InitFitFast}
+\end{figure}
+
+\newpage
+
+\section*{Dispersal evolution}
+Using the same metric of dispersal evolution from the main text (average change in phenotype for each patch), we display here the observed dispersal evolution over the course of climate change for all experimental scenarios. Each histogram in the following figures represents a single experimental scenario as indicated by the figure text. The lower left panel and upper right panel from Figure B7 are the same histograms shown in Figure 3a\&b, but are here placed in the context of all other experimental scenarios.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Observed dispersal evolution in populations responding to a slow speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{fig:DispEvolSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Observed dispersal evolution in populations responding to a moderate speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{fig:DispEvolMain}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastDispEvol"}
+\vspace{-5mm}
+\caption[LoF entry]{Observed dispersal evolution in populations responding to a fast speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{fig:DispEvolFast}
+\end{figure}
+
+\newpage
+
+\section*{Initial dispersal phenotypes}
+Here, we present histograms of the initial distribution of dispersal phenotypes to demonstrate the importance of those phenotypes in determining population success or extinction during climate change. Dispersal phenotypes are log transformed for easier comparison. As with the dispersal evolution section, each histogram represents a single experimental scenario as indicated by the figure text. Similarly, the lower left panel and upper right panel from Figure B10 are the same histograms shown in Figure 3c\&d, but are here placed in the context of all other experimental scenarios. All histograms additionally have a vertical dashed line indicating the dispersal phenotype necessary to produce an expansion wave traveling at exactly the speed of climate change in each simulation. This value serves as a threshold to distinguish individuals from ultimately successful versus extinct populations.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a slow speed of climate change.}
+\label{fig:InitDispSlow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a slow speed of climate change.}
+\label{fig:InitDispMain}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitDispVals"}
+\vspace{-5mm}
+\caption[LoF entry]{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a slow speed of climate change.}
+\label{fig:InitDispFast}
+\end{figure}
+
+\end{document}

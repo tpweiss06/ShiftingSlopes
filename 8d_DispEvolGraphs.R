@@ -5,8 +5,8 @@ SpeedWords <- c("Slow", "Main", "Fast")
 
 # Create objects to hold coordinates for the various arrows to use in the graph
 TopArrow <- array(NA, dim = c(3, 2, 2))
-TopArrow[1,,] <- c(-75, 600, 16000, 16000)
-TopArrow[2,,] <- c(-75, 600, 18000, 18000)
+TopArrow[1,,] <- c(-75, 600, 15000, 15000)
+TopArrow[2,,] <- c(-75, 600, 16000, 16000)
 TopArrow[3,,] <- c(-75, 600, 16000, 16000)
 SideArrow <- array(NA, dim = c(3, 2, 2))
 SideArrow[1,,] <- c(-193, -193, -34000, 10000)
@@ -45,7 +45,7 @@ range(DispEvol[[1]]$DeltaDisp, na.rm = TRUE)
 range(DispEvol[[2]]$DeltaDisp)
 range(DispEvol[[3]]$DeltaDisp, na.rm = TRUE)
 # Set the HistBreaks accordingly...
-HistBreaks <- seq(-375, 475, by = 5)
+HistBreaks <- seq(-500, 500, by = 5)
 
 # Now make the figures
 for(v in 1:3){
@@ -85,20 +85,20 @@ for(v in 1:3){
           mtext("Frequency", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
           
           # Add the adaptation and gradient text
-          mtext("Adaptation potential", side = 2, outer = TRUE, line = AdaptLabLine,
+          mtext("Gradient in niche optimum", side = 2, outer = TRUE, line = AdaptLabLine,
                 cex = TextSize)
-          mtext("None", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+          mtext("Flat", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
                 adj = LowAdj)
-          mtext("Low", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize)
-          mtext("High", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+          mtext("Shallow", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize)
+          mtext("Steep", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
                 adj = HighAdj)
           
-          mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+          mtext("Range edge", side = 3, outer = TRUE, line = GradLabLine,
                 cex = TextSize)
           mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
                 adj = LowAdj)
           mtext("Moderate", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize)
-          mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+          mtext("Stark", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
                 adj = HighAdj)
      dev.off()
 }
@@ -125,9 +125,9 @@ for(v in 1:3){
           SkewIndex <- which((DispEvolResults$param == p) & (DispEvolResults$speed == v) & 
                                 (DispEvolResults$value == "skew"))
           # Calculate the observed values
-          DispEvolResults$Obs[MuIndex] <- mean(ExtantCurData$DeltaDisp)
-          DispEvolResults$Obs[SigmaIndex] <- sd(ExtantCurData$DeltaDisp)
-          DispEvolResults$Obs[SkewIndex] <- skewness(ExtantCurData$DeltaDisp)
+          DispEvolResults$Obs[MuIndex] <- mean(ExtantCurData$DeltaDisp, na.rm = TRUE)
+          DispEvolResults$Obs[SigmaIndex] <- sd(ExtantCurData$DeltaDisp, na.rm = TRUE)
+          DispEvolResults$Obs[SkewIndex] <- skewness(ExtantCurData$DeltaDisp, na.rm = TRUE)
           # Perform the randomization test for significance
           N <- nrow(ExtantCurData)
           Means <- rep(NA, Sims)
@@ -136,9 +136,9 @@ for(v in 1:3){
           for(i in 1:Sims){
                ExtantSeq <- sample(1:nrow(AllCurData), size = N, replace = FALSE)
                ExtantSim <- AllCurData[ExtantSeq,]
-               Means[i] <- mean(ExtantSim$DeltaDisp)
-               Sigmas[i] <- sd(ExtantSim$DeltaDisp)
-               Skews[i] <- skewness(ExtantSim$DeltaDisp)
+               Means[i] <- mean(ExtantSim$DeltaDisp, na.rm = TRUE)
+               Sigmas[i] <- sd(ExtantSim$DeltaDisp, na.rm = TRUE)
+               Skews[i] <- skewness(ExtantSim$DeltaDisp, na.rm = TRUE)
           }
           DispEvolResults$p.value[MuIndex] <- sum(Means >= DispEvolResults$Obs[MuIndex]) / Sims
           DispEvolResults$p.value[SigmaIndex] <- sum(Sigmas <= DispEvolResults$Obs[SigmaIndex]) / Sims

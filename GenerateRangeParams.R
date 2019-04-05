@@ -11,8 +11,9 @@ library(grid)
 library(gridBase)
 library(gridExtra)
 
-# Make a function to calculate the range curve over a given spatial extent
-f_xt <- function(beta, gamma, tau, xVals){
+# First make a function to generate the realized patch carrying capacities throughout
+#    the range based on the range parameters
+K <- function(beta, gamma, tau, xVals, Kmax){
      f <- rep(NA, length(xVals))
      for(i in 1:length(xVals)){
           if(xVals[i] > beta){
@@ -25,7 +26,8 @@ f_xt <- function(beta, gamma, tau, xVals){
                f[i] <- numerator / denominator
           } 
      }
-     return(f)
+     Kseq <- f * Kmax
+     return(Kseq)
 }
 
 # Given a delta and minimum gamma value, calculate the tau value necessary for a
@@ -36,128 +38,129 @@ CalcTauMin <- function(delta, gamma){
      return(TauMin)
 }
 
-# When changing the slope of the range boundary, keep the area of the range
-#    constant and calculate a new tau
-CalcTauNew <- function(gamma, C){
-     numerator <- log( exp( (C*gamma) / 2 ) - 1 )
-     TauNew <- numerator / gamma
+# Calculate a new tau value constrained by maintaining the width of the range
+NewTau <- function(xHat, gamma, fHat){
+     TauNew <- xHat + (1/gamma) * log(fHat/(1-fHat))
      return(TauNew)
 }
 
 # Calculate the total area under a given range curve
-Calc_C <- function(gamma, tau){
+Integral <- function(gamma, tau){
      numerator <- 2 * log( exp(gamma * tau) + 1 )
-     C <- numerator / gamma
-     return(C)
+     Area <- numerator / gamma
+     return(Area)
 }
 
+# Finally, make a function to calculate a new Kmax to keep the total achievable
+#    population size throughout the range constant.
+NewK <- function(gamma, tau, TotalK){
+     Area <- Integral(gamma = gamma, tau = tau)
+     Kmax <- TotalK / Area
+     return(Kmax)
+}
 
-# Now set the values for gamma, delta, eta, and beta
-GammaSeq <- c(0.0025, 0.025, 0.25)
-Delta <- 1e-3
+# Now set the values for gamma, lambda, eta, and beta
+GammaSeq <- c(0.0025, 0.0075, 0.25)
+LambdaSeq <- c(0, 0.004, 0.008)
 Beta <- 0
 Eta <- 50
 
 # Now create a sequence of x values and an object to store the tau values
 xSeq <- seq(-2000, 2000, length.out = 10000) 
 TauSeq <- rep(NA, length(GammaSeq))
+# Set the initial tau value based on previous exploratory trials
+TauSeq[1] <- -240
 
-# Instead of calculating an initial tau according to Delta, I'm going to arbitrarily
-#    pick a value that won't produce a smooth curve and go from there. This will
-#    allow an exploration of a wider range of range edge conditions
-TauSeq[1] <- 250
-C <- Calc_C(gamma = GammaSeq[1], tau = TauSeq[1])
-TauSeq[2] <- CalcTauNew(gamma = GammaSeq[2], C = C)
-TauSeq[3] <- CalcTauNew(gamma = GammaSeq[3], C = C)
+# Now calculate the values for ranges that keep the width constant. First, define
+#    the width of the range as the interval in which f(x,t) is equal or greater than
+#    0.1 (i.e. 10% of the maximum patch carrying capacity). Now use this definition
+#    to find the x values that will correspond to this threshold in all ranges.
+fHat <- 0.1
+xHat <- TauSeq[1] - (1/GammaSeq[1])*log(fHat/(1-fHat))
 
-# Now create a vector for the lambda values to use for local selection
-#LambdaSeq <- c(0, 0.01, 0.02)
-LambdaSeq <- c(0, 0.004, 0.008)
+# Now calculate the rest of the tau values corresponding to this width
+for(i in 2:length(GammaSeq)){
+     TauSeq[i] <- xHat + (1/GammaSeq[i])*log(fHat/(1-fHat))
+}
+
+# Using these tau values, calculate the area under the f(x,t) curves and use that
+#    to calculate the different Kmax values for each scenario
+AreaSeq <- rep(NA, length(GammaSeq))
+for(i in 1:3){
+     AreaSeq[i] <- Integral(gamma = GammaSeq[i], tau = TauSeq[i])
+}
+# Now arbitrarily set the Kmax for the gradual range edge and use this to set the
+#    others. This value is based on previous exploratory trials
+KmaxSeq <- rep(NA, length(GammaSeq))
+KmaxSeq[1] <- 240
+TotalK <- AreaSeq[1] * KmaxSeq[1]
+for(i in 2:length(GammaSeq)){
+     KmaxSeq[i] <- NewK(gamma = GammaSeq[i], tau = TauSeq[i], TotalK = TotalK)
+}
+
+# Use these values to calculate the realized patch carrying capacities
+#    throughout the ranges
+PatchK <- matrix(NA, nrow = length(GammaSeq), ncol = length(xSeq))
+for(i in 1:length(GammaSeq)){
+     PatchK[i,] <- K(beta = Beta, gamma = GammaSeq[i], tau = TauSeq[i], 
+                     xVals = xSeq, Kmax = KmaxSeq[i])
+}
 
 # Now, create a table to store the parameter values in
 RangeParams <- expand.grid(gamma = GammaSeq, lambda = LambdaSeq)
-RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3), eta = rep(Eta, 9))
+RangeParams <- cbind(RangeParams, tau = rep(TauSeq, 3), Kmax = rep(KmaxSeq, 3),
+                     eta = rep(Eta, 9))
 RangeParams
 # Save these parameters for later use and put them in a table grob for plotting
 write.csv(RangeParams, file = "RangeParameters.csv")
 PlotTable <- RangeParams
 PlotTable[,3] <- round(PlotTable[,3], digits = 3)
+PlotTable[,4] <- round(PlotTable[,4], digits = 4)
 PlotTableGrob <- tableGrob(d = PlotTable, cols = NULL)
 
-# Finally, use these values to calculate starting range shapes for each
-#    slope value
+# Finally, calculate the environmental niche values throughout the range
 PatchBounds <- range(xSeq) / Eta
 PatchCenter <- seq(PatchBounds[1], PatchBounds[2])
-
-fseq <- matrix(NA, nrow = length(GammaSeq), ncol = length(xSeq))
 Zopt <- matrix(NA, nrow = length(GammaSeq), ncol = length(PatchCenter))
 for(i in 1:length(GammaSeq)){
-     fseq[i,] <- f_xt(beta = Beta, gamma = GammaSeq[i], tau = TauSeq[i], xVals = xSeq)
      Zopt[i,] <- LambdaSeq[i] * (PatchCenter * Eta - Beta)
 }
 
-# Now plot a visualization of the parameters used
-# First make a layout matrix for the graph
-FigMat <- matrix(NA, nrow = 2, ncol = 6)
-FigMat[1,] <- c(1,1,2,2,3,3)
-FigMat[2,] <- c(4,4,4,5,5,6)
-
-pdf(file = "SchematicFigures/RangeParams.pdf", width = 7, height = 7, onefile = FALSE, paper = "special")
-     par(oma = c(0,2,0,0))
-     layout(mat = FigMat)
-     # Make the f(x) figures
-     for(i in 1:3){
-          plot(x = xSeq, y = fseq[i,], type = "l", col = "black", main = "", xlab = "",
-               ylab = "", xaxt = "n", las = 1, cex.axis = 1.5, ylim = c(0,1))
-          # Add vertical lines in for beta and beta +- tau with labels
-          segments(x0 = Beta, y0 = -1, x1 = Beta, y1 = 1, lty = 2)
-          text(x = 0, y = -0.1, labels = expression(beta["t"]), cex = 1.5, xpd = NA)
-          
-          if(i == 1){
-               mtext("f(x,t)", side = 2, cex = 1.5, line = 3.5)
-               mtext(expression(paste(gamma, " = 0.0025", sep = "")), side = 3,
-                     line = 0, cex = 1.25)
-          } else if(i == 2){
-               mtext("Spatial location (x)", side = 1, cex = 1.5, line = 4)
-               mtext(expression(paste(gamma, " = 0.025", sep = "")), side = 3,
-                     line = 0, cex = 1.25)
-          } else{
-               mtext(expression(paste(gamma, " = 0.25", sep = "")), side = 3,
-                     line = 0, cex = 1.25)
-          }
-     }
+# Now plot a visualization of the range parameters
+pdf(file = "SchematicFigures/RangeParams.pdf", width = 7, height = 4, onefile = FALSE, paper = "special")
+     par(mfrow = c(1,2), oma = c(0, 1, 0, 0), mar = c(5, 4.25, 4, 2.25) + 0.1)
+     # Make the K figure
+     plot(x = xSeq, y = PatchK[1,], type = "l", col = "red", lwd = 1.5, main = "", xlab = "",
+          ylab = "K", xaxt = "n", las = 1, cex.axis = 1.5, ylim = c(0,120), cex.lab = 1.25)
+     lines(x = xSeq, y = PatchK[2,], lwd = 1.5, col = "blue")
+     lines(x = xSeq, y = PatchK[3,], lwd = 1.5, col = "green")
+     abline(v = Beta, lty = 2, lwd = 0.75)
+     text(x = 0, y = -15, labels = expression(beta["t"]), cex = 1.5, xpd = NA)
      
      # Make the Zopt figure
-     PlotBottom <- -50
-     PlotTop <- 50
      plot(x = PatchCenter, y = Zopt[3,], type = "l", col = "black", main = "", xlab = "",
-          ylab = "", xaxt = "n", las = 1, cex.axis = 1.5)
-     mtext(expression("Z"["opt"]), side =2, line = 2.5, cex = 1.5)
+          ylab = expression("Z"["opt"]), xaxt = "n", las = 1, cex.axis = 1.5, cex.lab = 1.25)
      lines(x = PatchCenter, y = Zopt[1,])
      lines(x = PatchCenter, y = Zopt[2,])
-     # Add vertical lines in for beta
-     segments(x0 = Beta, y0 = PlotBottom + 5, x1 = Beta, y1 = PlotTop, lty = 2)
-     text(x = 0, y = PlotBottom - 5, labels = expression(beta["t"]), cex = 1.5)
+     abline(v = Beta, lty = 2, lwd = 0.75)
+     text(x = 0, y = -20, labels = expression(beta["t"]), cex = 1.5, xpd = NA)
      
-     # Add in the lambda values
-     text(x = 3800, y = 45, labels = expression(paste(lambda, " = 0.01", sep = "")), 
-          cex = 1.25, srt = 40)
-     text(x = 4200, y = 27, labels = expression(paste(lambda, " = 0.005", sep = "")), 
-          cex = 1.25, srt = 25)
-     text(x = 3800, y = 5, labels = expression(paste(lambda, " = 0", sep = "")), 
-          cex = 1.25)
-     mtext("Spatial location", side = 1, line = 1, cex = 1)
+     # Now add in the x label for both plots
+     mtext("Spatial location (x)", side = 1, outer = TRUE, cex = 1.5, line = -2)
+     #text(x = range(xSeq)[1] * 2, y = -10, labels = "Spatial location (x)", 
+     #     xpd = NA, cex = 1.25)
      
      # Finally, add the range parameters
      # Use frame() to move on to the next graphing window
-     frame()
-     vps <- baseViewports()
-     pushViewport(vps$inner, vps$figure, vps$plot)
-     grid.draw(PlotTableGrob)
-     text(x = 0.15, y = 1.1, labels = expression(gamma), xpd = NA, cex = 2)
-     text(x = 0.6, y = 1.1, labels = expression(lambda), xpd = NA, cex = 2)
-     text(x = 1.05, y = 1.1, labels = expression(tau), xpd = NA, cex = 2)
-     text(x = 1.5, y = 1.1, labels = expression(eta), xpd = NA, cex = 2)
+     #frame()
+     #vps <- baseViewports()
+     #pushViewport(vps$inner, vps$figure, vps$plot)
+     #grid.draw(PlotTableGrob)
+     #text(x = 0.15, y = 1.1, labels = expression(gamma), xpd = NA, cex = 2)
+     #text(x = 0.6, y = 1.1, labels = expression(lambda), xpd = NA, cex = 2)
+     #text(x = 1.05, y = 1.1, labels = expression(tau), xpd = NA, cex = 2)
+     #text(x = 1.5, y = 1.1, labels = expression("K"["max"]))
+     #text(x = 2, y = 1.1, labels = expression(eta), xpd = NA, cex = 2)
 dev.off()
 
 # Now create a second schematic figure to illustrate the scale of discretization
@@ -166,20 +169,21 @@ pdf(file = "SchematicFigures/Discretization.pdf", width = 7, height = 7, onefile
      par(mfrow = c(3,1), mar = c(3,5,3,2) + 0.1, oma = c(2,0,0,0))
      # Make the f(x) figures
      for(i in 1:3){
-          CenterVals <- f_xt(beta = Beta, gamma = GammaSeq[i], tau = TauSeq[i], xVals = PatchCenter*Eta)
-          ColVals <- ifelse(CenterVals < 0.02, "black", "red")
-          plot(NA, NA, xlim = range(xSeq), ylim = c(0, 1), main = "", xlab = "",
-               ylab = "f(x,t)", las = 1) #xaxt = "n"
-          points(x = PatchCenter*Eta, y = CenterVals, col = ColVals, pch = 16)
+          #CenterVals <- f_xt(beta = Beta, gamma = GammaSeq[i], tau = TauSeq[i], xVals = PatchCenter*Eta)
+          CenterVals <- K(beta = Beta, gamma = GammaSeq[i], tau = TauSeq[i], 
+                          xVals = PatchCenter*Eta, Kmax = KmaxSeq[i])
           
-          legend("topright", bty = "n", legend = c("Viable Patch", "Unviable Patch"),
-                 col = c("red", "black"), pch = 16)
+          plot(NA, NA, xlim = range(xSeq), ylim = c(0, 120), main = "", xlab = "",
+               ylab = "K", las = 1, cex.lab = 1.25) #xaxt = "n"
+          points(x = PatchCenter*Eta, y = CenterVals, col = "black", pch = 16)
+          abline(v = xHat, lty = 2)
+          abline(v = -1*xHat, lty = 2)
           
           if(i == 1){
                mtext(expression(paste(gamma, " = 0.0025", sep = "")), side = 3,
                      line = 0, cex = 1.25)
           } else if(i == 2){
-               mtext(expression(paste(gamma, " = 0.025", sep = "")), side = 3,
+               mtext(expression(paste(gamma, " = 0.0075", sep = "")), side = 3,
                      line = 0, cex = 1.25)
           } else{
                mtext(expression(paste(gamma, " = 0.25", sep = "")), side = 3,

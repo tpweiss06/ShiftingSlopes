@@ -13,7 +13,7 @@ cd ~/ShiftingSlopes/
 
 # Load R and MPI
 module load R/3.4.4
-module load ompi/3.0.0/gnu-7.2.0
+module load ompi/3.0.0/gnu-7.2.0-centos7
 
 export RMPI_TYPE=OPENMPI
 export OMPI_MCA_mpi_warn_on_fork=0

@@ -3,7 +3,7 @@
 #    combinations to be explored.
 
 # Set the number of processors and number of simulations to be run
-nProc <- 24*6
+nProc <- 24*18
 NumSims <- 200
 
 # Set the working directory and load necessary data and libraries
@@ -21,7 +21,6 @@ Vm <- c(0.0004, 0.0004)
 Lf <- 5
 Ld <- 5
 Rmax <- 2
-Kmax <- 100
 width <- 10
 kern <- "exp"
 EnvGradType <- "K"
@@ -40,14 +39,15 @@ z <- 0.5
 dmax <- 1000
 rho <- 0.5
 
-AllParams <- vector(mode = "list", length = 3)
+AllParams <- vector(mode = "list", length = 9)
 
-for(i in 1:3){
+for(i in 1:9){
      gamma <- RangeParams$gamma[i]
      lambda <- RangeParams$lambda[i]
      tau <- RangeParams$tau[i]
      eta <- RangeParams$eta[i]
-     
+     Kmax <- RangeParams$Kmax[i]
+
      AllParams[[i]] <- list(BetaInit, gamma, tau, lambda, omega, U, Vm, Lf, Ld, Rmax,
                         Kmax, width, kern, EnvGradType, monoecious, BurnIn, BurnOut, 
                         LengthShift, v, InitPopSize, FitInit, FitDiv, DispInit,
@@ -93,7 +93,7 @@ SimFunc <- function(i){
 }
 
 # Create a vector of parameter index values for the parallel computation
-SimVec <- rep(1:3, each = NumSims)
+SimVec <- rep(1:9, each = NumSims)
 
 # Create the cluster and run the simulations
 cl <- makeCluster(nProc - 1, type = "MPI")

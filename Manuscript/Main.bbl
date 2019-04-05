@@ -1,4 +1,4 @@
-\begin{thebibliography}{30}
+\begin{thebibliography}{29}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname url\endcsname\relax
   \def\url#1{{\tt #1}}\fi
@@ -44,11 +44,6 @@ Chen, X., X.~Zhang, J.~A. Church, C.~S. Watson, M.~A. King, D.~Monselesan,
   B.~Legresy, and C.~Harig. 2017.
 \newblock The increasing rate of global mean sea-level rise during 1993--2014.
 \newblock Nature Climate Change, {\bf 7}:492.
-
-\bibitem[{Crow and Kimura(1965)}]{crow1965evolution}
-Crow, J.~F. and M.~Kimura. 1965.
-\newblock Evolution in sexual and asexual populations.
-\newblock The American Naturalist, {\bf 99}:439--450.
 
 \bibitem[{Dallas et~al.(2017)Dallas, Decker, and Hastings}]{dallas2017species}
 Dallas, T., R.~R. Decker, and A.~Hastings. 2017.
@@ -146,6 +141,11 @@ Parmesan, C. 2006.
 \newblock Annual Review of Ecology, Evolution, and Systematics, {\bf
   37}:637--669.
 
+\bibitem[{Phillips(2015)}]{phillips2015evolutionary}
+Phillips, B.~L. 2015.
+\newblock Evolutionary processes make invasion speed difficult to predict.
+\newblock Biological Invasions, {\bf 17}:1949--1960.
+
 \bibitem[{Ricker(1954)}]{ricker1954stock}
 Ricker, W.~E. 1954.
 \newblock Stock and recruitment.
@@ -168,11 +168,6 @@ Shine, R., G.~P. Brown, and B.~L. Phillips. 2011.
   rather than through time.
 \newblock Proceedings of the National Academy of Sciences, {\bf
   108}:5708--5711.
-
-\bibitem[{Smith(1968)}]{smith1968evolution}
-Smith, J.~M. 1968.
-\newblock Evolution in sexual and asexual populations.
-\newblock The American Naturalist, {\bf 102}:469--473.
 
 \bibitem[{Sz{\H{u}}cs et~al.(2017)Sz{\H{u}}cs, Vahsen, Melbourne, Hoover,
   Weiss-Lehman, and Hufbauer}]{szHucs2017rapid}

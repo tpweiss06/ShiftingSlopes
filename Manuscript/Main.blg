@@ -3,44 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: Main.aux
 The style file: ecology.bst
 Database file #1: main_bib.bib
-You've used 30 entries,
+You've used 29 entries,
             2710 wiz_defined-function locations,
-            784 strings with 10281 characters,
-and the built_in function-call counts, 16634 in all, are:
-= -- 1555
-> -- 1007
-< -- 12
-+ -- 342
-- -- 300
-* -- 1444
-:= -- 3020
-add.period$ -- 120
-call.type$ -- 30
-change.case$ -- 249
-chr.to.int$ -- 30
-cite$ -- 30
-duplicate$ -- 677
-empty$ -- 1067
-format.name$ -- 390
-if$ -- 3233
+            775 strings with 10221 characters,
+and the built_in function-call counts, 16142 in all, are:
+= -- 1505
+> -- 985
+< -- 11
++ -- 335
+- -- 294
+* -- 1404
+:= -- 2933
+add.period$ -- 116
+call.type$ -- 29
+change.case$ -- 242
+chr.to.int$ -- 29
+cite$ -- 29
+duplicate$ -- 654
+empty$ -- 1033
+format.name$ -- 379
+if$ -- 3136
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 30
-newline$ -- 157
-num.names$ -- 120
-pop$ -- 298
+missing$ -- 29
+newline$ -- 152
+num.names$ -- 116
+pop$ -- 289
 preamble$ -- 1
-purify$ -- 219
+purify$ -- 213
 quote$ -- 0
-skip$ -- 380
+skip$ -- 366
 stack$ -- 0
-substring$ -- 1032
-swap$ -- 81
+substring$ -- 1002
+swap$ -- 77
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 270
+type$ -- 261
 warning$ -- 0
-while$ -- 143
+while$ -- 138
 width$ -- 0
-write$ -- 395
+write$ -- 382

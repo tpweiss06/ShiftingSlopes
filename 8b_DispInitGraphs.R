@@ -1,7 +1,7 @@
 # This script will make an appropriate graph of the initial dispersal values
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
 load("SimData/InitDispData.rdata")
-CurSpeed <- 2
+CurSpeed <- 3
 SpeedWords <- c("Slow", "Main", "Fast")
 
 # Calculate the dispersal phenotype corresponding to the current speed of climate
@@ -55,7 +55,7 @@ ArrowWidth <- 3
 ArrowLength <- 0.25
 FigWidth <- 8
 FigHeight <- 6
-DispAxisLabel <- expression(paste("Initial ", italic("log"), "(", italic("d"), ")", sep = ""))
+DispAxisLabel <- expression(paste("Equilibrium ", italic("log"), "(", italic("d"), ")", sep = ""))
 SimSeq <- c(7,8,9,4,5,6,1,2,3)
 xLabLine <- 2
 yLabLine <- 3
@@ -63,13 +63,13 @@ GradLabLine <- 3.5
 GradSubLine <- 1.5
 AdaptLabLine <- 9
 AdaptSubLine <- 7
-TopArrow <- matrix(c(-0.75, 260000, 17, 260000), nrow = 2, ncol = 2, byrow = TRUE)
-SideArrow <- matrix(c(-5.75, -550000, -5.75, 175000), nrow = 2, ncol = 2, byrow = TRUE)
+TopArrow <- matrix(c(-0.75, 240000, 17, 240000), nrow = 2, ncol = 2, byrow = TRUE)
+SideArrow <- matrix(c(-5, -550000, -5, 175000), nrow = 2, ncol = 2, byrow = TRUE)
 LowAdj <- 0.05
 HighAdj <- 0.95
 AllCol <- "lightskyblue"
 ExtantCol <- "navyblue"
-HistBreaks <- seq(-1.8, 3.4, by = 0.2)
+HistBreaks <- seq(-9.4, 3.4, by = 0.2)
 xticks <- seq(-1, 3, by = 0.2)
 PlotName <- paste("ResultFigures/", SpeedWords[CurSpeed], "InitDispVals.pdf", sep = "")
 pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, paper = "special")
@@ -114,20 +114,21 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      mtext("Frequency", side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
 
      # Add the selection and environmental gradient text
-     mtext("Adaptation potential", side = 2, outer = TRUE, line = AdaptLabLine,
+     mtext("Gradient in niche optimum", side = 2, outer = TRUE, line = AdaptLabLine,
            cex = TextSize)
-     mtext("None", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+     mtext("Flat", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
            adj = LowAdj)
-     mtext("Low", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize)
-     mtext("High", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+     mtext("Shallow", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize)
+     mtext("Steep", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
            adj = HighAdj)
 
-     mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+     mtext("Range edge", side = 3, outer = TRUE, line = GradLabLine,
            cex = TextSize)
      mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
            adj = LowAdj)
      mtext("Moderate", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize)
-     mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+     mtext("Stark", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
            adj = HighAdj)
 dev.off()
-
+# Reset the option for printing integers
+options(scipen = 0)

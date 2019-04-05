@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  5 SEP 2018 20:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  20 SEP 2018 10:16
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -512,68 +512,68 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
  [2] [3] [4]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 76.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 74.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 76.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 74.
 
 [5] [6] [7] [8] [9] [10] [11] [12] (./Main.bbl [13] [14] [15]) [16] [17]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/SimExa
-mple".pdf, id=231, 578.16pt x 180.675pt>
+mple".pdf, id=235, 578.16pt x 180.675pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/S
 imExample".pdf Graphic file (type pdf)
 
 <use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Si
 mExample".pdf>
 Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
-/SchematicFigures/SimExample".pdf used on input line 127.
+/SchematicFigures/SimExample".pdf used on input line 125.
 (pdftex.def)             Requested size: 469.75502pt x 146.79807pt.
  [18 </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/Si
 mExample.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainExtin
-ction".pdf, id=243, 578.16pt x 216.81pt>
+ction".pdf, id=246, 578.16pt x 216.81pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/Main
 Extinction".pdf Graphic file (type pdf)
 
 <use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainE
 xtinction".pdf>
 Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
-/ResultFigures/MainExtinction".pdf used on input line 137.
+/ResultFigures/MainExtinction".pdf used on input line 135.
 (pdftex.def)             Requested size: 469.75502pt x 176.15768pt.
  [19
 
  </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainExtin
 ction.pdf>]
 <"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/DispCompo
-site".pdf, id=255, 578.16pt x 433.62pt>
+site".pdf, id=258, 578.16pt x 433.62pt>
 File: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/Disp
 Composite".pdf Graphic file (type pdf)
 
 <use "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/DispC
 omposite".pdf>
 Package pdftex.def Info: "/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther
-/ResultFigures/DispComposite".pdf used on input line 147.
+/ResultFigures/DispComposite".pdf used on input line 145.
 (pdftex.def)             Requested size: 469.75502pt x 352.31538pt.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 152.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 150.
  [20
 
  </Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/DispCompo
 site.pdf>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 152.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 150.
  (./Main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 152.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 152.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 150.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 150.
 Package rerunfilecheck Info: File `Main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 152.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 150.
  ) 
 Here is how much of TeX's memory you used:
- 7626 strings out of 493014
- 111280 string characters out of 6133351
- 206220 words of memory out of 5000000
- 10979 multiletter control sequences out of 15000+600000
- 38933 words of font info for 89 fonts, out of 8000000 for 9000
+ 7619 strings out of 493014
+ 111190 string characters out of 6133351
+ 205188 words of memory out of 5000000
+ 10976 multiletter control sequences out of 15000+600000
+ 37225 words of font info for 86 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,7n,26p,1896b,477s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,7n,26p,1858b,477s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
@@ -583,10 +583,10 @@ e/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive
 2016/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2016/texmf
 -dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2016/texmf-dist/font
 s/type1/urw/times/utmri8a.pfb>
-Output written on Main.pdf (20 pages, 297433 bytes).
+Output written on Main.pdf (20 pages, 297139 bytes).
 PDF statistics:
- 311 PDF objects out of 1000 (max. 8388607)
- 272 compressed objects within 3 object streams
- 63 named destinations out of 1000 (max. 500000)
+ 314 PDF objects out of 1000 (max. 8388607)
+ 275 compressed objects within 3 object streams
+ 62 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,0 +1,525 @@
+\documentclass[11pt]{article}
+\usepackage[sc]{mathpazo} %Like Palatino with extensive math support
+\usepackage{fullpage}
+\usepackage[authoryear,sectionbib,sort]{natbib}
+\linespread{1.7}
+\usepackage[utf8]{inputenc}
+\usepackage{lineno}
+\usepackage{titlesec}
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{\thesection}{1em}{}
+\titleformat{\subsection}[block]{\Large\itshape\filcenter}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}[block]{\large\itshape}{\thesubsubsection}{1em}{}
+\titleformat{\paragraph}[runin]{\itshape}{\theparagraph}{1em}{}[. ]\renewcommand{\refname}{Literature Cited}
+
+\usepackage{mathptmx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage[centertags]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{fancybox}
+\usepackage{graphicx}
+\usepackage{graphics}
+\newcommand{\s}{^{(s)}}
+
+%%%%%%%%%%%%%%%%%%%%%
+% Line numbering
+%%%%%%%%%%%%%%%%%%%%%
+\usepackage{lineno}
+% Please use line numbering with your initial submission and
+% subsequent revisions. After acceptance, please turn line numbering
+% off by adding percent signs to the lines %\usepackage{lineno} and
+% to %\linenumbers{} and %\modulolinenumbers[3] below.
+
+\title{Spatial population structure determines extinction risk in climate-induced range shifts}
+
+% This version of the LaTeX template was last updated on
+% January 11, 2018.
+
+%%%%%%%%%%%%%%%%%%%%%
+% Authorship
+%%%%%%%%%%%%%%%%%%%%%
+% Please remove authorship information while your paper is under review,
+% unless you wish to waive your anonymity under double-blind review. You
+% will need to add this information back in to your final files after
+% acceptance.
+
+%\author{Owen E. Cook$^{1,\ast}$ \\ 
+%Generic H. Collaborator$^{2,\dag}$ \\ 
+%Additional Q. Expert$^{3}$}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%\noindent{} 1. University of Chicago, Chicago, Illinois 60637;
+
+%\noindent{} 2. University of Toronto, Toronto, Ontario M5S 1A5, Canada;
+
+%\noindent{} 3. Middle Eastern Technical University, Çankaya, Ankara 06800, Turkey.
+
+%\noindent{} $\ast$ Corresponding author; e-mail: amnat@uchicago.edu.
+
+%\noindent{} $\dag$ Deceased.
+
+\bigskip
+
+\textit{Manuscript elements}: Figure~1, figure~2, figure~3, online appendices~A and B (including figures~A1\&A2,  tables~A1\&A2, and figures~B1-B11). Figure~1 and figure~3 are to print in color.
+
+\bigskip
+
+\textit{Keywords}: range shifts, eco-evolutionary dynamics, local adaptation, individual-based model
+
+\bigskip
+
+\textit{Manuscript type}: Article. %Or e-article, note, e-note, natural history miscellany, e-natural history miscellany, comment, reply, invited symposium, or countdown to 150.
+
+\bigskip
+
+\noindent{\footnotesize Prepared using the suggested \LaTeX{} template for \textit{Am.\ Nat.}}
+
+\linenumbers{}
+\modulolinenumbers[3]
+
+\newpage{}
+
+\section*{Abstract}
+Climate change is an increasingly severe threat facing populations around the globe, necessitating a robust understanding of the ecological and evolutionary mechanisms dictating population responses. Population dynamics of range shifts, among the most commonly observed responses to climate change, can be influenced by many factors, including evolution of key traits, the degree of local adaptation, and the nature of the range edge. Here, we use an individual-based model to explore the interacting roles of these factors in the dynamics of climate-induced range shifts. We show that aspects of the spatial population structure within the initial range, in particular the potential for local adaptation, severely increased a population's extinction risk. Further, and contrary to expectations, we show that evolution of heightened dispersal during range shifts was unable to rescue faltering populations. Rather, a population's fate during climate change was determined by the composition of dispersal phenotypes that evolved within the initial range; only populations consisting of highly dispersive individuals prior to the onset of climate change survived. Our results demonstrate that dispersal evolution alone may be insufficient to save a range shifting population and that initial spatial population structure plays a pivotal role in determining the outcome of climate-induced range shifts.
+
+\newpage{}
+
+\section*{Introduction}
+Climate change is expected to dramatically reshape global biogeographic patterns as some species shift their ranges to track changing environmental conditions~\citep{gonzalez2010global}. These range shifts are generally predicted to proceed upwards in latitude, elevation, or both as average global temperatures continue to rise~\citep{loarie2009velocity}. Indeed, contemporary range shifts have already been observed in a wide variety of taxa, ranging from algae to mammals~\citep{chen2011rapid, parmesan2006ecological}. Such range shifts present significant challenges to current and future conservation efforts as they can result in the extinction of populations failing to track a changing climate~\citep{parmesan2006ecological} as well as the creation of novel species assemblages~\citep{hobbs2009novel}. Understanding the ecological and evolutionary dynamics of such climate-induced range shifts will play a key role in informing current and future conservation work.
+
+Large-scale population movements have been studied for decades in the context of range expansions (e.g. of invasive or reintroduced species), leading to a robust understanding of both the ecological~\citep{hastings2005spatial} and evolutionary~\citep{shine2011evolutionary, excoffier2009genetic} mechanisms shaping such expansions. For example, while the speed of a range expansion can be well approximated by a combination of the species' intrinsic growth rate and dispersal ability~\citep{hastings2005spatial}, recent research demonstrates that evolution in both of these traits can increase both the mean and variance of expansion speed through time~\citep{weiss2017rapid, ochocki2017rapid, szHucs2017rapid, shaw2015dispersal, phillips2015evolutionary}. As fundamentally similar spatial processes, it is likely that range shifts will also be subject to these ecological and evolutionary mechanisms known to drive range expansions. However, range shifts involve several additional complications absent from range expansions, which must be considered when predicting the dynamics of a shifting population. In particular, range shifts occur in populations with far more complex spatial structure compared to most range expansions, which typically begin from the successful establishment and spread of a small, founding population~\citep{hastings2005spatial}. While these founding populations often lack any significant spatial structure, populations undergoing range shifts are characterized by a spatial population structure formed by aspects of the previously stable ranges. For example, population ranges can vary in their potential for local adaptation throughout the range, the nature of the range edge, and the spatial distribution of key traits. 
+
+Each of these factors relating to spatial population structure has the potential to affect the dynamics of range shifts under changing climatic conditions. For example, the underlying mechanism responsible for the gradient in population size from the range core to the edge (i.e. declines in carrying capacity versus growth rate) alters a population's extinction risk during climate driven range shifts~\citep{henry2013eco}. Additionally, the potential for local adaptation throughout a range has been related to extinction risk during range shifts. Specifically, a low potential for local adaptation can decrease a population's ability to track a changing climate if dispersal occurs in a stepping stone manner, allowing some individuals to block the establishment of better adapted genotypes~\citep{atkins2010local}. While these aspects of spatial population structure have been shown to impact the dynamics of climate-induced range shifts in isolation, it is unclear how and if they might interact. 
+
+Further, given the importance of rapid trait evolution in range expansions~\citep{weiss2017rapid, ochocki2017rapid, szHucs2017rapid, shaw2015dispersal, phillips2015evolutionary}, it is necessary to consider the interplay between aspects of spatial population structure and the role of rapid evolution during range shifts. In asexual species, for example, local adaptation has been shown to interact with dispersal evolution during climate change, driving increased dispersal probability as genotypes shift to keep pace with their environmental optimum~\citep{hargreaves2015fitness}. However, it is unclear how these two processes might interact in a sexually reproducing species in which dispersal and local adaptation are directly linked via gene flow. Under sexual reproduction, evolution of increased dispersal could simultaneously reduce local adaptation within a population due to increased gene flow throughout the range. In fact, long-distance pollen dispersal in flowering plants has been shown to restrict local adaptation and, when pollen dispersal sufficiently outpaces seed dispersal, to lead to ecological niche shifts, rather than spatial range shifts, in response to simulated climate change~\citep{aguilee2016pollen}. In addition to potential interactions between local adaptation and dispersal evolution, the nature of the range edge could influence the potential for rapid trait evolution during range shifts. For example, the severity of the environmental gradient forming the range edge has been shown to alter the spatial distribution of dispersal phenotypes throughout the range~\citep{henry2013eco, hargreaves2014evolution}, thus altering the diversity of dispersal genotypes present for subsequent evolution during range shifts.
+
+Here, we assess the interaction of multiple aspects of spatial population structure with trait evolution in sexually reproducing populations undergoing climate-induced range shifts. We develop an individual-based model capable of incorporating a wide variety of spatial population structures in which males and females are defined by two genetically determined traits, thus allowing for both evolutionary and ecological responses to climate change. One trait determines dispersal ability while the second defines an individual's environmental niche. Using this model, we vary both the potential for local adaptation within the range and the nature of the range edge to ascertain how they interact with each other and with the process of trait evolution to impact a population's ability to track a changing climate. By contrasting the dynamics of extant and extinct populations, we isolate the factors most strongly contributing to extinction risk during climate change.
+
+\section*{Methods}
+A full description of the individual-based model using the Overview, Design concepts, and Details protocol~\citep{grimm2010odd} is available in Appendix A, while we present a brief summary here. Population dynamics occurred within discrete habitat patches embedded in a two dimensional lattice in which environmental conditions varied along the $x$ dimension but remained constant along the $y$ dimension (Fig. A1). Landscapes were unbounded in the $x$ dimension but defined by a fixed width in the $y$ dimension. Thus, the $x$ dimension defined the environmental context of the population and the $y$ dimension allowed for variation in population dynamics under identical environmental conditions. To simulate climate change, environmental conditions shifted at a constant rate along the $x$ dimension. Generations were non-overlapping and consisted of discrete dispersal and reproduction phases (Fig. A2).
+
+Individuals were characterized by two traits (dispersal and an environmental niche), both defined by a set of $5$ quantitative diploid loci. While the number of loci was arbitrary, $5$ was chosen as a compromise between computational restrictions and the likely polygenic nature of such complex traits. The dispersal trait defined an individual's expected dispersal distance, assuming an exponential dispersal kernel. An individual's environmental niche value allowed for local adaptation; the closer the niche value to the environmental optimum of the individual's patch, the higher the individual's realized fitness. The environmental optimum of individual patches could then be systematically varied across the range to allow for different degrees of local adaptation (i.e. larger changes in environmental optima allowed for greater local adaptation of the population). In addition to the potential for local adaptation, simulated ranges were characterized by a decline in patch carrying capacity from the range center to the edge, the severity of which could be adjusted without altering the total carrying capacity of the landscape (see Appendix A). Reproduction within each patch occurred via a stochastic implementation of the classic Ricker model~\citep{ricker1954stock, melbourne2008extinction}. Parental pairs formed via random sampling of the local population (with replacement) weighted by individual fitness. Allele inheritance was subject to mutation and assumed no linkages among loci.
+
+To determine the effect of spatial population structure on the eco-evolutionary dynamics of range shifts, we varied parameter combinations to explore the interacting roles of local adaptation and the severity of the gradient in environmentally suitable habitat at the range edge (Table A1 and A2). Specifically, we considered a factorial combination of three experimental factors: (1) no, low, and high potential for local adaptation, (2) shallow, moderate, and stark gradients in suitable habitat at the range edge, and (3) slow, moderate, and fast speeds of climate change. This yielded a total of $27$ different scenarios, each explored with $200$ simulations. Each simulation ran for $2150$ generations with stable climate conditions for the first $2000$, followed by $100$ generations of climate change and a final $50$ generations of stable conditions. Figure 1 shows an example of a single population responding to a moderate speed of climate change. For each scenario, we evaluated the role of dispersal evolution and initial spatial population structure in driving the dynamics of the range shifting populations. We primarily discuss simulations using a moderate speed of climate change in the main text, but present the results for slow and fast speeds of climate change in Appendix B.
+
+We calculated dispersal evolution in each patch throughout the landscape as the change in mean dispersal phenotype from the beginning of the period of climate change to the end. For this analysis, we defined individual patches by their relative location within the range rather than with their fixed spatial coordinates (e.g. leading edge vs. core populations). Due to local extinctions, not all patches were occupied at the end of the period of climate change. To quantify dispersal evolution in these patches, we used data from the last generation in which the population had at least $10$ individuals. Changes in mean dispersal phenotype were calculated by subtracting the initial mean dispersal phenotype from the value at the end of climate change (or at the last generation of at least $10$ individuals occupying the patch in the case of population extinctions); positive values indicate an increase in the mean dispersal phenotype. All simulations and data processing were performed in R version $3.4.4$~\citep{team2000r} and the code is available at (links are available from the journal office).
+
+\section*{Results}
+In all scenarios, some populations shifted their ranges in response to climate change. However the proportion of extinct populations that failed to track the changing climate depended on the initial spatial population structure. Populations defined by a higher potential for local adaptation and by stark habitat gradients at the range edge experienced the greatest probability of extinction due to climate change (quantified by the proportion of simulated populations to go extinct through time; Fig. 2). While both aspects of a population's range influenced extinction probabilities, the potential for local adaptation drove more dramatic changes to extinction risk, with greater changes in environmental optima across the landscape causing severe increases in the probability of extinction during climate change. We varied both parameters widely (the potential for local adaptation doubled from the low to high scenario and the parameter defining the severity of the environmental gradient was increased by a factor of 100 from shallow to stark gradients; Table A2), suggesting that potential for local adaptation may be the stronger driver of extinction risk during climate-induced range shifts across a wide region of parameter space and corresponding biological scenarios. Additionally, as expected, the pace of climate change also influenced extinction probabilities with faster climate change corresponding to greater extinction risk (Fig. B1 \& B2). However, this effect was independent of the roles of local adaptation and the habitat gradient at the range edge in determining the extinction probability during a range shift.
+
+Counterintuitively, populations that survived climate change tended to be characterized by reduced fitness at the range margins prior to the onset of climate change compared to populations that went extinct (Fig. B3-B5). Essentially, populations with initially higher degrees of local adaptation at the range edges, and thus greater fitness, were more likely to go extinct during climate change. This pattern was most evident in the simulations with either (1) a gradual environmental gradient at the range edge or (2) a high potential for local adaptation. As expected, there was no spatial variation in fitness for populations with no potential for local adaptation. 
+
+Dispersal evolution is predicted to play a key role in aiding populations as they shift to track a changing climate. While some, individual simulations confirmed these expectations with average dispersal phenotypes increasing through time (e.g. Fig. 1), examining all simulations from each experimental scenario revealed no differences in the magnitude or direction of dispersal evolution between successful and extinct populations (Fig. 3a\&b). Populations in all parameter combinations experienced both increases and decreases in average dispersal phenotypes, with all distributions of observed changes in dispersal phenotypes centered on $0$ (Fig. B3-B5). The similarity in evolved changes in dispersal between surviving and extinct populations suggests that dispersal evolution alone cannot explain which populations successfully tracked moving conditions and which became extinct.
+
+Instead, the initial distribution of dispersal phenotypes prior to the onset of climate change played a key role in determining a population's fate. A range of dispersal phenotypes evolved in populations over the $2000$ generations of stable climatic conditions in response to the potential for local adaptation and the severity of the habitat gradient at the range edge (Fig. B9-B11). Populations that survived climate change were composed primarily of individuals with heightened dispersal phenotypes (Fig. 3c\&d). In fact, comparing the full distribution of initial dispersal phenotypes present in a given experimental scenario to the distribution of phenotypes from surviving populations revealed a threshold value delineating individuals from surviving versus extinct populations. Comparison of the different experimental scenarios revealed this threshold to be constant for a given speed of climate change (Fig. B9-B11). To explain this phenomenon, we used the well-known approximation for the speed of an expanding population, $2\sqrt{rD}$~\citep{hastings2005spatial}, in which $r$ is the intrinsic growth rate and $D$ is the diffusion coefficient, to calculate the dispersal phenotype necessary to produce an expansion wave exactly matching the speed of climate change used in our simulations (see the model description in Appendix A). This dispersal phenotype matched the observed threshold value distinguishing surviving from extinction populations in all experimental scenarios (Figures B9-B11, vertical dashed line). Thus, surviving populations in each scenario happened to be the lucky few already composed primarily of individuals with dispersal phenotypes capable of spreading at the pace of climate change, rather than populations in which heightened dispersal evolved over time in response to climate change.
+
+\section*{Discussion}
+Range shifts due to climate change represent a global threat to biodiversity and much recent research has focused on exploring the underlying ecological and evolutionary dynamics of such range shifts to inform conservation efforts. We developed an individual-based model to explore the eco-evolutionary dynamics of climate-induced range shifts in sexually reproducing, diploid populations with both dispersal and environmental niche traits defined by multiple loci. In contrast, previous models have focused on a subset of these factors: ecological dynamics (e.g.~\citep{brooker2007modelling}), evolution in a single trait only (e.g.~\citep{atkins2010local, henry2013eco}), and relatively simple genetic scenarios (e.g. single-locus haploid genetics in asexual populations~\citep{boeye2013more, hargreaves2015fitness}).  Here, we tested the generality of previous results and the interplay of eco-evolutionary dynamics under increased levels of biological complexity. Specifically, we demonstrated the role of spatial population structure, in the form of local adaptation and the environmental gradient defining the range edge, in determining extinction risk for range shifting populations via impacts on the initial distribution of dispersal phenotypes and environmental niche values.
+
+Our results suggest that populations most likely to keep pace with climate change will be those with little to no local adaptation within the pre-expansion, stable range and in locations with shallow environmental gradients defining the range edge (Fig. 2). A survey of the scientific literature found evidence for local adaption in approximately $71\%$ of studies, suggesting a high prevalence of local adaptation in natural populations~\citep{hereford2009quantitative}. Further, a recent meta-analysis of $1400$ bird, mammal, fish, and tree species found no evidence for consistent declines in abundance towards range edges~\citep{dallas2017species}, suggesting many species exhibit similar abundances at the edge and center of their ranges similar to the stark environmental gradients imposed in our study. While some of these patterns could represent a publication bias, for example against negative results in studies of local adaptation, combined with our results they suggest many species will face elevated extinction risks in climate-induced range shifts due to the spatial population structure of their initial ranges.
+
+Our results emphasize the importance of the initial distribution of dispersal phenotypes composing the stable range in determining a population's extinction risk during climate change (Fig. 3c\&d). Survival in the face of climate change was primarily determined by the dispersal phenotypes making up the population, specifically whether the population included individuals with dispersal phenotypes at or above a threshold value. Importantly, the threshold necessary to survive climate change itself was constant across all parameter combinations for a given speed of climate change (Fig. B9-B11). Scenarios with no potential for local adaptation and gradual environmental gradients had larger proportions of high dispersal phenotypes under stable climate conditions, and therefore a lower probability of extinction during climate change. A high potential for local adaptation, in contrast, selected against such high dispersal phenotypes due to dispersal's homogenizing effect on population genetic structure~\citep{lenormand2002gene}. Similarly, a more severe habitat gradient at the range edge increased the risk of dispersing beyond the boundary of suitable habitat, resulting in selection against heightened dispersal~\citep{shaw2014population}. Thus, attributes defining the spatial structure of the range altered the distribution of dispersal phenotypes under stable climate conditions, subsequently determining the extinction risk of populations during climate change. Importantly, dispersal evolution during climate change was unable to counter the influence of initial spatial population structure on extinction dynamics.
+
+While high dispersal phenotypes prior to climate change increased the probability that populations tracked changing conditions, it had the additional effect of reducing average fitness at the range edges when populations had a moderate to high potential for local adaptation (Fig. B3-B5). In the model, populations at the range edges tended to have lower abundance than populations in the range core, increasing their susceptibility to gene flow from the core~\citep{lenormand2002gene}. Thus, in populations with high dispersal phenotypes prior to climate change, increased gene flow from the core likely reduced fitness at the range edge by preventing adaptation to local conditions. As a result, the populations most likely to survive climate change were, counterintuitively, also those characterized by lower fitness at the range edges prior to the onset of climate change. While not all populations are characterized by small populations at the range edges~\citep{dallas2017species}, our results suggest that populations exhibiting high levels of local adaptation within their stable range are likely to be at greater risk of extinction during periods of climate change.
+
+Previous research has suggested that evolution of increased dispersal ability during climate change may be a key mechanism in rescuing populations that would otherwise be unable to keep pace with shifting environmental conditions~\citep{boeye2013more}. Our results suggest this is not always the case, and in fact may only be possible under certain, relatively narrow conditions. Previous models showing that dispersal evolution may rescue populations during climate change have typically used relatively simple genetic frameworks to model dispersal, including haploid genetics with a single-locus defining dispersal~\citep{boeye2013more, hargreaves2015fitness}. As dispersal evolution during range expansions and shifts occurs via the spatial sorting of alleles contributing to heightened dispersal at the range edge~\citep{shine2011evolutionary}, such simplified genetic frameworks may allow more efficient sorting of such alleles compared to situations with more complex genetic structure underlying the dispersal trait. The negligible role played by dispersal evolution in our model (Fig. 3a\&b) suggests that when such simplifying assumptions are relaxed, the potential for population rescue via evolution of heightened dispersal is greatly reduced, thus increasing the role of the initial spatial population structure within the range in determining a population's fate under climate change.
+
+\section*{Conclusion}
+As climate change continues to threaten populations, communities, and ecosystems~\citep{chen2011rapid, hobbs2009novel, gonzalez2010global}, it is increasingly important to understand population responses to changing environmental conditions. In particular, a deeper, process-based understanding of extinction risk in populations undergoing range shifts will, in turn, allow more focused conservation interventions. Our results suggest that the initial spatial population structure, as determined by local adaptation and the environmental gradient at the range edge, has the potential to dramatically alter the extinction probability faced by species responding to climate change. Further, in contrast to other studies assuming more simplified genetic structures, we find very little role for the evolution of heightened dispersal abilities in allowing a population to successfully track climate change. Future work should continue to examine the interplay between initial conditions in range shifts and the potential for evolutionary rescue. As climate change continues to accelerate~\citep{chen2017increasing}, it is imperative to not only identify those factors leading to increased extinction risk in range shifting populations, but also to develop meaningful conservation strategies to mitigate such risk.
+
+%%%%%%%%%%%%%%%%%%%%%
+% Acknowledgments
+%%%%%%%%%%%%%%%%%%%%%
+% You may wish to remove the Acknowledgments section while your paper 
+% is under review (unless you wish to waive your anonymity under
+% double-blind review) if the Acknowledgments reveal your identity.
+% If you remove this section, you will need to add it back in to your
+% final files after acceptance.
+
+%\section*{Acknowledgments}
+
+\newpage{}
+
+\section*{Appendix A: Full model description}
+
+% Please reset counters for the appendix (thus normally figure A1, 
+% figure A2, table A1, etc.).
+
+% In certain cases, it may be appropriate to have a PRINT appendix in
+% addition to (or instead of) an online appendix. In this case, please 
+% name the print appendix Appendix A, and any subsequent appendixes (if 
+% there are any) should be named Online Appendix B, Online Appendix C,
+% etc.
+
+% Counters for each appendix should match the letter of that appendix.
+% For example, tables in Appendix C should be numbered table C1, table C2,
+% etc. This applies to tables, equations, and figures.
+
+% It's better not to use the \appendix command, because we have some
+% formatting peculiarities that \appendix conflicts with.
+
+\renewcommand{\theequation}{A\arabic{equation}}
+% redefine the command that creates the equation number.
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{equation}{0}  % reset counter 
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\section*{Model overview}
+\subsection*{Purpose} 
+This model tests an evolving population's ability to track a changing climate under a variety of conditions. Specifically, populations are simulated under different combinations of (1) the starkness of the range boundary and (2) the potential for local adaptation. In all simulations, an individual's expected dispersal distance and environmental niche are defined by an explicit set of quantitative diploid loci subject to mutation, thus allowing both traits to evolve over time. All simulations begin with stable climate conditions for $2000$ generations to allow the populations to reach a spatial equilibrium before the onset of climate change. Climate change is then modeled as a constant, directional shift in the location of environmentally suitable habitat (see \textit{Submodels} below). Finally, simulations end with another short period of climate stability to assess the population's ability to persist and recover after shifting its range.
+
+\subsection*{State variables and scales} 
+The model simulates a population of males and females characterized by diploid loci for both their expected dispersal distance and environmental niche. Space is modeled as a lattice of discrete patches overlaying a continuous Cartesian coordinate system. Landscapes are two dimensional with a fixed width along the $y$ axis and without bounds on the $x$ axis. Environmental conditions vary along the $x$ dimension but remain constant within the $y$ dimension. To avoid edge effects due to the fixed width of the $y$ dimension, the model employs wrapping boundaries such that if an individual disperses out of the landscape on one side, it appears at the opposite end of the same column of the landscape. Patches are defined by the location of the patch center in $x$ and $y$ coordinates and a patch width parameter defining the relationship between continuous Cartesian space and the discrete patches used for population dynamics (\textit{Submodels}). 
+
+The model implements climate change by shifting the location of a population's available habitat along the $x$ dimension of the landscape. Available habitat (i.e. a population's potential range) is defined by a center location on the $x$ dimension, the severity of the decline in habitat quality at the edge, and the width of the available habitat along the $x$ dimension (See Figure A1). Further, a gradient in environmental conditions is imposed throughout the landscape to allow for local adaptation via matching of an individual's environmental niche to the local environmental conditions (\textit{Submodels}). The severity of this gradient can be altered to change the potential for local adaptation (e.g. a shallower gradient will result in more similar environmental conditions throughout the range and therefore reduce the potential for local adaptation).
+
+[Figure A1 goes here]
+
+\subsection*{Process overview and scheduling} 
+Time is modeled in discrete intervals defining single generations of the population (Fig. A2). Within each generation, individuals first disperse from their natal patches according to their phenotypes. After dispersal, reproduction occurs according to a stochastic implementation of the classic Ricker model~\citep{ricker1954stock} taking into account the mean fitness of individuals within the patch. Reproduction occurs via random sampling of the local population (with replacement) weighted by individual relative fitness such that individuals with high relative fitness (as determined by the match between their environmental niche and local conditions) are likely to produce multiple offspring while individuals with low relative fitness may not produce any. Individuals inherit one allele from each parent at each loci, assuming independent segregation and a mutation process. After reproduction, all individuals in the current generation perish and the offspring begin the next generation with dispersal, resulting in discrete, non-overlapping generations. 
+
+[Figure A2 goes here]
+
+\section*{Design concepts}
+\subsection*{Emergence} 
+Emergent phenomena in this model include the spatial equilibrium of population abundances and trait values within the stable range, the demographic dynamics of the shifting population during climate change, and the evolutionary trajectories of both expected dispersal distances and environmental niche values during climate change.
+
+\subsection*{Stochasticity} 
+All biological processes in this model are stochastic including realized population growth in each patch, dispersal distances of each individual, and inheritance of loci. Environmental parameters are fixed, however, and the process of climate change (i.e. the movement of environmentally suitable habitat through time) is deterministic. Thus, the model removes the confounding influence of environmental stochasticity to focus on demographic and evolutionary dynamics of range shifts.
+
+\subsection*{Interactions} 
+Individuals in the model interact via mating and density-dependent competition within patches. Additionally, the evolutionary trajectories of the two different traits have the potential to interact via the relationship between gene flow and local adaptation. Further, aspects determining the spatial population structure of a population's range (potential for local adaptation and the nature of the range edge) can interact with trait evolution within the range both during stable climate conditions and during climate change.
+
+\subsection*{Desired output} 
+After each model run, full details of all surviving individuals at the last time point are recorded (spatial coordinates and loci values for both traits). If a population went extinct during the model run, the time of extinction is recorded. For each occupied patch throughout the simulation, we aggregated data on population size, the dispersal trait, and local adaptation to environmental conditions. 
+
+\section*{Details}
+\subsection*{Initialization} 
+The following parameters are set at the beginning of each simulation and form the initial conditions of the model: the mean and variance for allele values of each trait, population size, location of environmentally suitable habitat, number of generations for the pre-, post-, and during climate change periods of the simulation, and all other necessary parameters for the submodels defined below. Simulated populations are initialized in the center of the range and allowed to spread and equilibrate throughout the range during the period of stable climate conditions. This ensures that the populations reacting to a changing climate truly represent the expected spatial distribution for a given range, rather than the initial parameter values used in the simulation. See Tables A1 \& A2 for a full list of parameter values used in the simulations described here.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{2cm} | p{8cm} | p{2cm} }
+    \hline
+    Parameter & Description & Value \\ \hline \hline
+    $N_{1}$ & Initial population size (seeded across multiple patches) when beginning the simulations & $2500$ \\
+    $\beta_{1}$ & Center of environmentally suitable habitat before climate change & $0$ \\
+    $\eta$ & Spatial dimensions of habitat patches in continuous space & $50$ \\
+    $y_{max}$ & Number of patches the discrete lattice extends in the $y$ direction & $10$ \\
+    $\hat{t}$ & Last time point of stable climate conditions & $2000$ \\
+    $t_{\Delta}$ & Duration of climate change & $100$ \\
+    $t_{max}$ & Total number of time points in the simulation & $2150$ \\
+    $R$ & Intrinsic growth rate of the population & $2$ \\
+    $K_{max}$ & Maximum achievable carrying capacity in the range & $100$ \\ 
+    $\psi$ & Expected sex ratio in the population & $0.5$ \\
+    $\hat{d}$ & Maximum achievable dispersal phenotype & $1000$ \\
+    $\rho$ & Determines the slope of the transition in dispersal phenotypes from $0$ to $D$ & $0.5$ \\
+    $\omega$ & Defines the strength of stabilizing selection on fitness traits & $3$ \\
+    $U^{T}$ & Diploid mutation rate for each trait & $0.02$ for each trait \\
+    $V_{m}^{T}$ & Mutational variance for each trait & $0.0004$ for each trait \\
+    $L^{T}$ & Number of diploid loci defining each trait & $5$ for each trait \\
+    $\mu_{1}^{f}$ & Initial mean allele value for the environmental niche trait & $0$ \\
+    $\mu_{1}^{d}$ & Initial mean allele value for the dispersal trait & $-1$ \\
+    $\sigma_{1}^{f}$ & Initial standard deviation of allele values for the environmental niche trait & $0.025$ \\
+    $\sigma_{1}^{d}$ & Initial standard deviation of allele values for the dispersal trait & $1$ \\
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Simulation parameters held constant across all scenarios.}
+\label{table:ConstPars}
+\end{table}
+
+\subsection*{Submodels}
+\paragraph{Environmentally suitable habitat}
+Environmentally suitable habitat is determined by the population's carrying capacity as it ranges in space ($K_{x}$). The carrying capacity is maximized in the center of the species' range ($K_{max}$) and declines with increasing distance from the center. Specifically, the carrying capacity at a location $x$ is defined as the product of $K_{max}$ and a function $f(x,t)$, where $f(x,t)$ ranges from $1$ in the range center to $0$ far away from the center and is defined as follows 
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{e^{\gamma(x-\beta_{t}+\tau)}}{1+e^{\gamma(x-\beta_{t}+\tau)}} & x \leq \beta_{t} \\
+	\frac{e^{-\gamma(x-\beta_{t}-\tau)}}{1+e^{-\gamma(x-\beta_{t}-\tau)}} & x > \beta_{t}
+\end{cases}
+\end{equation}
+where $\beta_{t}$ defines the center of the area of suitable habitat at time $t$, $\tau$ sets the width of the range, and $\gamma$ affects the slope of the function at the range boundaries (See Figure A1). To understand the relationship between $\gamma$ and the slope of $f(x,t)$ at the range boundary, the partial derivative of $f(x,t)$ over the $x$ dimension can be shown to be
+\begin{equation}
+f(x,t)=
+\begin{cases}
+	\frac{\gamma e^{\gamma(x-\beta_{t}+\tau)}}{(1+e^{\gamma(x-\beta_{t}+\tau})^{2}} & x \leq \beta_{t} \\
+	\frac{-\gamma e^{-\gamma(x-\beta_{t}-\tau)}}{(1+e^{-\gamma(x-\beta_{t}-\tau})^{2}} & x > \beta_{t}
+\end{cases}	
+\end{equation}
+yielding a value of $\pm\frac{\gamma}{4}$ at the inflection points on either side of the range center ($x=\beta_{t}\pm\tau$).
+
+Population dynamics occur within discrete patches, so to calculate a $K_{x}$ value for a discrete patch from the continuous function $f(x,t)$, we use another parameter defining the spatial scale of each patch ($\eta$; See Figure A1). The local carrying capacity of a patch centered on $x$ ($K_{x}$) is then calculated as the mean of $f(x,t)$ over the interval of the patch multiplied by $K_{max}$.
+\begin{equation}
+K_{x} = \frac{K_{max}}{\eta}\int_{x-\frac{\eta}{2}}^{x+\frac{\eta}{2}}f(x,t)dx
+\end{equation}
+
+By varying the parameters defining $f(x,t)$, we can change both the total carrying capacity of the population, summed across all patches throughout the range, (by altering both $\tau$ and $\gamma$) and the slope at which $K_{x}$ declines to $0$ (by altering $\gamma$). Changing the slope affects not only the rate at which $K_{x}$ declines at the range boundaries (our focus), but it also alters the total carrying capacity of the population. To avoid this confounding factor, we fix the total area under the curve $f(x,t)$. The indefinite integral of $f(x,t)$ can be shown to be
+\begin{equation}
+\int_{-\infty}^{\infty}f(x,t)dx = \frac{2ln(e^{\gamma\tau}+1)}{\gamma}
+\end{equation}
+which can be solved for $\tau$. For a given fixed total area under the curve, an appropriate value of $\tau$ can be calculated for each value of $\gamma$.
+
+Thus, $\gamma$ and $\tau$ are both fixed within a given simulation and $\beta_{t}$ (the location of the center of suitable habitat) is used to simulate climate change. During the periods before and after climate change $\beta_{t}$ is constant, but to simulate climate change it varies with time as follows
+\begin{equation}
+\beta_{t}=\nu\eta(t-\hat{t})
+\end{equation}
+where $\nu$ is the velocity of climate change per generation in terms of discrete patches, $t$ is the current generation, and $\hat{t}$ is the last generation of stable climatic conditions before the onset of climate change.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ p{4cm} | p{4cm} | p{1.5cm} | p{1.5cm} | p{1.5cm} }
+    \hline
+    Habitat gradient at the range edge & Potential for local adaptation & $\gamma$ & $\tau$ & $\lambda$  \\ \hline \hline
+     & None & $0.0025$ & $250$ & $0$ \\
+    Shallow & Low & $0.0025$ & $250$ & $0.004$ \\
+     & High & $0.0025$ & $250$ & $0.008$ \\ \hline
+     & None & $0.025$ & $421.479$ & $0$ \\
+    Moderate & Low & $0.025$ & $421.479$ & $0.004$ \\
+     & High & $0.025$ & $421.479$ & $0.008$ \\ \hline
+     & None & $0.25$ & $421.48$ & $0$ \\
+    Stark & Low & $0.25$ & $421.48$ & $0.004$ \\
+     & High & $0.25$ & $421.48$ & $0.008$ \\ 
+    \hline
+  \end{tabular}
+\caption[LoF entry]{Descriptions and parameter values for the $9$ different experimental scenarios.}
+\label{table:Scenarios}
+\end{table}
+
+\paragraph{Local adaptation}
+To allow an arbitrary degree of local adaptation within the range, the local environmental optima for each patch ($z_{opt,x}$) are set as follows
+\begin{equation}
+z_{opt,x}=\lambda(x-\beta_{t})
+\end{equation}
+where $\lambda$ defines the potential for local adaptation with values close to $0$ resulting in little to no change in environmental optima across the range and values of greater magnitude resulting in large differences in environmental optima across the range. Individual relative fitness ($w_{i,x}$) values are then calculated according to the following equation assuming stabilizing selection
+\begin{equation}
+w_{i,x}=e^{\frac{-(z_{i}-z_{opt,x})^{2}}{2\omega^{2}}}
+\end{equation}
+where $\omega$ defines the strength of stabilizing selection and $z_{i}$ is an individual's niche phenotype~\citep{lande1976natural}. Thus, an individual's realized fitness will be higher the closer its niche phenotype ($z_{i}$) is to the environmental optimum of the patch it occupies ($z_{opt,x}$). All loci are assumed to contribute additively to an individual's environmental niche value with no dominance or epistasis, meaning an individual's phenotype is simply the sum of the individual's allele values.
+
+\paragraph{Population dynamics}
+Population growth within each patch is modeled with a stochastic implementation of the classic Ricker model~\citep{ricker1954stock, melbourne2008extinction}. To account for fitness effects on population growth, expected population growth is scaled by the mean relative fitness of individuals within the patch ($\bar{w_{x}}$). The expected number of new offspring in patch $x$ at time $t+1$ is then given by
+\begin{equation}
+\hat{N}_{t+1,x}=\bar{w_{x}}F_{t,x}\frac{R}{\psi}e^{\frac{-RN_{t,x}}{K_{x}}}
+\end{equation}
+where $F_{t,x}$ is the number of females in patch $x$ at time $t$, $R$ is the intrinsic growth rate for the population, $\psi$ is the expected sex ratio of the population, $N_{t,x}$ is the number of individuals (males and females) in patch $x$ at time $t$, and $K_{x}$ is the local carrying capacity based on the environmental conditions. To incorporate demographic stochasticity, the realized number of offspring for each patch is then drawn from a Poisson distribution.
+\begin{equation}
+N_{t+1,x}\sim Poisson(\hat{N}_{t+1,x})
+\end{equation}
+
+Parentage of the offspring is then assigned by random sampling of the local male and female population (i.e. polygynandrous mating). The sampling is weighted by individual fitness and occurs with replacement so highly fit individuals are likely to have multiple offspring while low fitness individuals may not have any. Each offspring inherits one allele per locus from each parent, assuming no linkage among loci. After reproduction, all members of the previous generation die and the offspring disperse to begin the next generation.
+
+\paragraph{Mutation}
+Inherited alleles are subject to mutation such that some offspring might not inherit identical copies of certain alleles from their parents. The mutation process is defined by two parameters for each trait $T$: the diploid mutation rate ($U^{T}$) and the mutational variance ($V_{m}^{T}$). Using these parameters along with the number of loci defining trait $T$ ($L^{T}$), the per locus probability of a mutation is
+\begin{equation}
+\frac{U^{T}}{2L^{T}}
+\end{equation}
+Mutational effects are drawn from a normal distribution with mean $0$ and a standard deviation of
+\begin{equation}
+\sqrt{V_{m}^{T}U^{T}}
+\end{equation}
+By defining the mutation process in this manner rather than setting a probability of mutation and mutational effect directly, similar mutational dynamics can be imposed regardless of the number of loci used in the simulation.
+
+\paragraph{Dispersal}
+Finally, individuals disperse according to an exponential dispersal kernel defined by each individual's dispersal phenotype. An individual's dispersal phenotype is the expected dispersal distance and is given by
+\begin{equation}
+d_{i} = \frac{\hat{d}\eta e^{\rho\Sigma L^{D}}}{1+e^{\rho\Sigma L^{D}}} 
+\end{equation}
+where $\hat{d}$ is the maximum expected dispersal distance in terms of discrete patches, $\rho$ is a constant determining the slope of the transition between $0$ and $\hat{d}$, and the summation is taken across all alleles contributing to dispersal. Thus, as with fitness, loci are assumed to contribute additively with no dominance or epistasis. The expected dispersal distance, $d_{i}$ is then used to draw a realized distance from an exponential dispersal kernel. Since the dispersal phenotype is the expected value of the exponential dispersal kernel, it can be used directly to calculate the two dimensional diffusion coefficient of population spread ($D$). Specifically, since $d_{i}^{2}$ represents the mean squared displacement of an individual with dispersal phenotype $d_{i}$, the two dimensional diffusion coefficient can be calculated as
+\begin{equation}
+D = \frac{1}{4}d_{i}^{2}
+\end{equation}
+
+Once the realized dispersal distance is obtained, the direction of dispersal is drawn from a uniform distribution bounded by $0$ and $2\pi$. If a dispersal trajectory takes an individual outside the bounds of the landscape in the $y$ dimension, the individual reappears at the same $x$ coordinate but the opposite end of the $y$ dimension, thus wrapping the top and bottom edges of the landscape to avoid edge effects. Dispersal occurs from the center of each patch and the individual's new patch is then determined according to its location in the overlaid grid of $\eta$ x $\eta$ patches (see Figure A1).
+
+\newpage{}
+
+\section*{Appendix B: Supplementary results for varying speeds of climate change}
+
+\renewcommand{\theequation}{B\arabic{equation}}
+% redefine the command that creates the equation number.
+\renewcommand{\thetable}{B\arabic{table}}
+\setcounter{equation}{0}  % reset counter 
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\section*{Extinction probability}
+As in the main text, we calculated the cumulative probability of extinction for both slow and fast speeds of climate change here. The figures in this section use the same layout and line types as Figure 2 in the main text to allow for direct comparisons.
+
+[Figures B1\&B2 go here.]
+
+\section*{Initial fitness throughout the landscape}
+To assess trends in realized fitness values throughout the landscape, we calculated the patch-level mean individual fitness value for each landscape just prior to the onset of climate change. To simplify the figures, we averaged over the $y$ dimension in which environmental conditions do not vary. By separating the results for both extinction populations and those that successfully tracked climate change, we identified a trend in which the edge populations displayed lower fitness in populations that were ultimately successful, particularly in simulations with a gradual environmental gradient at the range edge and the potential for local adaptation. As realized fitness values do not vary spatially in simulations with no potential for local adaptation, the following figures only show results for scenarios with a moderate or high potential for local adaptation.
+
+[Figures B3-B5 go here.]
+
+\section*{Dispersal evolution}
+Using the same metric of dispersal evolution from the main text (average change in phenotype for each patch), we display here the observed dispersal evolution over the course of climate change for all experimental scenarios. Each histogram in the following figures represents a single experimental scenario as indicated by the figure text. The lower left panel and upper right panel from Figure B7 are the same histograms shown in Figure 3a\&b, but are here placed in the context of all other experimental scenarios.
+
+[Figures B6-B8 go here.]
+
+\section*{Initial dispersal phenotypes}
+Here, we present histograms of the initial distribution of dispersal phenotypes to demonstrate the importance of those phenotypes in determining population success or extinction during climate change. Dispersal phenotypes are log transformed for easier comparison. As with the dispersal evolution section, each histogram represents a single experimental scenario as indicated by the figure text. Similarly, the lower left panel and upper right panel from Figure B10 are the same histograms shown in Figure 3c\&d, but are here placed in the context of all other experimental scenarios. All histograms additionally have a vertical dashed line indicating the dispersal phenotype necessary to produce an expansion wave traveling at exactly the speed of climate change in each simulation. This value serves as a threshold to distinguish individuals from ultimately successful versus extinct populations.
+
+[Figures B9-B11 go here.]
+
+\newpage{}
+
+%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%
+% You can either type your references following the examples below, or
+% compile your BiBTeX database and paste the contents of your .bbl file
+% here. The amnatnat.bst style file should work for this---but please
+% let us know if you run into any hitches with it!
+% The list below includes sample journal articles, book chapters, and
+% Dryad references.
+
+\bibliographystyle{amnat}
+\bibliography{main_bib}
+
+\newpage{}
+
+\section*{Figures}
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/SimExample"}
+\caption{A single example of a simulation with a high potential for local adaptation and a moderate habitat gradient defining the range edge. Information on the (a) abundance, (b) dispersal, and (c) fitness of individuals in each patch is shown for time periods beginning with the last generation of stable climate conditions ($t = 0$) to $40$ generations after the start of climate change. Log transformed mean dispersal phenotypes (b) are shown for each patch. Average patch fitness (c) was calculated based on the mean environmental niche trait of local individuals and the environmental optima for each patch.}
+\label{fig:SimExample}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainExtinction"}
+\caption{The cumulative probability of extinction due to climate change in different experimental scenarios. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) low, and (c) high potential for local adaptation, and in environments characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) gradient at the range edge.}
+\label{fig:ExtProb}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/DispComposite"}
+\caption{Patterns in the evolution and the initial distribution of the dispersal trait, highlighting extant simulations. Evolution in dispersal (a and b) is shown as the change in the mean dispersal phenotype of each patch from the beginning of the period of climate change to the end. Positive values indicate an increase in average dispersal ability in the patch. Initial distributions of the dispersal trait (c and d) are shown as log transformed dispersal phenotypes of individuals in populations after $2000$ generations of stable climate conditions. In all panels, values associated with extant populations are shown in dark blue. Results are shown for populations with no potential for local adaptation and a gradual environmental gradient at the range boundary (a and c; $n = 155$ extant populations) and for populations with a high potential for local adaptation and a stark gradient at the range boundary (b and d; $n = 14$ extant populations). Full results for all parameter combinations are provided in Appendix B.}
+\label{fig:Disp}
+\end{figure}
+
+\clearpage
+
+\subsection*{Online figures}
+
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/f_of_xt"}
+\caption{Example of the environmentally suitable habitat available to a population, as defined by $f(x,t)$ in Cartesian space. The parameters of $f(x,t)$ are shown on the figure at significant points along the $x$ axis. The lattice of discrete patches in which population dynamics occur is shown beneath. As described in the \textit{Submodels} section of the supplemental materials, $f(x,t)$ determines the carrying capacity of the discrete $\eta$ x $\eta$ patches. Carrying capacities vary with $f(x,t)$ along the $x$ dimension of the lattice and remain constant within each column along the $y$ dimension. Landscapes are  unbounded in the $x$ dimension and implemented with wrapping boundaries in the $y$ dimension.}
+\label{Fig:EnvFunction}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/SchematicFigures/LifeCycle"}
+\caption{The life cycle of simulated populations is shown divided between events contributing to reproduction and dispersal. Each generation begins with new offspring dispersing according to their phenotype, after which reproduction occurs in local populations defined by the discrete lattice. After reproduction, all parental individuals perish, resulting in discrete, non-overlapping generations.}
+\label{Fig:LifeCycle}
+\end{figure}
+
+\clearpage
+
+\renewcommand{\thefigure}{B\arabic{figure}}
+\setcounter{figure}{0}
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowExtinction"}
+\caption{Extinction probabilities for a slow speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) low, and (c) high potential for local adaptation, and in environments characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) gradient at the range edge.}
+\label{Fig:ExtProbSlow}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastExtinction"}
+\caption{Extinction probabilities for a fast speed of climate change. Graphs show the proportion of simulated populations that went extinct through time for scenarios with (a) no, (b) low, and (c) high potential for local adaptation, and in environments characterized by a shallow (solid line), moderate (dashed line), or stark (dotted line) gradient at the range edge.}
+\label{Fig:ExtProbFast}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitFitSpace"}
+\caption{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a slow speed of climate change.}
+\label{Fig:InitFitSlow}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitFitSpace"}
+\caption{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a moderate speed of climate change.}
+\label{Fig:InitFit}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitFitSpace"}
+\caption{Individual fitness along the $x$ dimensions of the landscape prior to the onset of climate change. Points represent the mean across simulations and error bars are interquartile ranges. Population status (extinct or successful) was determined for a fast speed of climate change.}
+\label{Fig:InitFitFast}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowDispEvol"}
+\caption{Observed dispersal evolution in populations responding to a slow speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{Fig:DispEvolSlow}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainDispEvol"}
+\caption{Observed dispersal evolution in populations responding to a moderate speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{Fig:DispEvolMain}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastDispEvol"}
+\caption{Observed dispersal evolution in populations responding to a fast speed of climate change. Positive values indicate an increase in average dispersal ability over the course of climate change. The values associate with populations successfully tracking climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. The experimental scenario corresponding to each histogram is indicated on the figure.}
+\label{Fig:DispEvolFast}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/SlowInitDispVals"}
+\caption{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a slow speed of climate change.}
+\label{Fig:InitDispSlow}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/MainInitDispVals"}
+\caption{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a moderate speed of climate change.}
+\label{Fig:InitDispMain}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\includegraphics[width=1\textwidth]{"/Users/Topher/Desktop/RangeShifts/ShiftingSlopesOther/ResultFigures/FastInitDispVals"}
+\caption{Distributions of the dispersal phenotypes observed in populations just prior to the onset of climate change. Phenotypes associated with populations that ultimately survived climate change are shown in dark blue and the total number of surviving populations is indicated in the top left corner. Vertical dashed lines indicate the dispersal phenotype necessary to produce an expansion wave exactly matching a fast speed of climate change.}
+\label{Fig:InitDispFast}
+\end{figure}
+
+\end{document}

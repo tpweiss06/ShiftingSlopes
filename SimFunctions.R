@@ -104,7 +104,7 @@ Disperse <- function(traits, width, kern, eta, angles, AngleIndex, rho,
      
      # Next generate the dispersal distances according to the type of kernel
      if(kern == "norm"){
-          sigma <- (d * sqrt(pi)) / sqrt(2)
+          sigma <- (d^2 * pi) / 2
           dists <- abs(rnorm(n = PopSize, mean = 0, sd = sigma))
      } else if(kern == "exp"){
           dists <- rexp(n = PopSize, rate = 1 / d)
@@ -221,11 +221,6 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, z, RelFits,
           NewPopMat[CurVec, PopIndices$x0] <- OccPatches[NewOccPatches[i], 1]
           NewPopMat[CurVec, PopIndices$y0] <- OccPatches[NewOccPatches[i], 2]
           
-          
-          # Identify the potential parents in the current patch
-          locals <- which( (PopMat[,PopIndices$x1] == OccPatches[NewOccPatches[i], 1]) &
-                                PopMat[,PopIndices$y1] == OccPatches[NewOccPatches[i], 2])
-          NumLocals <- length(locals)
           # Depending on life history being modeled (monoecious vs. dioecious),
           #    add in sex information if relevant and determine parents for each
           #    offspring
@@ -233,8 +228,12 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, z, RelFits,
                NewPopMat[CurVec, PopIndices$sex] <- SexRands[(OffspringIndex + CurStart):(OffspringIndex + CurEnd)]
                
                # Identify the females and males present in the current patch
-               females <- which(PopMat[locals, PopIndices$sex] == 1)
-               males <- which(PopMat[locals, PopIndices$sex] == 0)
+               females <- which( (PopMat[,PopIndices$x1] == OccPatches[NewOccPatches[i], 1]) &
+                                      (PopMat[,PopIndices$y1] == OccPatches[NewOccPatches[i], 2]) &
+                                      (PopMat[, PopIndices$sex] == 1) )
+               males <- which( (PopMat[,PopIndices$x1] == OccPatches[NewOccPatches[i], 1]) &
+                    (PopMat[,PopIndices$y1] == OccPatches[NewOccPatches[i], 2]) &
+                    (PopMat[, PopIndices$sex] == 0) )
                
                # Now extract the relative fitness values for the males and
                #    females
@@ -260,6 +259,11 @@ MatFill <- function(RealizedNtp1, PopIndices, OccPatches, z, RelFits,
                }
                parents <- cbind(parent1, parent2)
           } else{
+               # Identify the potential parents in the current patch
+               locals <- which( (PopMat[,PopIndices$x1] == OccPatches[NewOccPatches[i], 1]) &
+                                     (PopMat[,PopIndices$y1] == OccPatches[NewOccPatches[i], 2]) )
+               NumLocals <- length(locals)
+               
                # Get the relative fitness values for the potential parents
                ParentFits <- RelFits[locals]
                
@@ -925,10 +929,9 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
      
      # Set up an object to hold summary statistics 
      SumStatCols <- list(gen = 1, beta = 2, x = 3, y = 4, abund = 5, muFit = 6,
-                            sigmaFitPhen = 7, sigmaFitGen = 8, muDisp = 9, 
-                            sigmaDispPhen = 10, sigmaDispGen = 11)
+                            FitGenVar = 7, muDisp = 8, DispGenVar = 9)
      SumStatRow <- 1
-     SumStats <- matrix(NA, nrow = SumMatSize, ncol = 11)
+     SumStats <- matrix(NA, nrow = SumMatSize, ncol = 9)
      CurStatsDim <- SumMatSize
      
      # Calculate the beta values for during the period of climate change
@@ -1048,7 +1051,7 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
                if(g >= BurnIn){
                     NumPatches <- nrow(OccPatches)
                     if( (SumStatRow + NumPatches) > CurStatsDim){
-                         NewMat <- matrix(NA, nrow = SumMatSize, ncol = 11)
+                         NewMat <- matrix(NA, nrow = SumMatSize, ncol = 9)
                          SumStats <- rbind(SumStats, NewMat)
                          CurStatsDim <- CurStatsDim + SumMatSize
                     }
@@ -1069,14 +1072,16 @@ FullSim <- function(parameters, parallel = FALSE, SumMatSize = 5000, PopInit = N
                                    PatchFits <- sum(PopMat[PatchPop, PopIndices$FitCols])
                                    DispSums <- sum(PopMat[PatchPop, PopIndices$DispCols])
                               }
-                              # Calculate the expected dispersal distances for the patch population
+                              # Calculate the mean expected dispersal distances for the patch population
+                              #    and the genetic variance in dispersal
                               ExpDists <- (dmax * eta * exp(rho * DispSums)) / (1 + exp(rho * DispSums))
-                              SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
-                              SumStats[SumStatRow, SumStatCols$sigmaFitGen] <- sd(PopMat[PatchPop, PopIndices$FitCols])
-                              SumStats[SumStatRow, SumStatCols$sigmaFitPhen] <- sd(PatchFits)
                               SumStats[SumStatRow, SumStatCols$muDisp] <- mean(ExpDists)
-                              SumStats[SumStatRow, SumStatCols$sigmaDispGen] <- sd(PopMat[PatchPop, PopIndices$DispCols])
-                              SumStats[SumStatRow, SumStatCols$sigmaDispPhen] <- sd(ExpDists)
+                              DispGenVars <- var(PopMat[PatchPop,PopIndices$DispCols])
+                              SumStats[SumStatRow, SumStatCols$DispGenVar] <- sum(DispGenVars[lower.tri(DispGenVars, diag = TRUE)])
+                              # Calculate the mean niche phenotype and the genetic variance
+                              SumStats[SumStatRow, SumStatCols$muFit] <- mean(PatchFits)
+                              FitGenVars <- var(PopMat[PatchPop,PopIndices$FitCols])
+                              SumStats[SumStatRow, SumStatCols$FitGenVar] <- sum(FitGenVars[lower.tri(FitGenVars, diag = TRUE)])
                               SumStatRow <- SumStatRow + 1
                          }
                     }

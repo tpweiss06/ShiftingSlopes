@@ -1,7 +1,7 @@
 # This script will make an appropriate graph of the initial dispersal values
 setwd("~/Desktop/RangeShifts/ShiftingSlopesOther/")
 load("SimData/FitData.rdata")
-CurSpeed <- 2
+CurSpeed <- 1
 SpeedWords <- c("Slow", "Main", "Fast")
 
 # Sort the disp values into the appropriate lists
@@ -72,8 +72,8 @@ for(p in 1:9){
 
 # Set some graphical parameters to use for the subsequent figures
 yRange <- c(0, 1)
-xRange <- c(-40, 40)
-SmallTicks <- seq(-40, 40, by = 5)
+xRange <- c(-50, 50)
+SmallTicks <- seq(-35, 35, by = 5)
 OuterMar <- c(4, 10, 5, 2)
 InnerMar <- c(1.5, 1.5, 2, 1.5)
 TextSize <- 1.5
@@ -90,7 +90,7 @@ GradLabLine <- 3
 GradSubLine <- 1.5
 AdaptLabLine <- 8
 AdaptSubLine <- 5
-TopArrow <- matrix(c(-10, 1.3, 220, 1.3), nrow = 2, ncol = 2, byrow = TRUE)
+TopArrow <- matrix(c(-12, 1.3, 250, 1.3), nrow = 2, ncol = 2, byrow = TRUE)
 LowAdj <- 0.15
 HighAdj <- 0.85
 ExtinctCol <- "red"
@@ -122,11 +122,11 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
                         y1 = ExtinctPlot[[i]]$upr, lwd = LineWidth, col = ExtinctCol)
           }
           # Add the selection and environmental gradient arrows
-          mtext("Adaptation potential", side = 2, outer = TRUE, line = AdaptLabLine,
+          mtext("Gradient in niche optimum", side = 2, outer = TRUE, line = AdaptLabLine,
                 cex = TextSize)
-          mtext("Low", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+          mtext("Shallow", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
                 adj = LowAdj)
-          mtext("Strong", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
+          mtext("Steep", side = 2, outer = TRUE, line = AdaptSubLine, cex = TextSize,
                 adj = HighAdj)
           if(i == 7){
                arrows(x0 = TopArrow[1,1], y0 = TopArrow[1,2], x1 = TopArrow[2,1], 
@@ -144,11 +144,11 @@ pdf(file = PlotName, width = FigWidth, height = FigHeight, onefile = FALSE, pape
      mtext(FitAxisLabel, side = 2, outer = TRUE, line = yLabLine, cex = TextSize)
 
      # Add the environmental gradient text
-     mtext("Gradient at range edge", side = 3, outer = TRUE, line = GradLabLine,
+     mtext("Range edge", side = 3, outer = TRUE, line = GradLabLine,
            cex = TextSize)
      mtext("Gradual", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
            adj = LowAdj)
-     mtext("Severe", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
+     mtext("Stark", side = 3, outer = TRUE, line = GradSubLine, cex = TextSize,
            adj = HighAdj)
 dev.off()
 

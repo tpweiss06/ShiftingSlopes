@@ -1,19 +1,19 @@
 #!/bin/bash -l
-#PBS -l walltime=00:15:00,nodes=1:ppn=1,mem=2gb
+#PBS -l walltime=01:00:00,nodes=2:ppn=24,mem=124gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
 # Set the names of R scripts and log files
-Rscript=1b_SimCheck.R
-LogFile=1b_SimCheck.log
+Rscript=8_FitGenVarDataNew.R
+LogFile=8_FitGenVarDataNew.log
 
 # Change to the relevant working directory
 cd ~/ShiftingSlopes/
 
 # Load R and MPI
 module load R/3.4.4
-module load ompi/3.0.0/gnu-7.2.0
+module load ompi/3.0.0/gnu-7.2.0-centos7
 
 export RMPI_TYPE=OPENMPI
 export OMPI_MCA_mpi_warn_on_fork=0
