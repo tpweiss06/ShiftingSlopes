@@ -1,12 +1,12 @@
 #!/bin/bash -l
-#PBS -l walltime=00:30:00,nodes=4:ppn=24,mem=248gb
+#PBS -l walltime=01:30:00,nodes=2:ppn=24,mem=124gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
 # Set the names of R scripts and log files
-Rscript=7_VarData.R
-LogFile=7_VarData.log
+Rscript=9_FitGenVarData.R
+LogFile=9_FitGenVarData.log
 
 # Change to the relevant working directory
 cd ~/ShiftingSlopes/

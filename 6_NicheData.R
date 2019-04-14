@@ -35,17 +35,15 @@ FitExtract <- function(i){
                         "/", CurSims$SimID[1], "/parameters.R", sep = "")
      source(ParamFile)
      
-     # Create the data frames for extant and extinct simulations
-     ExtantFits <- data.frame(x = NA, g = NA, wBar = NA, lwr = NA, upr = NA)
-     ExtinctFits <- data.frame(x = NA, g = NA, wBar = NA, lwr = NA, upr = NA)
+     # Create the data frame for all simulations
+     MeanFits <- data.frame(x = NA, g = NA, Mismatch = NA, lwr = NA, upr = NA, Zopt = NA)
      
      # Now loop through each row of the data frame to fill it in
      for(g in GenSeq){
-          # Create temporary data frames to hold the results from all simulations
+          # Create a temporary data frame to hold the results from all simulations
           #    for each time point, which will then be condensed across simulations
           #    for the main data frames
-          TempExtant <- data.frame(x = NA, wBar = NA)
-          TempExtinct <- data.frame(x = NA, wBar = NA)
+          Temp <- data.frame(x = NA, Mismatch = NA, Zopt = NA)
           for(s in 1:nrow(CurSims)){
                if(g == 0){
                     InFile <- paste("~/ShiftingSlopes/MainSim/Params", ParamCombo,
@@ -63,61 +61,29 @@ FitExtract <- function(i){
                xSeq <- unique(CurSumStats$x)
                for(j in xSeq){
                     LocalData <- subset(CurSumStats, x == j)
-                    # Calculate wBar according to the local optimum
+                    # Calculate the mismatch between optimum and genotype and
+                    #    its direction (i.e. positive or negative)
                     Zopt <- lambda * (j * eta - LocalData$beta[1])
-                    LocalFits <- exp(-1 * (LocalData$muFit - Zopt)^2 / (2*omega^2))
-                    # Decide if this simulation goes in extinct or extant data
-                    if(SpeedWord == "Slow"){
-                         if(CurSims$Slow[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalFits)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalFits)), TempExtinct)
-                         }
-                    } else if(SpeedWord == "MainSim"){
-                         if(CurSims$Moderate[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalFits)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalFits)), TempExtinct)
-                         }
-                    } else{
-                         if(CurSims$Fast[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalFits)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalFits)), TempExtinct)
-                         }
-                    }
+                    Maladaptation <- LocalData$muFit
+                    # Add the simulation data to the Temp data frame
+                    Temp <- rbind(c(j, mean(Maladaptation), Zopt), Temp)
                }
           }
-          # remove the final row of NA's from TempExtant and TempExtinct
-          TempExtant <- TempExtant[-nrow(TempExtant),]
-          TempExtinct <- TempExtinct[-nrow(TempExtinct),]
+          # remove the final row of NA's from Temp
+          Temp <- Temp[-nrow(Temp),]
           # Find the unique x values, cycle through them, calculate mean and
           #    quantiles to go in master data frames
-          ExtantXvals <- unique(TempExtant$x)
-          ExtinctXvals <- unique(TempExtinct$x)
-          if(nrow(TempExtant) > 0){
-               for(j in ExtantXvals){
-                    TempData <- subset(TempExtant, x == j)
-                    FitQuants <- quantile(TempData$wBar, probs = c(0.25, 0.75))
-                    NewData <- c(j, g, mean(TempData$wBar), FitQuants)
-                    ExtantFits <- rbind(NewData, ExtantFits)
-               }
-          }
-          if(nrow(TempExtinct) > 0){
-               for(j in ExtinctXvals){
-                    TempData <- subset(TempExtinct, x == j)
-                    FitQuants <- quantile(TempData$wBar, probs = c(0.25, 0.75))
-                    NewData <- c(j, g, mean(TempData$wBar), FitQuants)
-                    ExtinctFits <- rbind(NewData, ExtinctFits)
-               }
+          Xvals <- unique(Temp$x)
+          for(j in Xvals){
+               TempData <- subset(Temp, x == j)
+               FitQuants <- quantile(TempData$Mismatch, probs = c(0.25, 0.75))
+               NewData <- c(j, g, mean(TempData$Mismatch), FitQuants, TempData$Zopt[1])
+               MeanFits <- rbind(NewData, MeanFits)
           }
      }
      # Remove the final row of NA values
-     ExtantFits <- ExtantFits[-nrow(ExtantFits),]
-     ExtinctFits <- ExtinctFits[-nrow(ExtinctFits),]
-     # Combine and return the results
-     Results <- list(Extant = ExtantFits, Extinct = ExtinctFits)
-     return(Results)
+     Mismatch <- MeanFits[-nrow(MeanFits),]
+     return(Mismatch)
 }
 
 # Create the cluster and run the simulations
@@ -130,16 +96,16 @@ clusterExport(cl, c("SpeedVec", "ParamVec", "SimIDs", "GenSeq"))
 SimFits <- clusterApply(cl, x = SimVec, fun = FitExtract)
 
 # Process the results into an appropriate object for the later graphing script
-FitData <- vector(mode = "list", length = 9)
+MismatchData <- vector(mode = "list", length = 9)
 for(p in 1:9){
-     FitData[[p]] <- vector(mode = "list", length = 3)
+     MismatchData[[p]] <- vector(mode = "list", length = 3)
      for(v in 1:3){
           CurIndex <- which((SpeedVec == SpeedWords[v]) & (ParamVec == p))
           CurResults <- SimFits[[CurIndex]]
-          FitData[[p]][[v]] <- CurResults
+          MismatchData[[p]][[v]] <- CurResults
      }
 }
 
 # Save the output
-save(FitData, file = "~/ShiftingSlopes/FitDataNew.rdata")
+save(MismatchData, file = "~/ShiftingSlopes/MismatchData.rdata")
 

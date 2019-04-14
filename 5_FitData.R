@@ -1,8 +1,8 @@
 # This script will extract the realized fitness of individuals throughout their
-#    ranges in the generation immediately prior to climate change
+#    ranges every 10 generations
 
-# Set the number of processors available for this scrip
-nProc <- 4*24
+# Set the number of processors available for this script 
+nProc <- 2*24
 
 # Set the working directory
 setwd("~/ShiftingSlopes/")
@@ -10,78 +10,101 @@ source("~/ShiftingSlopes/SimFunctions.R")
 library(parallel)
 library(Rmpi)
 RangeParams <- read.csv("~/ShiftingSlopes/RangeParameters.csv")
+load("ExtSimIDs.rdata")
 
-# Create the master list to hold all the values and the other necessary objects
-NumSims <- 200
-MaxGen <- c(151, 2151, 151)
-FilePaths <- c("~/ShiftingSlopes/Slow/Params", "~/ShiftingSlopes/MainSim/Params",
-               "~/ShiftingSlopes/Fast/Params")
-FitList <- vector(length = 9, mode = "list")
-for(p in 1:9){
-     FitList[[p]] <- vector(length = NumSims, mode = "list")
-}
+# Create the vectors to be passed to the function in the data extraction
+SimVec <- 1:27
+SpeedWords <- c("Slow", "MainSim", "Fast")
+SpeedVec <- rep(SpeedWords, 9)
+ParamVec <- rep(1:9, each = 3)
 
-# Create a data frame to index each simulation block in the above arrays
-TraitIndices <- expand.grid(params = 1:9, sim = 1:NumSims)
+# Create other useful objects to pass to the nodes
+GenSteps <- 10
+LengthShift <- 100
+GenSeq <- seq(0, LengthShift, by = GenSteps)
 
-# Write a function to be passed to various nodes
 FitExtract <- function(i){
-     # Sort out the parameter combination and simulation under consideration
-     Param <- TraitIndices$params[i]
-     ParamDirectory <- paste("~/ShiftingSlopes/MainSim/Params", Param, "/", sep = "")
-     AllSims <- list.files(ParamDirectory)
-     SimID <- AllSims[TraitIndices$sim[i]]
+     # Set the current speed and parameter combination and isolate the relevant
+     #    simulation IDs.
+     SpeedWord <- SpeedVec[i]
+     ParamCombo <- ParamVec[i]
+     CurSims <- subset(SimIDs, Params == ParamCombo)
      
-     # Load the corresponding population matrix
-     InFile <- paste("~/ShiftingSlopes/MainSim/Params", Param, "/", SimID,
-                     "/InitialPopMat.csv", sep = "")
-     ParamFile <- paste("~/ShiftingSlopes/MainSim/Params", Param, "/", SimID,
-                        "/parameters.R", sep = "")
-     SimData <- read.csv(InFile)
+     # Source a representative parameter file for useful values
+     ParamFile <- paste("~/ShiftingSlopes/", SpeedWord, "/Params", ParamCombo, 
+                        "/", CurSims$SimID[1], "/parameters.R", sep = "")
      source(ParamFile)
      
-     # Convert the phenotype values to relative fitness values based on where they are
-     #    in the range
-     FitCols <- grep(pattern = "fit", x = names(SimData))
-     Zopt <- lambda * (SimData$x0 * eta - BetaInit)
-     EnvNiche <- rowSums(SimData[, FitCols])
-     RelFits <- exp(-1 * (EnvNiche - Zopt)^2 / (2*omega^2))
+     # Create the data frame for all simulations
+     MeanFits <- data.frame(x = NA, g = NA, wBar = NA, lwr = NA, upr = NA)
      
-     # Put it all together
-     w <- matrix(NA, nrow = length(RelFits), ncol = 2)
-     w[,1] <- SimData$x0
-     w[,2] <- RelFits
-     
-     # Check if the simulation went extinct at each speed of climate change
-     Ext <- rep(NA, 3)
-     for(v in 1:3){
-          SumFile <- paste(FilePaths[v], Param, "/", SimID, "/SummaryStats.csv", sep = "")
-          SumStats <- read.csv(SumFile)
-          GenExtinct <- max(SumStats$gen) + 1
-          Ext[v] <- ifelse(GenExtinct < (MaxGen[v]), 0, 1)
+     # Now loop through each row of the data frame to fill it in
+     for(g in GenSeq){
+          # Create a temporary data frame to hold the results from all simulations
+          #    for each time point, which will then be condensed across simulations
+          #    for the main data frames
+          Temp <- data.frame(x = NA, wBar = NA)
+          for(s in 1:nrow(CurSims)){
+               if(g == 0){
+                    InFile <- paste("~/ShiftingSlopes/MainSim/Params", ParamCombo,
+                                    "/", CurSims$SimID[s], "/SummaryStats.csv", sep = "")
+                    SumStats <- read.csv(InFile)
+                    CurSumStats <- subset(SumStats, gen == 2000)
+               } else{
+                    InFile <- paste("~/ShiftingSlopes/", SpeedWord, "/Params", ParamCombo,
+                                    "/", CurSims$SimID[s], "/SummaryStats.csv", sep = "")
+                    SumStats <- read.csv(InFile)
+                    CurSumStats <- subset(SumStats, gen == (g + BurnIn))
+               }
+               # Isolate the x coordinates from the current data and loop through
+               #    them, adding their data to the temporary data frames
+               xSeq <- unique(CurSumStats$x)
+               for(j in xSeq){
+                    LocalData <- subset(CurSumStats, x == j)
+                    # Calculate wBar according to the local optimum
+                    Zopt <- lambda * (j * eta - LocalData$beta[1])
+                    LocalFits <- exp(-1 * (LocalData$muFit - Zopt)^2 / (2*omega^2))
+                    # Add the simulation data to the Temp data frame
+                    Temp <- rbind(c(j, mean(LocalFits)), Temp)
+               }
+          }
+          # remove the final row of NA's from Temp
+          Temp <- Temp[-nrow(Temp),]
+          # Find the unique x values, cycle through them, calculate mean and
+          #    quantiles to go in master data frames
+          Xvals <- unique(Temp$x)
+          for(j in Xvals){
+               TempData <- subset(Temp, x == j)
+               FitQuants <- quantile(TempData$wBar, probs = c(0.25, 0.75))
+               NewData <- c(j, g, mean(TempData$wBar), FitQuants)
+               MeanFits <- rbind(NewData, MeanFits)
+          }
      }
-     return(list(w = w, Ext = Ext))
+     # Remove the final row of NA values
+     MeanFits <- MeanFits[-nrow(MeanFits),]
+     return(MeanFits)
 }
 
 # Create the cluster and run the simulations
 cl <- makeCluster(nProc - 1, type = "MPI")
 
 # Export the necessary objects to each node
-clusterExport(cl, c("TraitIndices", "MaxGen", "FilePaths"))
+clusterExport(cl, c("SpeedVec", "ParamVec", "SimIDs", "GenSeq"))
 
-# Run the simulations
-SimVec <- 1:dim(TraitIndices)[1]
-SimFit <- clusterApply(cl, x = SimVec, fun = FitExtract)
+# Run the function on the cluster
+SimFits <- clusterApply(cl, x = SimVec, fun = FitExtract)
 
-# Now populate the MasterList
-ParamIndices <- rep(1, 9)
-for(i in SimVec){
-     CurParam <- TraitIndices$params[i]
-     CurParamIndex <- ParamIndices[CurParam]
-     FitList[[CurParam]][[CurParamIndex]] <- SimFit[[i]]
-     ParamIndices[CurParam] <- ParamIndices[CurParam] + 1
+# Process the results into an appropriate object for the later graphing script
+FitData <- vector(mode = "list", length = 9)
+for(p in 1:9){
+     FitData[[p]] <- vector(mode = "list", length = 3)
+     for(v in 1:3){
+          CurIndex <- which((SpeedVec == SpeedWords[v]) & (ParamVec == p))
+          CurResults <- SimFits[[CurIndex]]
+          FitData[[p]][[v]] <- CurResults
+     }
 }
 
 # Save the output
-save(FitList, file = "~/ShiftingSlopes/FitData.rdata")
+save(FitData, file = "~/ShiftingSlopes/FitDataNew_a.rdata")
 

@@ -35,17 +35,15 @@ DispExtract <- function(i){
                         "/", CurSims$SimID[1], "/parameters.R", sep = "")
      source(ParamFile)
      
-     # Create the data frames for extant and extinct simulations
-     ExtantDisps <- data.frame(x = NA, g = NA, dBar = NA, lwr = NA, upr = NA)
-     ExtinctDisps <- data.frame(x = NA, g = NA, dBar = NA, lwr = NA, upr = NA)
+     # Create the data frame for all simulations
+     MeanDisps <- data.frame(x = NA, g = NA, dBar = NA, lwr = NA, upr = NA)
      
      # Now loop through each row of the data frame to fill it in
      for(g in GenSeq){
-          # Create temporary data frames to hold the results from all simulations
+          # Create a temporary data frame to hold the results from all simulations
           #    for each time point, which will then be condensed across simulations
           #    for the main data frames
-          TempExtant <- data.frame(x = NA, dBar = NA)
-          TempExtinct <- data.frame(x = NA, dBar = NA)
+          Temp <- data.frame(x = NA, dBar = NA)
           for(s in 1:nrow(CurSims)){
                if(g == 0){
                     InFile <- paste("~/ShiftingSlopes/MainSim/Params", ParamCombo,
@@ -63,58 +61,25 @@ DispExtract <- function(i){
                xSeq <- unique(CurSumStats$x)
                for(j in xSeq){
                     LocalData <- subset(CurSumStats, x == j)
-                    # Decide if this simulation goes in extinct or extant data
-                    if(SpeedWord == "Slow"){
-                         if(CurSims$Slow[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalData$muDisp)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalData$muDisp)), TempExtinct)
-                         }
-                    } else if(SpeedWord == "MainSim"){
-                         if(CurSims$Moderate[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalData$muDisp)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalData$muDisp)), TempExtinct)
-                         }
-                    } else{
-                         if(CurSims$Fast[s] == 1){
-                              TempExtant <- rbind(c(j, mean(LocalData$muDisp)), TempExtant)
-                         }else{
-                              TempExtinct <- rbind(c(j, mean(LocalData$muDisp)), TempExtinct)
-                         }
-                    }
+                    # Add the simulation data to the Temp data frame
+                    Temp <- rbind(c(j, mean(LocalData$muDisp)), Temp)
                }
           }
-          # remove the final row of NA's from TempExtant and TempExtinct
-          TempExtant <- TempExtant[-nrow(TempExtant),]
-          TempExtinct <- TempExtinct[-nrow(TempExtinct),]
+          # remove the final row of NA's from Temp
+          Temp <- Temp[-nrow(Temp),]
           # Find the unique x values, cycle through them, calculate mean and
           #    quantiles to go in master data frames
-          ExtantXvals <- unique(TempExtant$x)
-          ExtinctXvals <- unique(TempExtinct$x)
-          if(nrow(TempExtant) > 0){
-               for(j in ExtantXvals){
-                    TempData <- subset(TempExtant, x == j)
-                    DispQuants <- quantile(TempData$dBar, probs = c(0.25, 0.75))
-                    NewData <- c(j, g, mean(TempData$dBar), DispQuants)
-                    ExtantDisps <- rbind(NewData, ExtantDisps)
-               }
-          }
-          if(nrow(TempExtinct) > 0){
-               for(j in ExtinctXvals){
-                    TempData <- subset(TempExtinct, x == j)
-                    DispQuants <- quantile(TempData$dBar, probs = c(0.25, 0.75))
-                    NewData <- c(j, g, mean(TempData$dBar), DispQuants)
-                    ExtinctDisps <- rbind(NewData, ExtinctDisps)
-               }
+          Xvals <- unique(Temp$x)
+          for(j in Xvals){
+               TempData <- subset(Temp, x == j)
+               DispQuants <- quantile(TempData$dBar, probs = c(0.25, 0.75))
+               NewData <- c(j, g, mean(TempData$dBar), DispQuants)
+               MeanDisps <- rbind(NewData, MeanDisps)
           }
      }
      # Remove the final row of NA values
-     ExtantDisps <- ExtantDisps[-nrow(ExtantDisps),]
-     ExtinctDisps <- ExtinctDisps[-nrow(ExtinctDisps),]
-     # Combine and return the results
-     Results <- list(Extant = ExtantDisps, Extinct = ExtinctDisps)
-     return(Results)
+     MeanDisps <- MeanDisps[-nrow(MeanDisps),]
+     return(MeanDisps)
 }
 
 # Create the cluster and run the simulations
@@ -138,5 +103,5 @@ for(p in 1:9){
 }
 
 # Save the output
-save(DispData, file = "~/ShiftingSlopes/DispDataNew.rdata")
+save(DispData, file = "~/ShiftingSlopes/DispDataNew_a.rdata")
 

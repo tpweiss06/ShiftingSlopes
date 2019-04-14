@@ -1,12 +1,12 @@
 #!/bin/bash -l
-#PBS -l walltime=08:00:00,nodes=6:ppn=24,mem=300gb
+#PBS -l walltime=01:30:00,nodes=2:ppn=24,mem=124gb
 #PBS -m abe
 #PBS -M cweissle@umn.edu
 #PBS -j oe
 
-# Set the parameter combination to use and generate names of R scripts and log files
-Rscript=1b_MainSimCont.R
-LogFile=1b_MainSimCont.log
+# Set the names of R scripts and log files
+Rscript=7_DispData.R
+LogFile=7_DispData.log
 
 # Change to the relevant working directory
 cd ~/ShiftingSlopes/
