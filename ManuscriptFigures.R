@@ -11,7 +11,6 @@ yLetterAdj <- 0.95
 xLabLine <- 3
 GenTextAdj <- 0.9
 BetaPos <- matrix(c(0,50,100,0,62.5,125,0,75,150), nrow = 3, ncol = 3, byrow = TRUE)
-LegInset <- -0.2
 LegInsetExt <- -0.15
 # Sizing
 FigWidth <- 12
@@ -34,8 +33,9 @@ yLabLine <- 5
 TextSize <- 1.75
 AxisSize <- 2.25
 LegSize <- 2.5
+LegInset <- -0.6
 LetterSize <- 2.5
-OuterMar <- c(5, 9, 4, 2)
+OuterMar <- c(11, 9, 2, 2)
 
 # -------------------------------------------------- 1) mean dispersal phenotype
 yLabel <- expression(bar(d))
@@ -90,12 +90,10 @@ for(v in 1:3){
                # Add a letter to the current plot
                text(x = xLetterAdj * xLwr[v], y = yLetterAdj * yUpr[v], 
                     labels = LetterSeq[n], cex = LetterSize)
-               # Add a legend on the first plot
-               if(n == 1){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+               # Add a legend
+               if(n == 3){
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
@@ -161,12 +159,10 @@ for(v in 1:3){
                # Add a letter to the current plot
                text(x = xLetterAdj * xLwr[v], y = yLetterAdj * yUpr[v], 
                     labels = LetterSeq[n], cex = LetterSize)
-               # Add a legend on the first plot
-               if(n == 1){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+               # Add a legend
+               if(n == 3){
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
@@ -184,8 +180,9 @@ yLabLine <- 4
 TextSize <- 2
 AxisSize <- 2
 LegSize <- 1.75
+LegInset <- -0.525
 LetterSize <- 2
-OuterMar <- c(5, 6, 4, 2)
+OuterMar <- c(9, 6, 2, 2)
 #############
 
 # ----------------------------------------------------- 3) mean relative fitness
@@ -241,12 +238,10 @@ for(v in 1:3){
                # Add a letter to the current plot
                text(x = xLetterAdj * xLwr[v], y = yLetterAdj * yUpr[v], 
                     labels = LetterSeq[n], cex = LetterSize)
-               # Add a legend on the first plot
-               if(n == 1){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+               # Add a legend
+               if(n == 2){
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
@@ -314,12 +309,10 @@ for(v in 1:3){
                # Add a letter to the current plot
                text(x = xLetterAdj * xLwr[v], y = yLetterAdj * yUpr[v], 
                     labels = LetterSeq[n], cex = LetterSize)
-               # Add a legend on the first plot
-               if(n == 1){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+               # Add a legend
+               if(n == 2){
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
@@ -391,12 +384,10 @@ for(v in 1:3){
                # Add a letter to the current plot
                text(x = xLetterAdj * xLwr[v], y = yLetterAdj * yUpr[v], 
                     labels = LetterSeq[n], cex = LetterSize)
-               # Add a legend on the first plot
-               if(n == 1){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+               # Add a legend
+               if(n == 2){
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
@@ -414,11 +405,11 @@ yLabLine <- 4
 TextSize <- 1.5
 AxisSize <- 2
 LegSize <- 2.25
-LegInset <- -0.15
+LegInset <- -0.55
 LetterSize <- 2
 LetterPos <- c(2, 0.925)
 LetterSeq <- c("c", "b", "a")
-OuterMar <- c(1,2,0,0)
+OuterMar <- c(6,2,0,0)
 FigWidth <- 12
 FigHeight <- 4.5
 xRange <- c(0,100)
@@ -463,12 +454,10 @@ for(i in 1:3){
                axis(1, at = TimeAxisSea2, labels = FALSE, tcl = -0.25)
                axis(2, at = ExtAxisSeq1, las = 1, cex.axis = AxisSize)
                axis(2, at = ExtAxisSeq2, labels = FALSE, tcl = -0.25)
-               # Add a legend on the middle plot
+               # Add a legend
                if(n == 2){
-                    LegendText <- c(EdgeWords[1], "", EdgeWords[2], "", EdgeWords[3])
-                    LegendCols <- c(EdgeCols[1], "white", EdgeCols[2], "white", EdgeCols[3])
-                    legend(x = "top", legend = LegendText, lty = c(1,0,1,0,1), col = LegendCols, 
-                           bty = "n", cex = LegSize, lwd = LineWidth, horiz = TRUE,
+                    legend(x = "bottom", legend = EdgeWords, lty = 1, col = EdgeCols, 
+                           cex = LegSize, lwd = LineWidth, horiz = TRUE,
                            inset = LegInset, xpd = NA)
                }
           }
