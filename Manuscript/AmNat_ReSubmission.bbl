@@ -1,4 +1,4 @@
-\begin{thebibliography}{53}
+\begin{thebibliography}{56}
 \providecommand{\natexlab}[1]{#1}
 
 \bibitem[{Aguil{\'e}e et~al.(2016)Aguil{\'e}e, Raoul, Rousset, and
@@ -60,10 +60,23 @@ Dallas, T., R.~R. Decker, and A.~Hastings. 2017.
   or climatic niche.
 \newblock Ecology Letters 20:1526--1533.
 
+\bibitem[{Darling et~al.(2008)Darling, Samis, and
+  Eckert}]{darling2008increased}
+Darling, E., K.~E. Samis, and C.~G. Eckert. 2008.
+\newblock Increased seed dispersal potential towards geographic range limits in
+  a pacific coast dune plant.
+\newblock New Phytologist 178:424--435.
+
 \bibitem[{Davis and Shaw(2001)}]{davis2001range}
 Davis, M.~B., and R.~G. Shaw. 2001.
 \newblock Range shifts and adaptive responses to quaternary climate change.
 \newblock Science 292:673--679.
+
+\bibitem[{Eckert et~al.(2008)Eckert, Samis, and Lougheed}]{eckert2008genetic}
+Eckert, C., K.~Samis, and S.~Lougheed. 2008.
+\newblock Genetic variation across species? geographical ranges: the
+  central--marginal hypothesis and beyond.
+\newblock Molecular ecology 17:1170--1188.
 
 \bibitem[{Ellner(1996)}]{ellner1996environmental}
 Ellner, S. 1996.
@@ -221,8 +234,8 @@ Phillips, B.~L. 2015.
 \newblock Evolutionary processes make invasion speed difficult to predict.
 \newblock Biological Invasions 17:1949--1960.
 
-\bibitem[{Polechova(2018)}]{polechova2018sky}
-Polechova, J. 2018.
+\bibitem[{Polechov{\'a}(2018)}]{polechova2018sky}
+Polechov{\'a}, J. 2018.
 \newblock Is the sky the limit? on the expansion threshold of a species? range.
 \newblock PLoS biology 16:e2005372.
 
@@ -288,6 +301,11 @@ Shine, R., G.~P. Brown, and B.~L. Phillips. 2011.
 \newblock An evolutionary process that assembles phenotypes through space
   rather than through time.
 \newblock Proceedings of the National Academy of Sciences 108:5708--5711.
+
+\bibitem[{Simmons and Thomas(2004)}]{simmons2004changes}
+Simmons, A.~D., and C.~D. Thomas. 2004.
+\newblock Changes in dispersal during species? range expansions.
+\newblock The American Naturalist 164:378--395.
 
 \bibitem[{Sz{\H{u}}cs et~al.(2017)Sz{\H{u}}cs, Vahsen, Melbourne, Hoover,
   Weiss-Lehman, and Hufbauer}]{szHucs2017rapid}
